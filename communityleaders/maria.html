@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maria Del Rosario Dossier</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+    
+    :root {
+      --primary-color: #00ff00;
+      --secondary-color: #003300;
+      --accent-color: #00cc00;
+      --error-color: #ff3333;
+    }
+    
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: black;
+      font-family: 'Share Tech Mono', monospace;
+      color: var(--primary-color);
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    /* CRT Effect */
+    .crt-effect::before {
+      content: " ";
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      background: linear-gradient(rgba(0, 255, 0, 0.03) 50%, rgba(0, 0, 0, 0.1) 50%),
+                  linear-gradient(90deg, rgba(0, 255, 0, 0.03), rgba(0, 255, 0, 0.02), rgba(0, 255, 0, 0.03));
+      background-size: 100% 3px, 3px 100%;
+      pointer-events: none;
+      z-index: 100;
+    }
+    
+    .crt-effect::after {
+      content: " ";
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      background: rgba(0, 0, 0, 0.1);
+      opacity: 0;
+      z-index: 100;
+      pointer-events: none;
+      animation: flicker 0.15s infinite;
+    }
+    
+    @keyframes flicker {
+      0% { opacity: 0.1; }
+      20% { opacity: 0.05; }
+      50% { opacity: 0.07; }
+      100% { opacity: 0.1; }
+    }
+    
+    .terminal-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 80px;
+      padding: 20px;
+      overflow-y: auto;
+      z-index: 2;
+    }
+    
+    .report-content {
+      white-space: pre-wrap;
+      line-height: 1.5;
+      word-break: break-word;
+      overflow-wrap: break-word;
+    }
+    
+    .classification-container {
+      display: inline-block;
+      vertical-align: middle;
+    }
+    
+    .classification {
+      display: inline-block;
+      background-color: var(--secondary-color);
+      padding: 2px 10px;
+      border: 1px solid var(--primary-color);
+      cursor: default;
+      position: relative;
+      width: 100px;
+      height: 20px;
+    }
+    
+    .classification::after {
+      content: "CONFIDENTIAL";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: var(--primary-color);
+      color: black;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    .classification:hover::after {
+      opacity: 1;
+    }
+    
+    .button-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      display: flex;
+      gap: 10px;
+      z-index: 10;
+    }
+    
+    .exit-button {
+      background-color: var(--error-color);
+      border: 1px solid #ff0000;
+      color: white;
+      padding: 10px 25px;
+      font-family: 'Share Tech Mono', monospace;
+      cursor: pointer;
+      transition: all 0.3s;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    
+    .exit-button.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    .exit-button:hover {
+      background-color: #ff0000;
+      box-shadow: 0 0 15px var(--error-color);
+    }
+    
+    .skip-button {
+      background-color: var(--accent-color);
+      border: 1px solid var(--primary-color);
+      color: black;
+      padding: 10px 25px;
+      font-family: 'Share Tech Mono', monospace;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .skip-button:hover {
+      background-color: var(--primary-color);
+      box-shadow: 0 0 15px var(--primary-color);
+    }
+    
+    .section-title {
+      color: var(--accent-color);
+      border-bottom: 1px solid var(--primary-color);
+      padding-bottom: 5px;
+      margin-top: 20px;
+      margin-bottom: 15px;
+      display: block;
+    }
+    
+    .typing-line {
+      overflow: hidden;
+      white-space: pre-wrap;
+      margin: 0;
+      border-right: 2px solid var(--primary-color);
+      animation: blink-caret 0.75s step-end infinite;
+    }
+    
+    @keyframes blink-caret {
+      from, to { border-color: transparent }
+      50% { border-color: var(--primary-color) }
+    }
+  </style>
+</head>
+<body class="crt-effect">
+  <!-- Background music -->
+  <audio id="bgMusic" loop>
+    <source src="../sounds/backgroundmusic2.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+
+  <div class="terminal-container">
+    <div class="report-content" id="reportContent"></div>
+  </div>
+
+  <div class="button-container">
+    <button class="skip-button" id="skipButton">SKIP</button>
+    <button class="exit-button" id="exitButton">EXIT</button>
+  </div>
+
+  <script>
+    // Start background music
+    document.addEventListener('DOMContentLoaded', () => {
+      const bgMusic = document.getElementById('bgMusic');
+      bgMusic.volume = 0.2;
+      
+      function startMusic() {
+        bgMusic.play().catch(e => console.log("Audio play failed:", e));
+        document.removeEventListener('click', startMusic);
+      }
+      
+      document.addEventListener('click', startMusic);
+    });
+
+    // Exit button functionality
+    document.getElementById('exitButton').addEventListener('click', () => {
+      window.location.href = '../raiden3.html';
+    });
+
+    // Report content
+    const reportText = `
+WESTERN INDUSTRIES - PERSONNEL DOSSIER
+CLASSIFICATION: <span class="classification-container"><span class="classification"></span></span>
+SUBJECT ID: WI-LEADER-013
+
+<span class="section-title">=== MARIA DEL ROSARIO ===</span>
+
+COMMUNITY: SPECTERS OF SEDNA
+
+<span class="section-title">PERSONAL INFORMATION:</span>
+Full Name: Maria Elena Del Rosario
+Age: 25
+Birthplace: Valentine City, Forum Drive
+Education: Self-taught researcher, survival specialist
+Languages: English, Spanish
+
+<span class="section-title">BIOGRAPHICAL SUMMARY:</span>
+Valentine City'nin Forum Drive bölgesinde Elena Rodriguez ve Eric Del Rosario'nun çocuğu olarak doğan Maria'nın erken yaşamı trajedi ve hayatta kalma ile işaretlenmiştir. Babası Eric suç faaliyetlerine karışmış ve Maria gençken gizemli koşullar altında hapiste ölmüştü. 2022 çöküşü sırasında annesi Elena, İngiltere'ye kaçma girişimleri sırasında kan kaybından öldü ve 9 yaşındaki Maria'yı Heathrow Havalimanı'nda yetim bıraktı. İngiliz Ordusu Albayı Cedric onu evlat edindi ve 2034'e kadar askeri bir kulübede hayatta kalma becerileri konusunda eğitti. Daha sonra askeri bir gemiyle Amerika'ya kaçtılar ve sonunda Paleto Bay'e, ardından Zone 166'ya ulaştılar.
+
+<span class="section-title">SURVIVAL EXPERIENCE:</span>
+2022-2034: Evlat edinen babası Cedric tarafından askeri ortamda yetiştirildi
+2034-2040: İngiltere'den Amerika'ya yolculuktan hayatta kaldı
+2040-Present: Specters of Sedna araştırma topluluğunu kurdu ve yönetiyor
+
+<span class="section-title">PERSONALITY PROFILE:</span>
+Güçlü koruyucu içgüdüleri olan sertleşmiş hayatta kalan. Çocukluk travması nedeniyle otoriteye güvensiz ama güvenini kazananlara karşı şiddetle sadık. Sokak zekası pragmatizmini savunmasız insanlara karşı gerçek ilgiyle birleştirir. Karizma yerine kişisel örnekle ilham veren doğal lider.
+
+<span class="section-title">LEADERSHIP STYLE:</span>
+Hayatta kalma deneyimine dayalı koruyucu, kararlı liderlik. Zor kararları hızlıca alır ama her zaman topluluk refahını düşünür. Teorik bilgiden çok pratik becerilere değer verir. Sıkı güvenlik protokollerini sürdürürken yakın topluluk bağlarını geliştirir.
+
+<span class="section-title">SKILLS AND CAPABILITIES:</span>
+- Gelişmiş hayatta kalma ve savaş eğitimi
+- Kaynak yönetimi ve lojistik
+- Topluluk organizasyonu ve koruma
+- Anormal olaylar araştırması
+- Stratejik planlama ve risk değerlendirmesi
+- Tibbi ve saha tedavi becerileri
+
+<span class="section-title">COMMUNITY RELATIONSHIP:</span>
+Specters of Sedna'yı açıklanamayan olayları araştırmaya adanmış, savunmasız hayatta kalanları koruyan araştırma odaklı hayatta kalma topluluğu olarak kurdu. Topluluk askeri benzeri disiplinle çalışır ama insani değerleri korur. Üyeler öncelikle Maria'nın hem bilgi hem de masumların korunmasına olan bağlılığını paylaşan araştırmacılar, hayatta kalanlar ve uzmanlardır.
+
+<span class="section-title">PSYCHOLOGICAL ASSESSMENT:</span>
+Derin köklü güven sorunları olan güçlü hayatta kalan zihniyeti. Çocukluk travmasını koruyucu liderliğe kanalize eder. Hipervigilans belirtileri gösterir ama topluluk sorumluluğu yoluyla duygusal istikrarı korur. Stres altında yüksek işlevsel, mükemmel kriz yönetimi yeteneklerine sahip.
+
+<span class="section-title">THREAT ASSESSMENT:</span>
+Western Industries için orta tehdit. Saygıyla yaklaşılırsa müzakere edecek ama topluluk tehdit edilirse agresif şekilde savaşacak. Askeri eğitim onu taktiksel olarak tehlikeli yapar. Çatışma başlatması olası değil ama savunma eylemi için hazır.
+
+<span class="section-title">RECRUITMENT POTENTIAL:</span>
+Düşük ila Orta. Güçlü bağımsız çizgi ve büyük organizasyonlara güvensizlik. Gerçek topluluk koruması ve araştırma kaynakları sunulursa sınırlı işbirliği düşünebilir.
+
+ANALYST: Director of Intelligence Rebecca Cross, Zone 013
+DATE: 2034-03-15
+NEXT REVIEW: 2024-06-15
+`;
+
+    let currentAnimations = [];
+    let skipRequested = false;
+
+    // Display report with typing animation
+    function displayReport() {
+      const reportContent = document.getElementById('reportContent');
+      reportContent.innerHTML = '';
+      
+      const lines = reportText.split('\n');
+      let currentLine = 0;
+      
+      function typeNextLine() {
+        if (skipRequested) {
+          showAllContent();
+          return;
+        }
+
+        if (currentLine < lines.length) {
+          const lineDiv = document.createElement('div');
+          lineDiv.className = 'typing-line';
+          reportContent.appendChild(lineDiv);
+          
+          const text = lines[currentLine];
+          let charIndex = 0;
+          
+          function typeChar() {
+            if (skipRequested) {
+              showAllContent();
+              return;
+            }
+
+            if (charIndex < text.length) {
+              lineDiv.innerHTML = text.substring(0, charIndex + 1);
+              charIndex++;
+              const animId = setTimeout(typeChar, Math.random() * 10 + 10);
+              currentAnimations.push(animId);
+            } else {
+              lineDiv.style.borderRight = 'none';
+              currentLine++;
+              const animId = setTimeout(typeNextLine, 50);
+              currentAnimations.push(animId);
+              reportContent.scrollTop = reportContent.scrollHeight;
+            }
+          }
+          
+          typeChar();
+        } else {
+          finishTyping();
+        }
+      }
+      
+      typeNextLine();
+    }
+
+    function showAllContent() {
+      clearAllAnimations();
+      const reportContent = document.getElementById('reportContent');
+      reportContent.innerHTML = reportText;
+      finishTyping();
+      reportContent.scrollTop = reportContent.scrollHeight;
+    }
+
+    function finishTyping() {
+      document.getElementById('exitButton').classList.add('visible');
+      document.getElementById('skipButton').style.display = 'none';
+    }
+
+    function clearAllAnimations() {
+      currentAnimations.forEach(id => clearTimeout(id));
+      currentAnimations = [];
+    }
+
+    // Skip button functionality
+    document.getElementById('skipButton').addEventListener('click', () => {
+      skipRequested = true;
+      showAllContent();
+    });
+
+    // Start the animation
+    displayReport();
+  </script>
+</body>
+</html>

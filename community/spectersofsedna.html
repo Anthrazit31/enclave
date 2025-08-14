@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Specters of Sedna Report</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+    
+    :root {
+      --primary-color: #00ff00;
+      --secondary-color: #003300;
+      --accent-color: #00cc00;
+      --error-color: #ff3333;
+    }
+    
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: black;
+      font-family: 'Share Tech Mono', monospace;
+      color: var(--primary-color);
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    /* CRT Effect */
+    .crt-effect::before {
+      content: " ";
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      background: linear-gradient(rgba(0, 255, 0, 0.03) 50%, rgba(0, 0, 0, 0.1) 50%),
+                  linear-gradient(90deg, rgba(0, 255, 0, 0.03), rgba(0, 255, 0, 0.02), rgba(0, 255, 0, 0.03));
+      background-size: 100% 3px, 3px 100%;
+      pointer-events: none;
+      z-index: 100;
+    }
+    
+    .crt-effect::after {
+      content: " ";
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      background: rgba(0, 0, 0, 0.1);
+      opacity: 0;
+      z-index: 100;
+      pointer-events: none;
+      animation: flicker 0.15s infinite;
+    }
+    
+    @keyframes flicker {
+      0% { opacity: 0.1; }
+      20% { opacity: 0.05; }
+      50% { opacity: 0.07; }
+      100% { opacity: 0.1; }
+    }
+    
+    .terminal-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 80px;
+      padding: 20px;
+      overflow-y: auto;
+      z-index: 2;
+    }
+    
+    .report-content {
+      white-space: pre-wrap;
+      line-height: 1.5;
+      word-break: break-word;
+      overflow-wrap: break-word;
+    }
+    
+    .classification-container {
+      display: inline-block;
+      vertical-align: middle;
+    }
+    
+    .classification {
+      display: inline-block;
+      background-color: var(--secondary-color);
+      padding: 2px 10px;
+      border: 1px solid var(--primary-color);
+      cursor: default;
+      position: relative;
+      width: 100px;
+      height: 20px;
+    }
+    
+    .classification::after {
+      content: "TOP SECRET";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: var(--primary-color);
+      color: black;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    .classification:hover::after {
+      opacity: 1;
+    }
+    
+    .button-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      display: flex;
+      gap: 10px;
+      z-index: 10;
+    }
+    
+    .exit-button {
+      background-color: var(--error-color);
+      border: 1px solid #ff0000;
+      color: white;
+      padding: 10px 25px;
+      font-family: 'Share Tech Mono', monospace;
+      cursor: pointer;
+      transition: all 0.3s;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    
+    .exit-button.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    .exit-button:hover {
+      background-color: #ff0000;
+      box-shadow: 0 0 15px var(--error-color);
+    }
+    
+    .skip-button {
+      background-color: var(--accent-color);
+      border: 1px solid var(--primary-color);
+      color: black;
+      padding: 10px 25px;
+      font-family: 'Share Tech Mono', monospace;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .skip-button:hover {
+      background-color: var(--primary-color);
+      box-shadow: 0 0 15px var(--primary-color);
+    }
+    
+    .section-title {
+      color: var(--accent-color);
+      border-bottom: 1px solid var(--primary-color);
+      padding-bottom: 5px;
+      margin-top: 20px;
+      margin-bottom: 15px;
+      display: block;
+    }
+    
+    .typing-line {
+      overflow: hidden;
+      white-space: pre-wrap;
+      margin: 0;
+      border-right: 2px solid var(--primary-color);
+      animation: blink-caret 0.75s step-end infinite;
+    }
+    
+    @keyframes blink-caret {
+      from, to { border-color: transparent }
+      50% { border-color: var(--primary-color) }
+    }
+  </style>
+</head>
+<body class="crt-effect">
+  <!-- Background music -->
+  <audio id="bgMusic" loop>
+    <source src="../sounds/backgroundmusic2.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+
+  <div class="terminal-container">
+    <div class="report-content" id="reportContent"></div>
+  </div>
+
+  <div class="button-container">
+    <button class="skip-button" id="skipButton">SKIP</button>
+    <button class="exit-button" id="exitButton">EXIT</button>
+  </div>
+
+  <script>
+    // Start background music
+    document.addEventListener('DOMContentLoaded', () => {
+      const bgMusic = document.getElementById('bgMusic');
+      bgMusic.volume = 0.2;
+      
+      function startMusic() {
+        bgMusic.play().catch(e => console.log("Audio play failed:", e));
+        document.removeEventListener('click', startMusic);
+      }
+      
+      document.addEventListener('click', startMusic);
+    });
+
+    // Exit button functionality
+    document.getElementById('exitButton').addEventListener('click', () => {
+      window.location.href = '../raiden3.html';
+    });
+
+    // Report content
+    const reportText = `
+WESTERN INDUSTRIES COMMUNITY ANALYSIS REPORT
+CLASSIFICATION: <span class="classification-container"><span class="classification"></span></span>
+REPORT ID: WI-2024-SOS-001
+
+<span class="section-title">===SPECTERS OF SEDNA===</span>
+
+EXECUTIVE SUMMARY:
+YÜKSEK İSTİHBARAT TEHDİTİ - Specters of Sedna, Zone 166'daki en entelektüel olarak gelişmiş ve araştırma kabiliyetine sahip hayatta kalan topluluğunu temsil etmektedir. Maria Del Rosario tarafından yönetilen bu organizasyon, Western Industries drone teknolojisini tersine mühendislik yapma ve Enfekte İnsan 1.0 örnekleri üzerinde sofistike araştırma yapma dâhil, benzeri görülmemiş bilimsel yetenekler göstermiştir. Sınıflandırılmış sualtı tesisimize son zamanlarda gerçekleştirdikleri sızma, önemli bir güvenlik ihlali temsil etmektedir.
+
+<span class="section-title">LEADERSHIP PROFILE:</span>
+Primary Leader: Maria Del Rosario
+Background: Los Santos Forum Drive'dan hayatta kalan, askeri eğitimli kendi kendini yetiştirmiş araştırmacı
+Leadership Style: Taktiksel hassasiyetle birleştirilmiş bilimsel metodoloji
+Risk Assessment: YÜKSEK - Son derece zeki ve teknolojik olarak yetenekli
+
+<span class="section-title">OPERATIONAL STRUCTURE:</span>
+Total Members: 12 aktif personel
+Advanced Research Division: 5 bilim insanı ve analist
+Technical Operations: 3 mühendis ve teknisyen
+Field Research Teams: 2 örnek toplayıcı ve keşif
+Security Specialists: 7 sızma ve koruma uzmanı
+
+<span class="section-title">PRIMARY ACTIVITIES:</span>
+- Western Industries drone teknolojisini tersine mühendislik
+Enfekte İnsan 1.0 davranış kalıpları ve biyolojisi üzerinde kapsamlı araştırma
+- Gelişmiş veri analizi ve bilimsel metodoloji geliştirme
+- Şirket operasyonları hakkında gizli istihbarat toplama
+Sızma ve sınıflandırılmış materyal edinimi
+
+<span class="section-title">RESEARCH CAPABILITIES:</span>
+Specters, WI Zone 166 gözetim drone'larının çoğunu başarıyla analiz etmiş, operasyonel yöntemlerimiz ve teknolojimiz hakkında değerli istihbarat çıkarmıştır. Enfekte İnsan 1.0 örnekleri üzerindeki araştırmaları benzeri görülmemiş anlayış derinliği gösterir, şunları içerir:
+- Detaylı davranış kalıbı analizi
+- Biyolojik ve nörolojik çalışmalar
+- Enfeksiyon ilerleme haritalaması
+- Potansiyel karşı önlem geliştirme
+
+<span class="section-title">CONFIRMED INTELLIGENCE OPERATIONS:</span>
+- WI drone devriye kalıplarının sürekli gözetimi ve analizi
+Enfekte İnsan 1.0 örneklerinin sistematik toplanması ve incelenmesi
+Çoklu WI araştırma veri ağlarına sızma
+- Sınıflandırılmış araştırma materyallerinin edinimi
+
+<span class="section-title">RECENT MAJOR SECURITY BREACH:</span>
+Mart 2024: WI Sualtı Araştırma Tesisi Gamma-12'ye başarılı sızma. Specters operatifleri tüm güvenlik önlemlerini aştı ve şunları çıkardı:
+- Sınıflandırılmış veri içeren John W. Brigid'in kişisel araştırma bilgisayarı
+Güvenli depolamadan gelişmiş prototip silahlar
+- Zone 166 operasyonları hakkında sınıflandırılmış araştırma dosyaları
+Deneysel bileşiklerin çoklu örnekleri
+
+<span class="section-title">THREAT ASSESSMENT:</span>
+Military Capability: DÜŞÜK-ORTA
+Research Capability: SON DERECE YÜKSEK
+Intelligence Gathering: SON DERECE YÜKSEK
+Corporate Infiltration Risk: MAKSIMUM
+
+<span class="section-title">STRATEGIC CONCERNS:</span>
+Specters, Western Industries operasyonlarına karşı en sofistike entelektüel tehdidi temsil eder. Teknolojimizi tersine mühendislik yapma, gelişmiş bilimsel araştırma yapma ve en güvenli tesislerimize başarıyla sızma yetenekleri, sınırlı askeri yeteneklerine rağmen onları son derece tehlikeli yapar. Maria Del Rosario'nun liderliği umutsuz hayatta kalanları dünya sınıfı bir araştırma organizasyonuna dönüştürmüştür.
+
+<span class="section-title">INTELLIGENCE ASSESSMENT:</span>
+John W. Brigid'in bilgisayarının çalınması felaket bir güvenlik ihlali temsil eder. Cihaz şunları içeriyordu:
+- Zone 166 operasyonel protokollerinin tamamı
+- Tüm hayatta kalan topluluklar hakkında araştırma verileri
+- Gelişmiş silah şemaları
+- Şirket stratejik planlama belgeleri
+
+<span class="section-title">RECOMMENDED ACTIONS:</span>
+1. ACİL: Tam güvenlik protokolü revizyonu uygula
+2. ACİL: Tüm mevcut operasyonların tehlikeye girdiğini varsay
+3. Specters'a karşı karşı istihbarat operasyonları dağıt
+4. Specters' birincil entelektüel tehdit olarak değerlendir
+5. Potansiyel teknolojik karşı önlemler için hazırlan
+6. Kilit personel için işe alım olasılıklarını değerlendir
+
+ANALYST: Director of Intelligence Rebecca Cross, Zone 013 
+DATE: 2034-03-15
+NEXT REVIEW: 2034-04-19
+PRIORITY: MAKSIMUM İSTİHBARAT TEHDİDİ
+`;
+
+    let currentAnimations = [];
+    let skipRequested = false;
+
+    // Display report with typing animation
+    function displayReport() {
+      const reportContent = document.getElementById('reportContent');
+      reportContent.innerHTML = '';
+      
+      const lines = reportText.split('\n');
+      let currentLine = 0;
+      
+      function typeNextLine() {
+        if (skipRequested) {
+          showAllContent();
+          return;
+        }
+
+        if (currentLine < lines.length) {
+          const lineDiv = document.createElement('div');
+          lineDiv.className = 'typing-line';
+          reportContent.appendChild(lineDiv);
+          
+          const text = lines[currentLine];
+          let charIndex = 0;
+          
+          function typeChar() {
+            if (skipRequested) {
+              showAllContent();
+              return;
+            }
+
+            if (charIndex < text.length) {
+              lineDiv.innerHTML = text.substring(0, charIndex + 1);
+              charIndex++;
+              const animId = setTimeout(typeChar, Math.random() * 10 + 10);
+              currentAnimations.push(animId);
+            } else {
+              lineDiv.style.borderRight = 'none';
+              currentLine++;
+              const animId = setTimeout(typeNextLine, 50);
+              currentAnimations.push(animId);
+              reportContent.scrollTop = reportContent.scrollHeight;
+            }
+          }
+          
+          typeChar();
+        } else {
+          finishTyping();
+        }
+      }
+      
+      typeNextLine();
+    }
+
+    function showAllContent() {
+      clearAllAnimations();
+      const reportContent = document.getElementById('reportContent');
+      reportContent.innerHTML = reportText;
+      finishTyping();
+      reportContent.scrollTop = reportContent.scrollHeight;
+    }
+
+    function finishTyping() {
+      document.getElementById('exitButton').classList.add('visible');
+      document.getElementById('skipButton').style.display = 'none';
+    }
+
+    function clearAllAnimations() {
+      currentAnimations.forEach(id => clearTimeout(id));
+      currentAnimations = [];
+    }
+
+    // Skip button functionality
+    document.getElementById('skipButton').addEventListener('click', () => {
+      skipRequested = true;
+      showAllContent();
+    });
+
+    // Start the animation
+    displayReport();
+  </script>
+</body>
+</html>

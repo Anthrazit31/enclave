@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WI Analysist Drone Report</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+    
+    :root {
+      --primary-color: #00ff00;
+      --secondary-color: #003300;
+      --accent-color: #00cc00;
+      --error-color: #ff3333;
+    }
+    
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: black;
+      font-family: 'Share Tech Mono', monospace;
+      color: var(--primary-color);
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    /* CRT Effect */
+    .crt-effect::before {
+      content: " ";
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      background: linear-gradient(rgba(0, 255, 0, 0.03) 50%, rgba(0, 0, 0, 0.1) 50%),
+                  linear-gradient(90deg, rgba(0, 255, 0, 0.03), rgba(0, 255, 0, 0.02), rgba(0, 255, 0, 0.03));
+      background-size: 100% 3px, 3px 100%;
+      pointer-events: none;
+      z-index: 100;
+    }
+    
+    .crt-effect::after {
+      content: " ";
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      background: rgba(0, 0, 0, 0.1);
+      opacity: 0;
+      z-index: 100;
+      pointer-events: none;
+      animation: flicker 0.15s infinite;
+    }
+    
+    @keyframes flicker {
+      0% { opacity: 0.1; }
+      20% { opacity: 0.05; }
+      50% { opacity: 0.07; }
+      100% { opacity: 0.1; }
+    }
+    
+    .terminal-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 80px;
+      padding: 20px;
+      overflow-y: auto;
+      z-index: 2;
+    }
+    
+    .report-content {
+      white-space: pre-wrap;
+      line-height: 1.5;
+      word-break: break-word;
+      overflow-wrap: break-word;
+    }
+    
+    .classification-container {
+      display: inline-block;
+      vertical-align: middle;
+    }
+    
+    .classification {
+      display: inline-block;
+      background-color: var(--secondary-color);
+      padding: 2px 10px;
+      border: 1px solid var(--primary-color);
+      cursor: default;
+      position: relative;
+      width: 100px;
+      height: 20px;
+    }
+    
+    .classification::after {
+      content: "CONFIDENTIAL";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: var(--primary-color);
+      color: black;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    .classification:hover::after {
+      opacity: 1;
+    }
+    
+    .button-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      display: flex;
+      gap: 10px;
+      z-index: 10;
+    }
+    
+    .exit-button {
+      background-color: var(--error-color);
+      border: 1px solid #ff0000;
+      color: white;
+      padding: 10px 25px;
+      font-family: 'Share Tech Mono', monospace;
+      cursor: pointer;
+      transition: all 0.3s;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    
+    .exit-button.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    .exit-button:hover {
+      background-color: #ff0000;
+      box-shadow: 0 0 15px var(--error-color);
+    }
+    
+    .skip-button {
+      background-color: var(--accent-color);
+      border: 1px solid var(--primary-color);
+      color: black;
+      padding: 10px 25px;
+      font-family: 'Share Tech Mono', monospace;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .skip-button:hover {
+      background-color: var(--primary-color);
+      box-shadow: 0 0 15px var(--primary-color);
+    }
+    
+    .section-title {
+      color: var(--accent-color);
+      border-bottom: 1px solid var(--primary-color);
+      padding-bottom: 5px;
+      margin-top: 20px;
+      margin-bottom: 15px;
+      display: block;
+    }
+    
+    .typing-line {
+      overflow: hidden;
+      white-space: pre-wrap;
+      margin: 0;
+      border-right: 2px solid var(--primary-color);
+      animation: blink-caret 0.75s step-end infinite;
+    }
+    
+    @keyframes blink-caret {
+      from, to { border-color: transparent }
+      50% { border-color: var(--primary-color) }
+    }
+  </style>
+</head>
+<body class="crt-effect">
+  <!-- Background music -->
+  <audio id="bgMusic" loop>
+    <source src="../sounds/backgroundmusic2.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+
+  <div class="terminal-container">
+    <div class="report-content" id="reportContent"></div>
+  </div>
+
+  <div class="button-container">
+    <button class="skip-button" id="skipButton">SKIP</button>
+    <button class="exit-button" id="exitButton">EXIT</button>
+  </div>
+
+  <script>
+    // Start background music
+    document.addEventListener('DOMContentLoaded', () => {
+      const bgMusic = document.getElementById('bgMusic');
+      bgMusic.volume = 0.2;
+      
+      function startMusic() {
+        bgMusic.play().catch(e => console.log("Audio play failed:", e));
+        document.removeEventListener('click', startMusic);
+      }
+      
+      document.addEventListener('click', startMusic);
+    });
+
+    // Exit button functionality
+    document.getElementById('exitButton').addEventListener('click', () => {
+      window.location.href = '../raiden3.html';
+    });
+
+    // Report content
+    const reportText = `
+WESTERN INDUSTRIES - DRONE INVENTORY REPORT
+CLASSIFICATION: <span class="classification-container"><span class="classification"></span></span>
+INVENTORY ID: wi-ANALYSIST
+
+<span class="section-title">=== WI ANALYSIST DRONE ===</span>
+
+<span class="section-title">TECHNICAL SPECIFICATIONS:</span>
+Model: WI Analysist
+Manufacturer: Western Industries
+Production Date: 2023
+Operational Status: Active (2024 - Present)
+Primary Color: White
+Regional Identification: Ortasında hangi bölgeye ait olduğu ile alakalı rakam yazar
+
+<span class="section-title">MISSION PROFILE:</span>
+Gözlem ve analiz operasyonları için tasarlanmış gelişmiş drone sistemi. 2024 yılında hükümet anlaşması kapsamında tüm Amerika genelinde aktif faaliyet göstermektedir. PRIMARY FUNCTIONS:
+- Yer bilimci araştırmaları ve analizi
+- Doğa araştırmaları ve çevresel gözlem
+Sismik olaylar araştırması ve izleme
+- Canlıların sağlık durumu analizi
+- Bölgesel güvenlik gözlemi
+
+<span class="section-title">ADVANCED CAPABILITIES:</span>
+X-Ray Tarayıcı Sistemi:
+- Yüksek çözünürlüklü X-Ray görüntüleme
+MR (Manyetik Rezonans) görevi gören fotolama yeteneği
+Canlı organizmaların iç yapı analizi
+Sağlık durumu değerlendirmesi ve raporlama
+
+<span class="section-title">DEFENSIVE SYSTEMS:</span>
+Koruma Önlemi Silah Sistemi:
+- 4x 9mm namlu konfigürasyonu
+Otomatik tehdit algılama sistemi Kendini savunma protokolleri
+- Acil durum müdahale yetenekleri
+
+<span class="section-title">OPERATIONAL DEPLOYMENT:</span>
+Deployment Region: Tüm Amerika Birleşik Devletleri Authorization: Hükümet Anlaşması - 2024
+Mission Duration: Sürekli operasyonel
+Command Structure: Western Industries Zone Command
+
+<span class="section-title">POLICE DEPARTMENT VERSION:</span>
+Law Enforcement Integration:
+- Polis teşkilatı özel versiyonu
+- İhbarlara hızlı intikal sistemi
+- Hedef bölgelerde aktif faaliyet
+Örnek operasyon bölgesi: Valentine City
+- Kolluk kuvvetleri destek operasyonları
+
+<span class="section-title">MAINTENANCE SCHEDULE:</span>
+Routine Inspection: Her 30 gün
+System Upgrade: 6 aylık periyotlar
+Component Replacement: İhtiyaç bazında
+Data Backup: Günlük otomatik
+
+<span class="section-title">SECURITY CLEARANCE:</span>
+Access Level: CONFIDENTIAL
+Personnel Authorization: Level 3 ve üzeri
+Data Classification: Restricted Distribution
+
+ANALYST: Western Industries Technical Division
+`;
+
+    let currentAnimations = [];
+    let skipRequested = false;
+
+    // Display report with typing animation
+    function displayReport() {
+      const reportContent = document.getElementById('reportContent');
+      reportContent.innerHTML = '';
+      
+      const lines = reportText.split('\n');
+      let currentLine = 0;
+      
+      function typeNextLine() {
+        if (skipRequested) {
+          showAllContent();
+          return;
+        }
+
+        if (currentLine < lines.length) {
+          const lineDiv = document.createElement('div');
+          lineDiv.className = 'typing-line';
+          reportContent.appendChild(lineDiv);
+          
+          const text = lines[currentLine];
+          let charIndex = 0;
+          
+          function typeChar() {
+            if (skipRequested) {
+              showAllContent();
+              return;
+            }
+
+            if (charIndex < text.length) {
+              lineDiv.innerHTML = text.substring(0, charIndex + 1);
+              charIndex++;
+              const animId = setTimeout(typeChar, Math.random() * 10 + 10);
+              currentAnimations.push(animId);
+            } else {
+              lineDiv.style.borderRight = 'none';
+              currentLine++;
+              const animId = setTimeout(typeNextLine, 50);
+              currentAnimations.push(animId);
+              reportContent.scrollTop = reportContent.scrollHeight;
+            }
+          }
+          
+          typeChar();
+        } else {
+          finishTyping();
+        }
+      }
+      
+      typeNextLine();
+    }
+
+    function showAllContent() {
+      clearAllAnimations();
+      const reportContent = document.getElementById('reportContent');
+      reportContent.innerHTML = reportText;
+      finishTyping();
+      reportContent.scrollTop = reportContent.scrollHeight;
+    }
+
+    function finishTyping() {
+      document.getElementById('exitButton').classList.add('visible');
+      document.getElementById('skipButton').style.display = 'none';
+    }
+
+    function clearAllAnimations() {
+      currentAnimations.forEach(id => clearTimeout(id));
+      currentAnimations = [];
+    }
+
+    // Skip button functionality
+    document.getElementById('skipButton').addEventListener('click', () => {
+      skipRequested = true;
+      showAllContent();
+    });
+
+    // Start the animation
+    displayReport();
+  </script>
+</body>
+</html>
