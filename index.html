@@ -332,6 +332,7 @@
         
         if (password === "enclave") {
           this.loginContainer.classList.remove('active');
+          localStorage.setItem('userType', 'military');
           
           // Play access granted sound
           this.accessGrantedSound.currentTime = 0;
@@ -345,6 +346,7 @@
           }, 2000);
           
         } else if (password === "arastirma") {
+          localStorage.setItem('userType', 'researcher');
           this.loginContainer.classList.remove('active');
           
           // Play access granted sound
