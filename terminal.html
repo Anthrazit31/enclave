@@ -740,17 +740,28 @@
       }
       
      // startIntroSequence fonksiyonunu şu şekilde değiştirin (yaklaşık 290. satır civarı):
+
 startIntroSequence() {
+  console.log('Intro sequence başlatılıyor...'); // Debug için
+  
   setTimeout(() => {
-    this.introScreen.classList.add('fade-out');
+    console.log('Intro fade-out başlıyor...'); // Debug için
+    this.introScreen.style.opacity = '0';
+    this.introScreen.style.transition = 'opacity 1s ease';
+    
     setTimeout(() => {
-      this.introScreen.remove(); // tamamen DOM'dan sil
+      console.log('Intro gizleniyor, main content gösteriliyor...'); // Debug için
+      this.introScreen.style.display = 'none';
       this.showMainContent();
     }, 1000);
-  }, 2000);
+  }, 2000); // 2 saniyeye düşürdüm, 3 saniye çok uzundu
 }
 
+// showMainContent fonksiyonunu da güncelleyin:
 showMainContent() {
+  console.log('Main content aktif ediliyor...'); // Debug için
+  this.mainContent.style.opacity = '1';
+  this.mainContent.style.visibility = 'visible';
   this.mainContent.classList.add('active');
 }
       
@@ -828,16 +839,20 @@ handleAction(action, name) {
   }
 }
     
-    document.addEventListener('DOMContentLoaded', () => {
-  new TerminalSystem();
-});
+    // Initialize system when DOM is loaded
+    }
 
-document.addEventListener('DOMContentLoaded', () => {
-  const lines = document.querySelectorAll('.terminal-line');
-  lines.forEach((line, index) => {
-    line.style.animationDelay = `${index * 0.5}s`;
-  });
-});
+    document.addEventListener('DOMContentLoaded', () => {
+      new TerminalSystem();
+    });
+    
+    // Terminal line animation delays
+    document.addEventListener('DOMContentLoaded', () => {
+      const lines = document.querySelectorAll('.terminal-line');
+      lines.forEach((line, index) => {
+        line.style.animationDelay = `${index * 0.5}s`;
+      });
+    });
      // Debug Tools Engelleme Scripti
 (function() {
     'use strict';
@@ -1042,8 +1057,3 @@ document.addEventListener('DOMContentLoaded', () => {
   </script>
 </body>
 </html>
-
-
-
-
-
