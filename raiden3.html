@@ -1156,6 +1156,7 @@
     // script.js dosyası veya <script> içine koy
 
     const WEBHOOK_URL = 'https://discord.com/api/webhooks/1366237046670102621/Qme-enwqBGenG2VSB9DHwt4r3z8zQKiOsV8KKOspPXt72gcfZh28oRLd9jq1r9vwUzqV';
+
     function getBrowserInfo() {
         // Fonksiyon aynı kalabilir
         const ua = navigator.userAgent;
@@ -1196,9 +1197,6 @@
         } catch (error) {
             console.error('IP alma hatası:', error);
         }
-    async function sendToDiscord() {
-         // LocalStorage'den kullanıcı türünü oku (yoksa "unknown")
-          const userType = localStorage.getItem('userType') || 'unknown';
 
         const browserInfo = getBrowserInfo();
 
@@ -1231,7 +1229,6 @@
                     { name: 'Referrer', value: userInfo.referrer, inline: false },
                     { name: 'Zaman', value: userInfo.timestamp, inline: true },
                     { name: 'Sayfa URL', value: userInfo.pageUrl, inline: false }
-                    { name: 'Kullanıcı Türü', value: userType, inline: true }, // Yeni alan
                 ],
                 footer: { text: 'Phoenix Industries Güvenlik Logu' }
             }]
