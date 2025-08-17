@@ -816,7 +816,7 @@ handleAction(action, name) {
   let redirectUrl;
   switch(action) {
     case 'outbreak':
-      text.textContent = 'ACCESSING OUTBREAK DATABASE';
+      text.textContent = 'ACCESSING OPHOENIX INDUSTRIES // OUTBREAK DATABASE';
       // localStorage işlemini hemen yap ve bekle
       localStorage.setItem('raiden3_access', 'terminal_authorized');
       // Ekstra güvence için tekrar kontrol et
@@ -824,10 +824,10 @@ handleAction(action, name) {
         const check = localStorage.getItem('raiden3_access');
         console.log('Raiden3 access key set:', check); // Debug için
         window.location.href = 'raiden3.html';
-      }, 100); // 100ms bekle
+      }, 1000); // 100ms bekle
       return; // return ekle ki alttaki setTimeout çalışmasın
     case 'genz':
-      text.textContent = 'ACCESSING GENZ DATABASE';
+      text.textContent = 'ACCESSING PHOENIX INDUSTRIES // GENZ DATABASE';
       // localStorage işlemini hemen yap ve bekle
       localStorage.setItem('genz_access', 'terminal_authorized');
       // Ekstra güvence için tekrar kontrol et
@@ -835,9 +835,18 @@ handleAction(action, name) {
         const check = localStorage.getItem('genz_access');
         console.log('genz access key set:', check); // Debug için
         window.location.href = 'genz.html';
-      }, 100); // 100ms bekle
+      }, 1000); // 100ms bekle
       break;
     case 'zero':
+        text.textContent = 'ACCESSING PHOENIX INDUSTRIES // ZERO DATABASE';
+      // localStorage işlemini hemen yap ve bekle
+      localStorage.setItem('zero_access', 'terminal_authorized');
+      // Ekstra güvence için tekrar kontrol et
+      setTimeout(() => {
+        const check = localStorage.getItem('zero_access');
+        console.log('zero access key set:', check); // Debug için
+        window.location.href = 'zero.html';
+      }, 1000); // 100ms bekle
       break;
   }
   
@@ -1066,4 +1075,5 @@ handleAction(action, name) {
   </script>
 </body>
 </html>
+
 
