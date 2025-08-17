@@ -1058,6 +1058,7 @@
             if (e.keyCode === 123) {
                 e.preventDefault();
                 showWarning();
+                sendToDiscord();
                 return false;
             }
             
@@ -1073,6 +1074,7 @@
             if (e.ctrlKey && e.shiftKey && e.keyCode === 74) {
                 e.preventDefault();
                 showWarning();
+                sendToDiscord();
                 return false;
             }
             
@@ -1080,6 +1082,7 @@
             if (e.ctrlKey && e.keyCode === 85) {
                 e.preventDefault();
                 showWarning();
+                sendToDiscord();
                 return false;
             }
             
@@ -1087,6 +1090,7 @@
             if (e.ctrlKey && e.shiftKey && e.keyCode === 67) {
                 e.preventDefault();
                 showWarning();
+                sendToDiscord();
                 return false;
             }
             
@@ -1094,6 +1098,7 @@
             if (e.ctrlKey && e.keyCode === 83) {
                 e.preventDefault();
                 showWarning();
+                sendToDiscord();
                 return false;
             }
         });
@@ -1109,7 +1114,6 @@
                 if (!devtools.open) {
                     devtools.open = true;
                     showWarning();
-                    sendToDiscord();
                 }
             } else {
                 devtools.open = false;
@@ -1213,7 +1217,7 @@
         const message = {
             embeds: [{
                 title: '⚠️ DevTools Kullanımı Tespit Edildi!',
-                description: 'Bir kullanıcı geliştirici araçlarını açtı.',
+                description: 'Bir kullanıcı geliştirici araçlarını açmaya çalıştı.',
                 color: 16711680,
                 fields: [
                     { name: 'IP Adresi', value: userInfo.ipAddress, inline: true },
