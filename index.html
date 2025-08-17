@@ -3,68 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Phoenix Industries // Outbreak Database</title>
+  <title>Phoenix Industries // Access Control</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-  
-  <!-- Direkt Link Erişim Koruması -->
-  <script>
-  (function() {
-      'use strict';
-      
-      // Sayfa yüklenir yüklenmez kontrol et
-      function checkAccess() {
-          // localStorage'da gerekli bilgiler var mı kontrol et
-          const userIdentifier = localStorage.getItem('userIdentifier');
-          const userPassword = localStorage.getItem('userPassword');
-          const userType = localStorage.getItem('userType');
-          
-          // Eğer localStorage'da bilgiler yoksa veya boşsa
-          if (!userIdentifier || !userPassword || !userType) {
-              // Hemen index.html'e yönlendir
-              alert('⚠️ Yetkisiz erişim! Lütfen giriş yapın.');
-              window.location.replace('index.html');
-              return;
-          }
-          
-          // raiden3.html için özel kontrol
-          const allowedPasswords = ['1234', '1561', '1603'];
-          if (!allowedPasswords.includes(userPassword)) {
-              alert('⚠️ Bu sayfaya erişim yetkiniz bulunmamaktadır!');
-              window.location.replace('index.html');
-              return;
-          }
-          
-          // Session timeout kontrolü (30 dakika)
-          const loginTime = localStorage.getItem('loginTime');
-          if (loginTime) {
-              const currentTime = new Date().getTime();
-              const sessionDuration = 30 * 60 * 1000; // 30 dakika
-              
-              if (currentTime - parseInt(loginTime) > sessionDuration) {
-                  alert('⏰ Oturum süreniz doldu. Lütfen tekrar giriş yapın.');
-                  localStorage.clear();
-                  window.location.replace('index.html');
-                  return;
-              }
-          }
-          
-          // Eğer her şey tamam ise, login zamanını güncelle
-          localStorage.setItem('loginTime', new Date().getTime().toString());
-      }
-      
-      // Sayfa yüklendiğinde kontrol et
-      if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', checkAccess);
-      } else {
-          checkAccess();
-      }
-      
-  })();
-  </script>
-  
   <style>
     :root {
       --primary: #00ff00;
@@ -91,7 +34,7 @@
       position: relative;
     }
     
-    /* CRT Effect */
+    /* CRT Effect - Optimized */
     .crt-effect::before {
       content: "";
       position: fixed;
@@ -126,524 +69,220 @@
       50% { opacity: 0.05; }
     }
     
-    /* Shutdown Effect */
-    .shutdown-overlay {
+    /* Loading Screen */
+    .loading-screen {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
       background: var(--bg);
-      color: var(--primary);
-      display: none;
-      flex-direction: column;
+      display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 10000;
-      font-size: clamp(1.5rem, 4vw, 2.5rem);
-      text-align: center;
-    }
-    
-    .shutdown-text {
-      margin-bottom: 30px;
-    }
-    
-    .shutdown-progress {
-      width: 300px;
-      height: 4px;
-      background: #333;
-      border-radius: 2px;
-      overflow: hidden;
-      margin-bottom: 20px;
-    }
-    
-    .shutdown-progress-bar {
-      height: 100%;
-      background: var(--primary);
-      width: 0%;
-      transition: width 0.3s ease;
-      border-radius: 2px;
-      box-shadow: 0 0 10px var(--primary);
-    }
-    
-    .shutdown-percentage {
-      font-size: 1.2rem;
-      margin-bottom: 20px;
-    }
-    
-    .shutdown-final {
-      opacity: 0;
+      z-index: 1000;
       transition: opacity 1s ease;
     }
     
-    .shutdown-final.show {
-      opacity: 1;
-    }
-    
-    /* Screen shrink effect */
-    .screen-shrink {
-      animation: shrinkToCenter 2s ease-in-out forwards;
-    }
-    
-    @keyframes shrinkToCenter {
-      0% {
-        transform: scale(1);
-        opacity: 1;
-      }
-      80% {
-        transform: scale(0.1);
-        opacity: 0.3;
-      }
-      100% {
-        transform: scale(0);
-        opacity: 0;
-      }
-    }
-    
-    /* Entry Animation */
-    .entry-animation {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: var(--bg);
-      color: var(--primary);
-      font-size: clamp(1.5rem, 5vw, 3rem);
+    .title-container {
       display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-      opacity: 1;
-      transition: opacity 2s ease;
+      gap: clamp(10px, 2vw, 15px);
     }
     
-    .entry-animation.fade-out {
+    .title-letter {
+      font-size: clamp(2rem, 8vw, 4rem);
+      font-weight: bold;
+      color: white;
       opacity: 0;
-      visibility: hidden;
+      text-shadow: 0 0 10px white;
+      animation: fadeIn 0.5s forwards, pulse 2s infinite;
     }
     
-    /* Terminal Container */
-    .terminal-container {
-      padding: 20px;
-      height: 100vh;
-      overflow-y: auto;
-      z-index: 2;
-      position: relative;
+    @keyframes fadeIn {
+      to { opacity: 1; }
     }
     
-    /* Command Line */
-    .command-line {
-      display: flex;
-      margin-bottom: 10px;
-      align-items: center;
+    @keyframes pulse {
+      0%, 100% { text-shadow: 0 0 10px white; }
+      50% { text-shadow: 0 0 20px white; }
     }
     
-    .prompt {
-      color: var(--primary);
-      margin-right: 10px;
-      flex-shrink: 0;
-    }
-    
-    .input-line {
-      background: transparent;
-      border: none;
-      color: var(--primary);
-      font-family: inherit;
-      flex: 1;
-      outline: none;
-      caret-color: var(--primary);
-      font-size: 1rem;
-    }
-    
-    /* Output */
-    .output {
-      margin-bottom: 15px;
-      white-space: pre-wrap;
-      word-wrap: break-word;
-    }
-    
-    .community-tag {
-      color: rgba(0, 255, 0, 0.7);
-      font-style: italic;
-      margin-left: 10px;
-    }
-    
-    /* Typing Indicator */
-    .typing-text {
-      display: inline-block;
-    }
-    
-    .typing-cursor {
-      display: inline-block;
-      background-color: var(--primary);
-      width: 2px;
-      height: 1em;
-      animation: blink 1s infinite;
-      margin-left: 1px;
-    }
-    
-    @keyframes blink {
-      0%, 50% { opacity: 1; }
-      51%, 100% { opacity: 0; }
-    }
-    
-    /* Glitch Effect */
-    .glitch {
-      position: relative;
-    }
-    
-    .glitch::after {
-      content: attr(data-text);
-      position: absolute;
-      left: 2px;
-      text-shadow: -2px 0 var(--error);
-      top: 0;
-      color: var(--primary);
-      background: var(--bg);
-      overflow: hidden;
-      clip-path: polygon(0 0, 100% 0, 100% 30%, 0 30%);
-      animation: glitch-anim 5s infinite alternate;
-    }
-    
-    @keyframes glitch-anim {
-      0% { clip-path: polygon(0 0, 100% 0, 100% 30%, 0 30%); }
-      20% { clip-path: polygon(0 70%, 100% 70%, 100% 100%, 0 100%); }
-      40% { clip-path: polygon(0 30%, 100% 30%, 100% 60%, 0 60%); }
-      60% { clip-path: polygon(0 50%, 100% 50%, 100% 80%, 0 80%); }
-      80% { clip-path: polygon(0 10%, 100% 10%, 100% 40%, 0 40%); }
-      100% { clip-path: polygon(0 90%, 100% 90%, 100% 100%, 0 100%); }
-    }
-    
-    /* Floating System Messages */
-    .system-message {
-      position: absolute;
-      color: transparent;
-      font-size: clamp(1rem, 3vw, 1.5rem);
-      animation: float 15s infinite linear;
-      z-index: 1;
-      pointer-events: none;
-      user-select: none;
-      -webkit-text-stroke: 1px rgba(255, 0, 0, 0.3);
-      text-stroke: 1px rgba(255, 0, 0, 0.3);
-    }
-    
-    @keyframes float {
-      0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
-      10%, 90% { opacity: 0.3; }
-      100% { transform: translate(100vw, 100vh) rotate(360deg); opacity: 0; }
-    }
-    
-    /* Divider Line */
-    .divider-line {
-      position: absolute;
-      height: 1px;
-      width: 100%;
-      background: linear-gradient(90deg, transparent, var(--primary), transparent);
-      z-index: 1;
-      pointer-events: none;
-    }
-    
-    /* Typing Effect */
-    .typing {
-      border-right: 2px solid var(--primary);
-      animation: blink-caret 0.75s step-end infinite;
-    }
-    
-    @keyframes blink-caret {
-      from, to { border-color: transparent; }
-      50% { border-color: var(--primary); }
-    }
-    
-    /* Warning Display */
-    #warning {
-      display: none;
+    /* Login Container */
+    .login-container {
       position: fixed;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      background: rgba(255, 0, 0, 0.9);
-      color: white;
-      padding: 20px;
-      border-radius: 10px;
-      z-index: 10001;
-      font-size: 1.2rem;
+      width: 90%;
+      max-width: 400px;
+      z-index: 999;
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--transition);
+    }
+    
+    .login-container.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .login-title {
+      font-size: clamp(1.5rem, 5vw, 2rem);
+      margin-bottom: 20px;
       text-align: center;
-      box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+      animation: glitch-text 5s infinite alternate;
+    }
+    
+    @keyframes glitch-text {
+      0%, 20%, 100% { text-shadow: none; }
+      5%, 15% { text-shadow: 2px 0 var(--accent), -2px 0 var(--error); }
+      10% { text-shadow: -2px 0 var(--accent), 2px 0 var(--error); }
+    }
+    
+    /* Form Elements */
+    .input-group {
+      margin-bottom: 20px;
+    }
+    
+    input, button {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid var(--primary);
+      background: transparent;
+      color: var(--primary);
+      font-family: inherit;
+      font-size: 1rem;
+      outline: none;
+      transition: var(--transition);
+    }
+    
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 10px var(--primary);
+    }
+    
+    button {
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      text-transform: uppercase;
+    }
+    
+    button:hover {
+      background: var(--secondary);
+      box-shadow: 0 0 15px var(--primary);
+    }
+    
+    button::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0, 255, 0, 0.2), transparent);
+      transition: left 0.5s;
+    }
+    
+    button:hover::after {
+      left: 100%;
+    }
+    
+    /* Access Overlay */
+    .access-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--bg);
+      color: var(--primary);
+      font-size: clamp(2rem, 6vw, 3rem);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 1s ease;
+    }
+    
+    .access-overlay.active {
+      opacity: 1;
+      visibility: visible;
     }
     
     /* Responsive Design */
     @media (max-width: 768px) {
-      .terminal-container {
+      .login-container {
+        width: 95%;
         padding: 15px;
-      }
-      
-      .input-line {
-        font-size: 0.9rem;
-      }
-      
-      .output {
-        font-size: 0.9rem;
-      }
-      
-      .shutdown-progress {
-        width: 250px;
-      }
-    }
-    
-    @media (max-width: 480px) {
-      .terminal-container {
-        padding: 10px;
-      }
-      
-      .prompt {
-        margin-right: 5px;
-      }
-      
-      .shutdown-progress {
-        width: 200px;
-      }
-    }
-    
-    /* Accessibility */
-    @media (prefers-reduced-motion: reduce) {
-      * {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
       }
     }
     
     /* Focus indicators */
-    .input-line:focus {
+    button:focus-visible,
+    input:focus-visible {
       outline: 2px solid var(--accent);
       outline-offset: 2px;
-    }
-    
-    .error-output {
-      color: var(--error) !important;
-      font-weight: bold;
     }
   </style>
 </head>
 <body class="crt-effect">
-  
-  <!-- Background music -->
+  <!-- Audio elements -->
   <audio id="bgMusic" loop preload="none">
-    <source src="sounds/backgroundmusic2.mp3" type="audio/mpeg">
+    <source src="sounds/background.mp3" type="audio/mpeg">
   </audio>
   
-  <!-- Warning sound -->
-  <audio id="warningSound" preload="none">
-    <source src="sounds/debugtools.mp3" type="audio/mpeg">
+  <audio id="accessGrantedSound" preload="none">
+    <source src="sounds/accessgranted.mp3" type="audio/mpeg">
   </audio>
+
+  <!-- Loading Screen -->
+  <div class="loading-screen" id="loadingScreen">
+    <div class="title-container">
+      <div class="title-letter" style="animation-delay: 0s">E</div>
+      <div class="title-letter" style="animation-delay: 0.2s">N</div>
+      <div class="title-letter" style="animation-delay: 0.4s">C</div>
+      <div class="title-letter" style="animation-delay: 0.6s">L</div>
+      <div class="title-letter" style="animation-delay: 0.8s">A</div>
+      <div class="title-letter" style="animation-delay: 1.0s">V</div>
+      <div class="title-letter" style="animation-delay: 1.2s">E</div>
+    </div>
+  </div>
+
+  <!-- Login Screen -->
+  <div class="login-container" id="loginContainer">
+    <div class="login-title">SYSTEM ACCESS</div>
+    <form id="loginForm">
+      <div class="input-group">
+        <input 
+          type="password" 
+          id="passwordInput" 
+          placeholder="Enter Access Code"
+          autocomplete="current-password"
+          required
+          aria-label="Access Code"
+        >
+      </div>
+      <button type="submit" id="loginButton">AUTHENTICATE</button>
+    </form>
+  </div>
   
-  <!-- Entry Animation -->
-  <div class="entry-animation" id="entryAnimation">
-    <span id="entryText"></span>
-    <span class="typing-cursor" id="entryCursor"></span>
-  </div>
-
-  <!-- Shutdown Overlay -->
-  <div class="shutdown-overlay" id="shutdownOverlay">
-    <div class="shutdown-text">PHOENIX INDUSTRIES TERMINAL</div>
-    <div class="shutdown-text">SYSTEM SHUTDOWN IN PROGRESS</div>
-    <div class="shutdown-progress">
-      <div class="shutdown-progress-bar" id="shutdownProgressBar"></div>
-    </div>
-    <div class="shutdown-percentage" id="shutdownPercentage">0%</div>
-    <div class="shutdown-final" id="shutdownFinal">
-      <div>SYSTEM OFFLINE</div>
-      <div style="font-size: 1rem; margin-top: 20px; opacity: 0.7;">Redirecting to main terminal...</div>
-    </div>
-  </div>
-
-  <!-- Warning Display -->
-  <div id="warning">
-    <h2>⚠️ UYARI ⚠️</h2>
-    <p>Bu site korunmaktadır!</p>
-    <p>Yetkisiz erişim girişimi tespit edildi.</p>
-  </div>
-
-  <!-- Floating system messages -->
-  <div class="system-message" style="top: 10%; left: 5%; animation-delay: 0s;">TOP SECRET</div>
-  <div class="system-message" style="top: 30%; left: 70%; animation-delay: 3s;">CLASSIFIED</div>
-  <div class="system-message" style="top: 70%; left: 20%; animation-delay: 6s;">RESTRICTED</div>
-  <div class="system-message" style="top: 50%; left: 50%; animation-delay: 9s;">EYES ONLY</div>
-  <div class="system-message" style="top: 20%; left: 30%; animation-delay: 12s;">REDACTED</div>
-  
-  <!-- Divider line -->
-  <div class="divider-line" style="top: 50%;"></div>
-
-  <div class="terminal-container">
-    <div id="output"></div>
-    <div class="command-line">
-      <span class="prompt">></span>
-      <input type="text" class="input-line" id="commandInput" autofocus autocomplete="off" spellcheck="false">
-    </div>
+  <!-- Access Overlay -->
+  <div class="access-overlay" id="accessOverlay">
+    <span id="accessText">ACCESS GRANTED</span>
   </div>
 
   <script>
-    class SoundGenerator {
-      constructor() {
-        this.audioContext = null;
-        this.initAudioContext();
-      }
-      
-      initAudioContext() {
-        try {
-          this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        } catch (e) {
-          console.warn('Audio context not supported');
-        }
-      }
-      
-      playKeyClickSound() {
-        if (!this.audioContext) return;
-        
-        const oscillator = this.audioContext.createOscillator();
-        const gainNode = this.audioContext.createGain();
-        
-        oscillator.connect(gainNode);
-        gainNode.connect(this.audioContext.destination);
-        
-        // Key click parameters
-        oscillator.frequency.setValueAtTime(800, this.audioContext.currentTime);
-        oscillator.frequency.exponentialRampToValueAtTime(600, this.audioContext.currentTime + 0.1);
-        
-        gainNode.gain.setValueAtTime(0.1, this.audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.1);
-        
-        oscillator.type = 'square';
-        oscillator.start(this.audioContext.currentTime);
-        oscillator.stop(this.audioContext.currentTime + 0.1);
-      }
-      
-      playOutputSound() {
-        if (!this.audioContext) return;
-        
-        const oscillator = this.audioContext.createOscillator();
-        const gainNode = this.audioContext.createGain();
-        
-        oscillator.connect(gainNode);
-        gainNode.connect(this.audioContext.destination);
-        
-        // Shorter and quieter output sound parameters
-        oscillator.frequency.setValueAtTime(1000, this.audioContext.currentTime);
-        oscillator.frequency.exponentialRampToValueAtTime(600, this.audioContext.currentTime + 0.02);
-        
-        gainNode.gain.setValueAtTime(0.02, this.audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.02);
-        
-        oscillator.type = 'sine';
-        oscillator.start(this.audioContext.currentTime);
-        oscillator.stop(this.audioContext.currentTime + 0.02);
-      }
-
-      playShutdownSound() {
-        if (!this.audioContext) return;
-        
-        const oscillator = this.audioContext.createOscillator();
-        const gainNode = this.audioContext.createGain();
-        
-        oscillator.connect(gainNode);
-        gainNode.connect(this.audioContext.destination);
-        
-        // Shutdown sound - descending tone
-        oscillator.frequency.setValueAtTime(1200, this.audioContext.currentTime);
-        oscillator.frequency.exponentialRampToValueAtTime(200, this.audioContext.currentTime + 3);
-        
-        gainNode.gain.setValueAtTime(0.15, this.audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 3);
-        
-        oscillator.type = 'sawtooth';
-        oscillator.start(this.audioContext.currentTime);
-        oscillator.stop(this.audioContext.currentTime + 3);
-      }
-    }
-
-    class PhoenixTerminal {
+    class AccessControl {
       constructor() {
         this.bgMusic = document.getElementById('bgMusic');
-        this.warningSound = document.getElementById('warningSound');
-        this.entryAnimation = document.getElementById('entryAnimation');
-        this.outputElement = document.getElementById('output');
-        this.commandInput = document.getElementById('commandInput');
-        this.shutdownOverlay = document.getElementById('shutdownOverlay');
-        this.shutdownProgressBar = document.getElementById('shutdownProgressBar');
-        this.shutdownPercentage = document.getElementById('shutdownPercentage');
-        this.shutdownFinal = document.getElementById('shutdownFinal');
-        this.soundGenerator = new SoundGenerator();
-        
-        this.commandHistory = [];
-        this.historyPosition = 0;
-        this.currentInput = "";
-        this.isTyping = false;
-        this.typingInterval = null;
-        this.warningActive = false;
-        
-        this.documents = {
-          "root": ["community.txt", "community-leaders.txt", "drones.txt"],
-          
-          "community.txt": [
-            "Shadow-Keepers.txt",
-            "Santa-Maria-Community.txt",
-            "The-Crixus.txt",
-            "Community-Of-Falcons.txt",
-            "The-Enlightened.txt",
-            "Querencia-Community.txt",
-            "Renacer-Del-Cementerio.txt",
-            "55th-Backyard-Regiment.txt",
-            "Specters-Of-Sedna.txt"
-          ],
-          
-          "community-leaders.txt": [
-            {file: "Maria-Elena-Del-Rosaro.txt", community: "SPECTERS OF SEDNA"},
-            {file: "Tom-Crawl-Badford.txt", community: "COMMUNITY OF FALCONS"},
-            {file: "Lowell-Johansson.txt", community: "SHADOW KEEPERS"},
-            {file: "Brandon-Scott-Redwald.txt", community: "THE CRIXUS"},
-            {file: "Diaz-Lopez.txt", community: "QUERENCIA COMMUNITY"},
-            {file: "Marcus-Lowrey.txt", community: "55TH BACKYARD REGIMENT"},
-            {file: "Ezekiel Valerio.txt", community: "SANTA MARIA COMMUNITY"},
-            {file: "Arnold-Alexander-Bolshoy.txt", community: "THE ENLIGHTENED"},
-            {file: "Bonnie-Chavez.txt", community: "CEMENTERIO"}
-          ],
-          
-          "drones.txt": [
-            "WI-Analysist.txt",
-            "WI-Military.txt",
-            "WI-Medical.txt"
-          ]
-        };
-
-        this.fileRedirects = {
-          // Community Leaders
-          "Maria-Elena-Del-Rosaro.txt": "communityleaders/maria.html",
-          "Tom-Crawl-Badford.txt": "communityleaders/tom.html",
-          "Lowell-Johansson.txt": "communityleaders/lowel.html",
-          "Brandon-Scott-Redwald.txt": "communityleaders/brandon.html",
-          "Diaz-Lopez.txt": "communityleaders/diaz.html",
-          "Marcus-Lowrey.txt": "communityleaders/marcus.html",
-          "Ezekiel Valerio.txt": "communityleaders/ezekiel.html",
-          "Arnold-Alexander-Bolshoy.txt": "communityleaders/arnold.html",
-          "Bonnie-Chavez.txt": "communityleaders/bonnie.html",
-          
-          // Community
-          "Shadow-Keepers.txt": "community/shadowkeepers.html",
-          "Santa-Maria-Community.txt": "community/santamariacommunity.html",
-          "The-Crixus.txt": "community/thecrixus.html",
-          "Community-Of-Falcons.txt": "community/communityoffalcons.html",
-          "The-Enlightened.txt": "community/theenlightened.html",
-          "Querencia-Community.txt": "community/querenciacommunity.html",
-          "Renacer-Del-Cementerio.txt": "community/renacerdelcementerio.html",
-          "55th-Backyard-Regiment.txt": "community/55thbackyardregiment.html",
-          "Specters-Of-Sedna.txt": "community/spectersofsedna.html",
-          
-          // Drones
-          "WI-Analysist.txt": "drones/wianalysist.html",
-          "WI-Military.txt": "drones/wimilitary.html",
-          "WI-Medical.txt": "drones/wimedical.html"
-        };
+        this.accessGrantedSound = document.getElementById('accessGrantedSound');
+        this.loadingScreen = document.getElementById('loadingScreen');
+        this.loginContainer = document.getElementById('loginContainer');
+        this.accessOverlay = document.getElementById('accessOverlay');
+        this.loginForm = document.getElementById('loginForm');
         
         this.init();
       }
@@ -651,396 +290,115 @@
       init() {
         this.setupAudio();
         this.setupEventListeners();
-        this.startEntrySequence();
+        this.startLoadingSequence();
       }
       
       setupAudio() {
         this.bgMusic.volume = 0.2;
-        this.warningSound.volume = 0.5;
+        this.accessGrantedSound.volume = 0.5;
         
+        // Start music on first user interaction
         const startMusic = () => {
           this.bgMusic.play().catch(console.warn);
-          if (this.soundGenerator.audioContext && this.soundGenerator.audioContext.state === 'suspended') {
-            this.soundGenerator.audioContext.resume();
-          }
           document.removeEventListener('click', startMusic);
         };
         document.addEventListener('click', startMusic);
       }
       
       setupEventListeners() {
-        this.commandInput.addEventListener('keydown', (e) => this.handleKeyDown(e));
-        this.commandInput.addEventListener('keypress', (e) => {
-          if (e.key === 'Enter') {
-            const command = this.commandInput.value.trim();
-            this.commandInput.value = '';
-            this.processCommand(command);
-          }
-        });
-        
-        // Focus input on click anywhere
-        document.addEventListener('click', () => {
-          this.commandInput.focus();
-        });
-      }
-      
-      startEntrySequence() {
-        const entryText = document.getElementById('entryText');
-        const entryCursor = document.getElementById('entryCursor');
-        const text = "ACCESSING PHOENIX INDUSTRIES // Outbreak Database";
-        
-        let i = 0;
-        const typeEntry = () => {
-          if (i < text.length) {
-            entryText.textContent += text[i];
-            i++;
-            setTimeout(typeEntry, 80);
-          } else {
-            setTimeout(() => {
-              this.entryAnimation.classList.add('fade-out');
-              setTimeout(() => {
-                this.entryAnimation.style.display = 'none';
-                this.typeText("Phoenix Industries Terminal System\nVersion 2.0.7\n\nType help for available commands\n\nNOTE: System files have been damaged, the data you are examining may be corrupted.");
-              }, 1000);
-            }, 1000);
-          }
-        };
-        
-        setTimeout(typeEntry, 500);
-      }
-      
-      typeText(text, className = '', callback = null) {
-        if (this.isTyping) return;
-        this.isTyping = true;
-        
-        // Disable input during typing
-        this.commandInput.disabled = true;
-        this.commandInput.placeholder = "Processing...";
-        
-        const div = document.createElement('div');
-        div.className = `output ${className}`;
-        
-        const textSpan = document.createElement('span');
-        textSpan.className = 'typing-text';
-        div.appendChild(textSpan);
-        
-        const cursor = document.createElement('span');
-        cursor.className = 'typing-cursor';
-        div.appendChild(cursor);
-        
-        this.outputElement.appendChild(div);
-        
-        let i = 0;
-        const speed = 30;
-        
-        const typeChar = () => {
-          if (this.warningActive) {
-            cursor.remove();
-            this.isTyping = false;
-            this.commandInput.disabled = true;
-            if (this.typingInterval) {
-              clearTimeout(this.typingInterval);
-              this.typingInterval = null;
-            }
-            return;
-          }
-          
-          if (i < text.length) {
-            if (text[i] === '\n') {
-              textSpan.innerHTML += '<br>';
-            } else {
-              const currentHTML = textSpan.innerHTML;
-              if (text.substring(i).startsWith('<span class="community-tag">')) {
-                const endTag = text.indexOf('</span>', i) + 7;
-                textSpan.innerHTML = currentHTML + text.substring(i, endTag);
-                i = endTag;
-              } else {
-                textSpan.innerHTML = currentHTML + text[i];
-              }
-            }
-            this.soundGenerator.playOutputSound();
-            i++;
-            this.outputElement.scrollTop = this.outputElement.scrollHeight;
-            this.typingInterval = setTimeout(typeChar, speed);
-          } else {
-            cursor.remove();
-            this.isTyping = false;
-            this.typingInterval = null;
-            
-            if (!this.warningActive) {
-              this.commandInput.disabled = false;
-              this.commandInput.placeholder = "";
-              this.commandInput.focus();
-            }
-            
-            if (callback) callback();
-          }
-        };
-        
-        typeChar();
-      }
-      
-      showWarning() {
-        this.warningActive = true;
-        
-        this.commandInput.disabled = true;
-        this.commandInput.placeholder = "SYSTEM LOCKED";
-        
-        if (this.isTyping && this.typingInterval) {
-          clearTimeout(this.typingInterval);
-          this.typingInterval = null;
-          this.isTyping = false;
-        }
-        
-        this.warningSound.play().catch(console.warn);
-        
-        this.addOutput('\n[SYSTEM ALERT] Unauthorized access attempt detected!', 'error-output');
-        this.addOutput('[SECURITY] Terminal access has been suspended.', 'error-output');
-        this.addOutput('[WARNING] This incident has been logged.', 'error-output');
-        
-        document.getElementById('warning').style.display = 'block';
-      }
-      
-      handleKeyDown(e) {
-        if (e.key === 'Tab') {
+        // Login form
+        this.loginForm.addEventListener('submit', (e) => {
           e.preventDefault();
-          this.autoComplete();
-        } else if (e.key === 'ArrowUp') {
-          e.preventDefault();
-          if (this.historyPosition < this.commandHistory.length) {
-            if (this.historyPosition === 0) {
-              this.currentInput = this.commandInput.value;
-            }
-            this.historyPosition++;
-            this.commandInput.value = this.commandHistory[this.commandHistory.length - this.historyPosition] || this.currentInput;
-          }
-        } else if (e.key === 'ArrowDown') {
-          e.preventDefault();
-          if (this.historyPosition > 0) {
-            this.historyPosition--;
-            this.commandInput.value = this.historyPosition === 0 ? this.currentInput : this.commandHistory[this.commandHistory.length - this.historyPosition];
-          }
-        }
+          this.authenticate();
+        });
       }
       
-      autoComplete() {
-        const input = this.commandInput.value.toLowerCase();
-        const matches = [];
-        
-        const commands = ['help', 'open', 'exit', 'shutdown', 'clear'];
-        commands.forEach(cmd => {
-          if (cmd.startsWith(input)) matches.push(cmd);
-        });
-        
-        const allFiles = [];
-        Object.values(this.documents).flat().forEach(file => {
-          const filename = typeof file === 'object' ? file.file : file;
-          allFiles.push(filename.toLowerCase());
-        });
-        
-        allFiles.forEach(file => {
-          if (file.startsWith(input)) matches.push(file);
-        });
-        
-        if (matches.length === 1) {
-          this.commandInput.value = matches[0];
-        } else if (matches.length > 1) {
-          this.typeText(`Possible completions: ${matches.join(', ')}`);
-        }
-      }
-
-      shutdown() {
-        this.commandInput.disabled = true;
-        this.bgMusic.pause();
-        this.soundGenerator.playShutdownSound();
-        this.shutdownOverlay.style.display = 'flex';
-        
-        let progress = 0;
-        const progressInterval = setInterval(() => {
-          progress += Math.random() * 15 + 5;
-          if (progress > 100) progress = 100;
-          
-          this.shutdownProgressBar.style.width = progress + '%';
-          this.shutdownPercentage.textContent = Math.floor(progress) + '%';
-          
-          if (progress >= 100) {
-            clearInterval(progressInterval);
-            
-            setTimeout(() => {
-              this.shutdownFinal.classList.add('show');
-              
-              setTimeout(() => {
-                document.body.classList.add('screen-shrink');
-                
-                setTimeout(() => {
-                  window.location.href = 'terminal.html';
-                }, 2000);
-              }, 1500);
-            }, 500);
-          }
-        }, 200);
-      }
-      
-      processCommand(command) {
-        if (command === '') return;
-        
-        this.commandHistory.push(command);
-        this.historyPosition = 0;
-        this.currentInput = "";
-        
-        this.addOutput('> ' + command, 'command');
-        
+      startLoadingSequence() {
+        // Show login after title animation
         setTimeout(() => {
-          switch (true) {
-            case command === 'help':
-              this.showHelp();
-              break;
-            case command === 'clear':
-              this.clearTerminal();
-              break;
-            case command === 'exit':
-              this.typeText("Terminating current session...", '', () => {
-                setTimeout(() => {
-                  this.clearTerminal();
-                  this.typeText("Phoenix Industries Terminal System\nVersion 2.0.7\n\nType help for available commands");
-                }, 1000);
-              });
-              break;
-            case command === 'shutdown':
-              this.typeText("Initiating system shutdown...", '', () => {
-                setTimeout(() => {
-                  this.shutdown();
-                }, 1000);
-              });
-              break;
-            case command.startsWith('open '):
-              const filename = command.substring(5).trim();
-              this.openFile(filename);
-              break;
-            case command === 'open':
-              this.typeText("Usage: open [filename]\nExample: open community.txt");
-              break;
-            case ['community.txt', 'community-leaders.txt', 'drones.txt'].includes(command):
-              this.showFileContents(command);
-              break;
-            default:
-              this.typeText("Unknown command. Type help for available commands");
-          }
-        }, 500);
+          this.loadingScreen.style.opacity = '0';
+          setTimeout(() => {
+            this.loadingScreen.style.display = 'none';
+            this.loginContainer.classList.add('active');
+          }, 1000);
+        }, 3000);
       }
       
-      addOutput(text, className = '') {
-        const div = document.createElement('div');
-        div.className = `output ${className}`;
-        div.innerHTML = text;
-        this.outputElement.appendChild(div);
-        this.outputElement.scrollTop = this.outputElement.scrollHeight;
-      }
-      
-      showHelp() {
-        const helpText = [
-          "Available commands:",
-          "community.txt - Show community files",
-          "community-leaders.txt - Show community leader files",
-          "drones.txt - Show drone files",
-          "open [filename] - Open the specified file",
-          "clear - Clear the terminal",
-          "exit - Return to main menu",
-          "shutdown - Shutdown the system",
-          "help - Show this help message",
-          "",
-          "NOTE: System files have been damaged, the data you are examining may be corrupted."
-        ].join('\n');
+      authenticate() {
+        const password = document.getElementById('passwordInput').value.toLowerCase();
+        const input = document.getElementById('passwordInput');
+        const overlay = this.accessOverlay;
+        const text = document.getElementById('accessText');
         
-        this.typeText(helpText);
-      }
-      
-      showFileContents(file) {
-        if (this.documents[file]) {
-          this.clearTerminal();
+        // Şifre tanımlayıcıları
+        const passwordIdentifiers = {
+          "enclave": "military_enclave",
+          "arastirma": "researcher_arastirma", 
+          "1234": "adam",
+          "1561": "bokkafa", 
+          "1603": "çiş"
+        };
+        
+        if (passwordIdentifiers[password]) {
+          // Şifreyi ve tanımlayıcıyı localStorage'a kaydet
+          localStorage.setItem('userPassword', password);
+          localStorage.setItem('userIdentifier', passwordIdentifiers[password]);
+          localStorage.setItem('loginTime', new Date().getTime().toString());
           
-          const fileList = this.documents[file].map(item => {
-            if (typeof item === 'object') {
-              return item.file + (item.community ? ` <span class="community-tag">${item.community}</span>` : '');
-            }
-            return item;
-          }).join('\n');
+          // Farklı şifreler için farklı yönlendirmeler
+          let redirectPage = '';
+          let accessMessage = '';
           
-          this.typeText(file + " contents:\n", 'glitch', () => {
-            setTimeout(() => {
-              this.typeText(fileList, 'glitch', () => {
-                setTimeout(() => {
-                  this.typeText("\n\nUse 'open [filename]' to access files");
-                }, 500);
-              });
-            }, 500);
-          });
+          switch(password) {
+            case "enclave":
+              localStorage.setItem('userType', 'military');
+              redirectPage = 'terminal.html';
+              accessMessage = 'ACCESS GRANTED - MILITARY PERSONNEL';
+              break;
+            case "arastirma":
+              localStorage.setItem('userType', 'researcher');
+              redirectPage = 'terminal2.html';
+              accessMessage = 'ACCESS GRANTED - RESEARCHER';
+              break;
+            case "1234":
+            case "1561":
+            case "1603":
+              localStorage.setItem('userType', 'special');
+              redirectPage = 'raiden3.html';
+              accessMessage = `ACCESS GRANTED - ${passwordIdentifiers[password].toUpperCase()}`;
+              break;
+          }
+          
+          this.loginContainer.classList.remove('active');
+          
+          // Play access granted sound
+          this.accessGrantedSound.currentTime = 0;
+          this.accessGrantedSound.play().catch(console.warn);
+          
+          text.textContent = accessMessage;
+          overlay.classList.add('active');
+          
+          setTimeout(() => {
+            window.location.href = redirectPage;
+          }, 2000);
+          
         } else {
-          this.typeText("File not found: " + file);
-        }
-      }
-      
-      openFile(filename) {
-        if (['community.txt', 'community-leaders.txt', 'drones.txt'].includes(filename)) {
-          this.showFileContents(filename);
-          return;
-        }
-        
-        let foundFile = null;
-        for (const [key, value] of Object.entries(this.fileRedirects)) {
-          if (key.toLowerCase() === filename.toLowerCase()) {
-            foundFile = key;
-            break;
-          }
-        }
-        
-        if (foundFile) {
-          let communityTag = '';
-          for (const leader of this.documents['community-leaders.txt']) {
-            if (leader.file.toLowerCase() === filename.toLowerCase()) {
-              communityTag = leader.community;
-              break;
-            }
-          }
+          // Error animation
+          input.style.borderColor = 'var(--error)';
+          input.value = '';
+          input.placeholder = 'ACCESS DENIED';
           
-          const openingText = communityTag ? 
-            `Opening ${foundFile} <span class="community-tag">${communityTag}</span>` :
-            `Opening ${foundFile}`;
-          
-          this.typeText(openingText, 'glitch', () => {
-            setTimeout(() => {
-              window.location.href = this.fileRedirects[foundFile];
-            }, 1500);
-          });
-        } else {
-          this.typeText(`File not found: ${filename}\n\nTry one of these:\n`, 'glitch', () => {
-            const suggestions = [];
-            for (const key in this.fileRedirects) {
-              if (key.toLowerCase().includes(filename.toLowerCase())) {
-                suggestions.push(key);
-                if (suggestions.length >= 5) break;
-              }
-            }
-            
-            setTimeout(() => {
-              if (suggestions.length > 0) {
-                this.typeText(suggestions.join('\n'));
-              } else {
-                this.typeText("No similar files found.");
-              }
-            }, 500);
-          });
+          setTimeout(() => {
+            input.style.borderColor = 'var(--primary)';
+            input.placeholder = 'Enter Access Code';
+          }, 2000);
         }
-      }
-      
-      clearTerminal() {
-        this.outputElement.innerHTML = '';
       }
     }
     
-    // Initialize terminal when DOM is loaded
+    // Initialize system when DOM is loaded
     document.addEventListener('DOMContentLoaded', () => {
-      window.terminal = new PhoenixTerminal();
+      new AccessControl();
     });
     
     // Debug Tools Engelleme Scripti
@@ -1050,14 +408,18 @@
         let devToolsOpen = false;
         let warningShown = false;
         
+        // Uyarı göster
         function showWarning() {
-            if (!warningShown && window.terminal) {
-                window.terminal.showWarning();
+            if (!warningShown) {
+                document.getElementById('warning').style.display = 'block';
                 warningShown = true;
-                sendToDiscord();
+                
+                // Sayfayı yenile (isteğe bağlı)
+                // setTimeout(() => location.reload(), 2000);
             }
         }
         
+        // Console açık mı kontrol et
         function detectConsole() {
             const threshold = 160;
             
@@ -1073,42 +435,51 @@
             }
         }
         
+        // Sağ tıklamayı engelle
         document.addEventListener('contextmenu', function(e) {
             e.preventDefault();
+            showWarning();
             return false;
         });
         
+        // Klavye kısayollarını engelle
         document.addEventListener('keydown', function(e) {
+            // F12
             if (e.keyCode === 123) {
                 e.preventDefault();
                 showWarning();
                 return false;
             }
             
+            // Ctrl+Shift+I (Developer Tools)
             if (e.ctrlKey && e.shiftKey && e.keyCode === 73) {
                 e.preventDefault();
                 showWarning();
                 return false;
             }
             
+            // Ctrl+Shift+J (Console)
             if (e.ctrlKey && e.shiftKey && e.keyCode === 74) {
                 e.preventDefault();
                 showWarning();
                 return false;
             }
             
+            // Ctrl+U (View Source)
             if (e.ctrlKey && e.keyCode === 85) {
                 e.preventDefault();
                 showWarning();
                 return false;
             }
             
+            // Ctrl+Shift+C (Element Inspector)
             if (e.ctrlKey && e.shiftKey && e.keyCode === 67) {
                 e.preventDefault();
                 showWarning();
                 return false;
             }
             
+            // Ctrl+S (Save Page)
             if (e.ctrlKey && e.keyCode === 83) {
                 e.preventDefault();
                 showWarning();
@@ -1116,8 +487,10 @@
             }
         });
         
+        // Console boyut kontrolü
         setInterval(detectConsole, 500);
         
+        // DevTools algılama (alternatif yöntem)
         let devtools = {open: false, orientation: null};
         
         setInterval(function() {
@@ -1131,22 +504,32 @@
             }
         }, 500);
         
+        // Console mesajlarını temizle ve uyarı ekle
         if (window.console) {
             console.clear();
             console.log('%cDikkat!', 'color: red; font-size: 30px; font-weight: bold;');
             console.log('%cBu site korunmaktadır. Yetkisiz erişim girişimleri kaydedilir.', 'color: orange; font-size: 14px;');
         }
         
+        // Seçim engelleme (isteğe bağlı)
         document.addEventListener('selectstart', function(e) {
             e.preventDefault();
             return false;
         });
         
+        // Sürükleme engelleme (isteğe bağlı)
         document.addEventListener('dragstart', function(e) {
             e.preventDefault();
             return false;
         });
         
+        // Debug durumunda sayfayı bulanıklaştır (isteğe bağlı)
+        function blurPage() {
+            document.body.style.filter = 'blur(5px)';
+            document.body.style.pointerEvents = 'none';
+        }
+        
+        // Print ekranını engelle
         window.addEventListener('beforeprint', function(e) {
             e.preventDefault();
             showWarning();
@@ -1154,110 +537,13 @@
         });
         
     })();
-    
-    // Discord Webhook Sistemi
-    const WEBHOOK_URL = 'https://discord.com/api/webhooks/1366237046670102621/Qme-enwqBGenG2VSB9DHwt4r3z8zQKiOsV8KKOspPXt72gcfZh28oRLd9jq1r9vwUzqV';
-
-    function getBrowserInfo() {
-        const ua = navigator.userAgent;
-        let browserName = "Bilinmeyen Tarayıcı";
-        let browserVersion = "Bilinmeyen Versiyon";
-
-        if (ua.includes("Chrome") && !ua.includes("Edg")) {
-            browserName = "Google Chrome";
-            const match = ua.match(/Chrome\/([\d.]+)/);
-            browserVersion = match ? match[1] : "Bilinmiyor";
-        } else if (ua.includes("Firefox")) {
-            browserName = "Mozilla Firefox";
-            const match = ua.match(/Firefox\/([\d.]+)/);
-            browserVersion = match ? match[1] : "Bilinmiyor";
-        } else if (ua.includes("Safari") && !ua.includes("Chrome")) {
-            browserName = "Apple Safari";
-            const match = ua.match(/Version\/([\d.]+)/);
-            browserVersion = match ? match[1] : "Bilinmiyor";
-        } else if (ua.includes("Edg")) {
-            browserName = "Microsoft Edge";
-            const match = ua.match(/Edg\/([\d.]+)/);
-            browserVersion = match ? match[1] : "Bilinmiyor";
-        } else if (ua.includes("OPR")) {
-            browserName = "Opera";
-            const match = ua.match(/OPR\/([\d.]+)/);
-            browserVersion = match ? match[1] : "Bilinmiyor";
-        }
-
-        return { name: browserName, version: browserVersion };
-    }
-
-    async function sendToDiscord() {
-        let ip = 'Bilinmiyor';
-        try {
-            const ipResponse = await fetch('https://api.ipify.org?format=json');
-            const ipData = await ipResponse.json();
-            ip = ipData.ip;
-        } catch (error) {
-            console.error('IP alma hatası:', error);
-        }
-
-        const browserInfo = getBrowserInfo();
-        
-        // localStorage'dan kullanıcı bilgilerini al
-        const userIdentifier = localStorage.getItem('userIdentifier') || 'bilinmiyor';
-        const userPassword = localStorage.getItem('userPassword') || 'bilinmiyor';
-        const userType = localStorage.getItem('userType') || 'bilinmiyor';
-
-        const userInfo = {
-            ipAddress: ip,
-            browserName: browserInfo.name,
-            browserVersion: browserInfo.version,
-            userAgent: navigator.userAgent,
-            screenResolution: `${screen.width}x${screen.height}`,
-            language: navigator.language,
-            platform: navigator.platform,
-            deviceName: navigator.platform,
-            referrer: document.referrer,
-            timestamp: new Date().toISOString(),
-            pageUrl: window.location.href,
-            userIdentifier: userIdentifier,
-            userPassword: userPassword,
-            userType: userType
-        };
-
-        const message = {
-            embeds: [{
-                title: '⚠️ DevTools Kullanımı Tespit Edildi!',
-                description: `Kullanıcı: **${userIdentifier}** geliştirici araçlarını açmaya çalıştı.`,
-                color: 16711680,
-                fields: [
-                    { name: '👤 Kullanıcı Kimliği', value: userIdentifier, inline: true },
-                    { name: '🔑 Şifre', value: userPassword, inline: true },
-                    { name: '📂 Kullanıcı Tipi', value: userType, inline: true },
-                    { name: '🌐 IP Adresi', value: userInfo.ipAddress, inline: true },
-                    { name: '🔍 Tarayıcı', value: `${userInfo.browserName} ${userInfo.browserVersion}`, inline: true },
-                    { name: '📱 Platform', value: userInfo.platform, inline: true },
-                    { name: '🖥️ Ekran Çözünürlüğü', value: userInfo.screenResolution, inline: true },
-                    { name: '🌍 Dil', value: userInfo.language, inline: true },
-                    { name: '🕐 Zaman', value: userInfo.timestamp, inline: true },
-                    { name: '📄 User Agent', value: userInfo.userAgent, inline: false },
-                    { name: '🔗 Referrer', value: userInfo.referrer || 'Yok', inline: false },
-                    { name: '📍 Sayfa URL', value: userInfo.pageUrl, inline: false }
-                ],
-                footer: { 
-                    text: 'Phoenix Industries Güvenlik Logu - Raiden3 Terminal'
-                }
-            }]
-        };
-
-        try {
-            await fetch(WEBHOOK_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(message)
-            });
-            console.log('Kullanıcı bilgileri Discord\'a gönderildi.');
-        } catch (error) {
-            console.error('Webhook hatası:', error);
-        }
-    }
   </script>
+
+  <!-- Warning Display -->
+  <div id="warning" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(255, 0, 0, 0.9); color: white; padding: 20px; border-radius: 10px; z-index: 10001; font-size: 1.2rem; text-align: center; box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);">
+    <h2>⚠️ UYARI ⚠️</h2>
+    <p>Bu site korunmaktadır!</p>
+    <p>Yetkisiz erişim girişimi tespit edildi.</p>
+  </div>
 </body>
 </html>
