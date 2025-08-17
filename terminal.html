@@ -742,19 +742,18 @@
      // startIntroSequence fonksiyonunu şu şekilde değiştirin (yaklaşık 290. satır civarı):
 
 startIntroSequence() {
-  console.log('Intro sequence başlatılıyor...'); // Debug için
+  console.log('Intro sequence başlatılıyor...');
   
   setTimeout(() => {
-    console.log('Intro fade-out başlıyor...'); // Debug için
-    this.introScreen.style.opacity = '0';
-    this.introScreen.style.transition = 'opacity 1s ease';
+    console.log('Intro fade-out başlıyor...');
+    this.introScreen.classList.add('fade-out'); // class ekle
     
     setTimeout(() => {
-      console.log('Intro gizleniyor, main content gösteriliyor...'); // Debug için
+      console.log('Intro gizleniyor, main content gösteriliyor...');
       this.introScreen.style.display = 'none';
       this.showMainContent();
-    }, 1000);
-  }, 2000); // 2 saniyeye düşürdüm, 3 saniye çok uzundu
+    }, 1000); // CSS transition ile uyumlu süre
+  }, 2000);
 }
 
 // showMainContent fonksiyonunu da güncelleyin:
@@ -1055,5 +1054,6 @@ handleAction(action, name) {
   </script>
 </body>
 </html>
+
 
 
