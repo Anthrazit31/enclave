@@ -806,11 +806,16 @@ handleAction(action, name) {
   let redirectUrl;
   switch(action) {
     case 'outbreak':
-      // Raiden3 için erişim anahtarı ver
-      localStorage.setItem('raiden3_access', 'terminal_authorized');
       text.textContent = 'ACCESSING OUTBREAK DATABASE';
-      redirectUrl = 'raiden3.html';
-      break;
+      // localStorage işlemini hemen yap ve bekle
+      localStorage.setItem('raiden3_access', 'terminal_authorized');
+      // Ekstra güvence için tekrar kontrol et
+      setTimeout(() => {
+        const check = localStorage.getItem('raiden3_access');
+        console.log('Raiden3 access key set:', check); // Debug için
+        window.location.href = 'raiden3.html';
+      }, 100); // 100ms bekle
+      return; // return ekle ki alttaki setTimeout çalışmasın
     case 'genz':
       text.textContent = 'ACCESS GRANTED - GENZ SYSTEM';
       redirectUrl = 'genz.html';
@@ -827,22 +832,6 @@ handleAction(action, name) {
     }, 2000);
   }
 }
-      
-      handleLogout() {
-        this.playCloseSound();
-        
-        const overlay = this.accessOverlay;
-        const text = document.getElementById('accessText');
-        
-        text.textContent = 'SYSTEM SHUTDOWN';
-        text.style.color = 'var(--error)';
-        overlay.classList.add('active');
-        
-        setTimeout(() => {
-          window.location.href = 'index.html';
-        }, 2000);
-      }
-    }
     
     // Initialize system when DOM is loaded
     document.addEventListener('DOMContentLoaded', () => {
@@ -1093,4 +1082,5 @@ handleAction(action, name) {
 </body>
 
 </html>
+
 
