@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phoenix Industries // Access Control</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <style>
+    :root {
+      --primary: #00ff00;
+      --secondary: #003300;
+      --accent: #00cc00;
+      --error: #ff3333;
+      --bg: #000;
+      --text: #00ff00;
+      --transition: all 0.3s ease;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Share Tech Mono', monospace;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    /* CRT Effect - Optimized */
+    .crt-effect::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        linear-gradient(rgba(0, 255, 0, 0.03) 50%, rgba(0, 0, 0, 0.1) 50%),
+        linear-gradient(90deg, rgba(0, 255, 0, 0.03), rgba(0, 255, 0, 0.02), rgba(0, 255, 0, 0.03));
+      background-size: 100% 3px, 3px 100%;
+      pointer-events: none;
+      z-index: 100;
+    }
+    
+    .crt-effect::after {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.1);
+      opacity: 0.1;
+      pointer-events: none;
+      z-index: 100;
+      animation: flicker 0.15s infinite;
+    }
+    
+    @keyframes flicker {
+      0%, 100% { opacity: 0.1; }
+      50% { opacity: 0.05; }
+    }
+    
+    /* Loading Screen */
+    .loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      transition: opacity 1s ease;
+    }
+    
+    .title-container {
+      display: flex;
+      gap: clamp(10px, 2vw, 15px);
+    }
+    
+    .title-letter {
+      font-size: clamp(2rem, 8vw, 4rem);
+      font-weight: bold;
+      color: white;
+      opacity: 0;
+      text-shadow: 0 0 10px white;
+      animation: fadeIn 0.5s forwards, pulse 2s infinite;
+    }
+    
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+    
+    @keyframes pulse {
+      0%, 100% { text-shadow: 0 0 10px white; }
+      50% { text-shadow: 0 0 20px white; }
+    }
+    
+    /* Login Container */
+    .login-container {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 90%;
+      max-width: 400px;
+      z-index: 999;
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--transition);
+    }
+    
+    .login-container.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .login-title {
+      font-size: clamp(1.5rem, 5vw, 2rem);
+      margin-bottom: 20px;
+      text-align: center;
+      animation: glitch-text 5s infinite alternate;
+    }
+    
+    @keyframes glitch-text {
+      0%, 20%, 100% { text-shadow: none; }
+      5%, 15% { text-shadow: 2px 0 var(--accent), -2px 0 var(--error); }
+      10% { text-shadow: -2px 0 var(--accent), 2px 0 var(--error); }
+    }
+    
+    /* Form Elements */
+    .input-group {
+      margin-bottom: 20px;
+    }
+    
+    input, button {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid var(--primary);
+      background: transparent;
+      color: var(--primary);
+      font-family: inherit;
+      font-size: 1rem;
+      outline: none;
+      transition: var(--transition);
+    }
+    
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 10px var(--primary);
+    }
+    
+    button {
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      text-transform: uppercase;
+    }
+    
+    button:hover {
+      background: var(--secondary);
+      box-shadow: 0 0 15px var(--primary);
+    }
+    
+    button::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0, 255, 0, 0.2), transparent);
+      transition: left 0.5s;
+    }
+    
+    button:hover::after {
+      left: 100%;
+    }
+    
+    /* Access Overlay */
+    .access-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--bg);
+      color: var(--primary);
+      font-size: clamp(2rem, 6vw, 3rem);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 1s ease;
+    }
+    
+    .access-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .login-container {
+        width: 95%;
+        padding: 15px;
+      }
+    }
+    
+    /* Focus indicators */
+    button:focus-visible,
+    input:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+  </style>
+</head>
+<body class="crt-effect">
+  <!-- Audio elements -->
+  <audio id="bgMusic" loop preload="none">
+    <source src="sounds/background.mp3" type="audio/mpeg">
+  </audio>
+  
+  <audio id="accessGrantedSound" preload="none">
+    <source src="sounds/accessgranted.mp3" type="audio/mpeg">
+  </audio>
+
+  <!-- Loading Screen -->
+  <div class="loading-screen" id="loadingScreen">
+    <div class="title-container">
+      <div class="title-letter" style="animation-delay: 0s">E</div>
+      <div class="title-letter" style="animation-delay: 0.2s">N</div>
+      <div class="title-letter" style="animation-delay: 0.4s">C</div>
+      <div class="title-letter" style="animation-delay: 0.6s">L</div>
+      <div class="title-letter" style="animation-delay: 0.8s">A</div>
+      <div class="title-letter" style="animation-delay: 1.0s">V</div>
+      <div class="title-letter" style="animation-delay: 1.2s">E</div>
+    </div>
+  </div>
+
+  <!-- Login Screen -->
+  <div class="login-container" id="loginContainer">
+    <div class="login-title">SYSTEM ACCESS</div>
+    <form id="loginForm">
+      <div class="input-group">
+        <input 
+          type="password" 
+          id="passwordInput" 
+          placeholder="Enter Access Code"
+          autocomplete="current-password"
+          required
+          aria-label="Access Code"
+        >
+      </div>
+      <button type="submit" id="loginButton">AUTHENTICATE</button>
+    </form>
+  </div>
+  
+  <!-- Access Overlay -->
+  <div class="access-overlay" id="accessOverlay">
+    <span id="accessText">ACCESS GRANTED</span>
+  </div>
+
+  <script>
+    class AccessControl {
+      constructor() {
+        this.bgMusic = document.getElementById('bgMusic');
+        this.accessGrantedSound = document.getElementById('accessGrantedSound');
+        this.loadingScreen = document.getElementById('loadingScreen');
+        this.loginContainer = document.getElementById('loginContainer');
+        this.accessOverlay = document.getElementById('accessOverlay');
+        this.loginForm = document.getElementById('loginForm');
+        
+        this.init();
+      }
+      
+      init() {
+        this.setupAudio();
+        this.setupEventListeners();
+        this.startLoadingSequence();
+      }
+      
+      setupAudio() {
+        this.bgMusic.volume = 0.2;
+        this.accessGrantedSound.volume = 0.5;
+        
+        // Start music on first user interaction
+        const startMusic = () => {
+          this.bgMusic.play().catch(console.warn);
+          document.removeEventListener('click', startMusic);
+        };
+        document.addEventListener('click', startMusic);
+      }
+      
+      setupEventListeners() {
+        // Login form
+        this.loginForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          this.authenticate();
+        });
+      }
+      
+      startLoadingSequence() {
+        // Show login after title animation
+        setTimeout(() => {
+          this.loadingScreen.style.opacity = '0';
+          setTimeout(() => {
+            this.loadingScreen.style.display = 'none';
+            this.loginContainer.classList.add('active');
+          }, 1000);
+        }, 3000);
+      }
+      
+      authenticate() {
+        const password = document.getElementById('passwordInput').value.toLowerCase();
+        const input = document.getElementById('passwordInput');
+        const overlay = this.accessOverlay;
+        const text = document.getElementById('accessText');
+        
+        if (password === "enclave") {
+          this.loginContainer.classList.remove('active');
+          
+          // Play access granted sound
+          this.accessGrantedSound.currentTime = 0;
+          this.accessGrantedSound.play().catch(console.warn);
+          
+          text.textContent = 'ACCESS GRANTED - MILITARY PERSONNEL';
+          overlay.classList.add('active');
+          
+          setTimeout(() => {
+            window.location.href = 'terminal.html';
+          }, 2000);
+          
+        } else if (password === "arastirma") {
+          this.loginContainer.classList.remove('active');
+          
+          // Play access granted sound
+          this.accessGrantedSound.currentTime = 0;
+          this.accessGrantedSound.play().catch(console.warn);
+          
+          text.textContent = 'ACCESS GRANTED - RESEARCHER';
+          overlay.classList.add('active');
+          
+          setTimeout(() => {
+            window.location.href = 'terminal2.html';
+          }, 2000);
+          
+        } else {
+          // Error animation
+          input.style.borderColor = 'var(--error)';
+          input.value = '';
+          input.placeholder = 'ACCESS DENIED';
+          
+          setTimeout(() => {
+            input.style.borderColor = 'var(--primary)';
+            input.placeholder = 'Enter Access Code';
+          }, 2000);
+        }
+      }
+    }
+    
+    // Initialize system when DOM is loaded
+    document.addEventListener('DOMContentLoaded', () => {
+      new AccessControl();
+    });
+    // Debug Tools Engelleme Scripti
+        (function() {
+            'use strict';
+            
+            let devToolsOpen = false;
+            let warningShown = false;
+            
+            // Uyarı göster
+            function showWarning() {
+                if (!warningShown) {
+                    document.getElementById('warning').style.display = 'block';
+                    warningShown = true;
+                    
+                    // Sayfayı yenile (isteğe bağlı)
+                    // setTimeout(() => location.reload(), 2000);
+                }
+            }
+            
+            // Console açık mı kontrol et
+            function detectConsole() {
+                const threshold = 160;
+                
+                if (window.outerHeight - window.innerHeight > threshold || 
+                    window.outerWidth - window.innerWidth > threshold) {
+                    if (!devToolsOpen) {
+                        devToolsOpen = true;
+                        showWarning();
+                        console.clear();
+                        console.log('%cDurdur!', 'color: red; font-size: 50px; font-weight: bold;');
+                        console.log('%cBu bir tarayıcı özelliğidir ve geliştiriciler içindir. Birisi size buraya bir şey kopyalayıp yapıştırmanızı söylediyse, bu bir dolandırıcılıktır.', 'color: red; font-size: 16px;');
+                    }
+                }
+            }
+            
+            // Sağ tıklamayı engelle
+            document.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                showWarning();
+                return false;
+            });
+            
+            // Klavye kısayollarını engelle
+            document.addEventListener('keydown', function(e) {
+                // F12
+                if (e.keyCode === 123) {
+                    e.preventDefault();
+                    showWarning();
+                    return false;
+                }
+                
+                // Ctrl+Shift+I (Developer Tools)
+                if (e.ctrlKey && e.shiftKey && e.keyCode === 73) {
+                    e.preventDefault();
+                    showWarning();
+                    return false;
+                }
+                
+                // Ctrl+Shift+J (Console)
+                if (e.ctrlKey && e.shiftKey && e.keyCode === 74) {
+                    e.preventDefault();
+                    showWarning();
+                    return false;
+                }
+                
+                // Ctrl+U (View Source)
+                if (e.ctrlKey && e.keyCode === 85) {
+                    e.preventDefault();
+                    showWarning();
+                    return false;
+                }
+                
+                // Ctrl+Shift+C (Element Inspector)
+                if (e.ctrlKey && e.shiftKey && e.keyCode === 67) {
+                    e.preventDefault();
+                    showWarning();
+                    return false;
+                }
+                
+                // Ctrl+S (Save Page)
+                if (e.ctrlKey && e.keyCode === 83) {
+                    e.preventDefault();
+                    showWarning();
+                    return false;
+                }
+            });
+            
+            // Console boyut kontrolü
+            setInterval(detectConsole, 500);
+            
+            // DevTools algılama (alternatif yöntem)
+            let devtools = {open: false, orientation: null};
+            
+            setInterval(function() {
+                if (window.outerHeight - window.innerHeight > 200 || window.outerWidth - window.innerWidth > 200) {
+                    if (!devtools.open) {
+                        devtools.open = true;
+                        showWarning();
+                    }
+                } else {
+                    devtools.open = false;
+                }
+            }, 500);
+            
+            // Console mesajlarını temizle ve uyarı ekle
+            if (window.console) {
+                console.clear();
+                console.log('%cDikkat!', 'color: red; font-size: 30px; font-weight: bold;');
+                console.log('%cBu site korunmaktadır. Yetkisiz erişim girişimleri kaydedilir.', 'color: orange; font-size: 14px;');
+            }
+            
+            // Seçim engelleme (isteğe bağlı)
+            document.addEventListener('selectstart', function(e) {
+                e.preventDefault();
+                return false;
+            });
+            
+            // Sürükleme engelleme (isteğe bağlı)
+            document.addEventListener('dragstart', function(e) {
+                e.preventDefault();
+                return false;
+            });
+            
+            // Debug durumunda sayfayı bulanıklaştır (isteğe bağlı)
+            function blurPage() {
+                document.body.style.filter = 'blur(5px)';
+                document.body.style.pointerEvents = 'none';
+            }
+            
+            // Print ekranını engelle
+            window.addEventListener('beforeprint', function(e) {
+                e.preventDefault();
+                showWarning();
+                return false;
+            });
+            
+        })();
+  </script>
+</body>
+</html>

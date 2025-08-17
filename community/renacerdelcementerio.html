@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Renacer Del Cementerio Report</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+    
+    :root {
+      --primary-color: #00ff00;
+      --secondary-color: #003300;
+      --accent-color: #00cc00;
+      --error-color: #ff3333;
+    }
+    
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: black;
+      font-family: 'Share Tech Mono', monospace;
+      color: var(--primary-color);
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    /* CRT Effect */
+    .crt-effect::before {
+      content: " ";
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      background: linear-gradient(rgba(0, 255, 0, 0.03) 50%, rgba(0, 0, 0, 0.1) 50%),
+                  linear-gradient(90deg, rgba(0, 255, 0, 0.03), rgba(0, 255, 0, 0.02), rgba(0, 255, 0, 0.03));
+      background-size: 100% 3px, 3px 100%;
+      pointer-events: none;
+      z-index: 100;
+    }
+    
+    .crt-effect::after {
+      content: " ";
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      background: rgba(0, 0, 0, 0.1);
+      opacity: 0;
+      z-index: 100;
+      pointer-events: none;
+      animation: flicker 0.15s infinite;
+    }
+    
+    @keyframes flicker {
+      0% { opacity: 0.1; }
+      20% { opacity: 0.05; }
+      50% { opacity: 0.07; }
+      100% { opacity: 0.1; }
+    }
+    
+    .terminal-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 80px;
+      padding: 20px;
+      overflow-y: auto;
+      z-index: 2;
+    }
+    
+    .report-content {
+      white-space: pre-wrap;
+      line-height: 1.5;
+      word-break: break-word;
+      overflow-wrap: break-word;
+    }
+    
+    .classification-container {
+      display: inline-block;
+      vertical-align: middle;
+    }
+    
+    .classification {
+      display: inline-block;
+      background-color: var(--secondary-color);
+      padding: 2px 10px;
+      border: 1px solid var(--primary-color);
+      cursor: default;
+      position: relative;
+      width: 100px;
+      height: 20px;
+    }
+    
+    .classification::after {
+      content: "TOP SECRET";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: var(--primary-color);
+      color: black;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    .classification:hover::after {
+      opacity: 1;
+    }
+    
+    .button-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      display: flex;
+      gap: 10px;
+      z-index: 10;
+    }
+    
+    .exit-button {
+      background-color: var(--error-color);
+      border: 1px solid #ff0000;
+      color: white;
+      padding: 10px 25px;
+      font-family: 'Share Tech Mono', monospace;
+      cursor: pointer;
+      transition: all 0.3s;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    
+    .exit-button.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    .exit-button:hover {
+      background-color: #ff0000;
+      box-shadow: 0 0 15px var(--error-color);
+    }
+    
+    .skip-button {
+      background-color: var(--accent-color);
+      border: 1px solid var(--primary-color);
+      color: black;
+      padding: 10px 25px;
+      font-family: 'Share Tech Mono', monospace;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .skip-button:hover {
+      background-color: var(--primary-color);
+      box-shadow: 0 0 15px var(--primary-color);
+    }
+    
+    .section-title {
+      color: var(--accent-color);
+      border-bottom: 1px solid var(--primary-color);
+      padding-bottom: 5px;
+      margin-top: 20px;
+      margin-bottom: 15px;
+      display: block;
+    }
+    
+    .typing-line {
+      overflow: hidden;
+      white-space: pre-wrap;
+      margin: 0;
+      border-right: 2px solid var(--primary-color);
+      animation: blink-caret 0.75s step-end infinite;
+    }
+    
+    @keyframes blink-caret {
+      from, to { border-color: transparent }
+      50% { border-color: var(--primary-color) }
+    }
+  </style>
+</head>
+<body class="crt-effect">
+  <!-- Background music -->
+  <audio id="bgMusic" loop>
+    <source src="../sounds/backgroundmusic2.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+
+  <div class="terminal-container">
+    <div class="report-content" id="reportContent"></div>
+  </div>
+
+  <div class="button-container">
+    <button class="skip-button" id="skipButton">SKIP</button>
+    <button class="exit-button" id="exitButton">EXIT</button>
+  </div>
+
+  <script>
+    // Start background music
+    document.addEventListener('DOMContentLoaded', () => {
+      const bgMusic = document.getElementById('bgMusic');
+      bgMusic.volume = 0.2;
+      
+      function startMusic() {
+        bgMusic.play().catch(e => console.log("Audio play failed:", e));
+        document.removeEventListener('click', startMusic);
+      }
+      
+      document.addEventListener('click', startMusic);
+    });
+
+    // Exit button functionality
+    document.getElementById('exitButton').addEventListener('click', () => {
+      window.location.href = '../raiden3.html';
+    });
+
+    // Report content
+    const reportText = `
+WESTERN INDUSTRIES - COMMUNITY ANALYSIS REPORT 
+CLASSIFICATION: <span class="classification-container"><span class="classification"></span></span>
+REPORT ID: WI-2024-RDC-001
+
+<span class="section-title">==== RENACER DEL CEMENTERIO ===</span>
+
+EXECUTIVE SUMMARY:
+ORTA TEHDİT - Renacer Del Cementerio, çevre nüfuslara güvenlik ve koruma sağlamaya odaklanan, haydut gruplarına karşı stratejik savaş yürüten ateist hayatta kalan organizasyonunu temsil etmektedir. Zero Burns tarafından yönetilen bu organizasyon, insani yardımı agresif anti-haydut operasyonlarıyla birleştirir.
+
+<span class="section-title">LEADERSHIP PROFILE:</span>
+Primary Leader: Zero Burns
+Background: Vecinos Del Cementerio topluluğunun eski üyesi
+Leadership Style: Topluluk güvenliğine odaklanan koruyucu liderlik
+Risk Assessment: ORTA - Agresif yeteneklerle savunma odaklı
+
+<span class="section-title">OPERATIONAL STRUCTURE:</span>
+Total Members: 14 aktif personel
+Security Teams: 8 koruma ve savaş uzmanı
+Humanitarian Division: 4 yardım ve destek uzmanı
+Resource Acquisition: 2 lojistik ve tedarik uzmanı
+
+<span class="section-title">PRIMARY ACTIVITIES:</span>
+- Sivillere güvenlik ve koruma sağlama
+- İnsani yardım ve mülteci desteği
+- Anti-haydut operasyonları ve savaş görevleri
+Haydut ortadan kaldırma yoluyla kaynak edinimi Güvenli bölge inşası ve bakımı
+- Belirlenmiş savaş bölgelerinde stratejik savaş
+
+<span class="section-title">IDEOLOGICAL FRAMEWORK:</span>
+Diğer dini inançlara saygı duyan ateist dini görüşler. Masum insanlara güvenlik ve koruma sağlarken haydut gruplarından gelen tehditleri ortadan kaldırmaya inanır. İnsani değerleri agresif savaş taktikleriyle birleştirir. Topluluk güvenliği ve karşılıklı yardıma değer verir. Haydut tehditlerini ortadan kaldırmak için savaşa girecek.
+
+<span class="section-title">STRATEGIC OBJECTIVES:</span>
+Renacer Del Cementerio, toplulukları içinde yeterli güvenlik sağlamayı ve bu korumayı çevre nüfuslara genişletmeyi amaçlar. Hedefleri belirlenmiş savaş bölgelerinde haydut gruplarıyla savaşmak, tehditleri ortadan kaldırırken kendi güçlerini ve topluluklarını güçlendirmektir. İnsanlar için güvenli alanlar yaratmayı, haydut tehditlerini ortadan kaldırmayı ararlar.
+
+<span class="section-title">COMMUNITY RELATIONSHIP:</span>
+Yok edilen Vecinos Del Cementerio topluluğundan hayatta kalanlar tarafından kuruldu. Grup dağınık hayatta kalanlardan güvenlik ve insani yardıma odaklanan yapılandırılmış organizasyona evrildi. Üyeler hem koruma hem de topluluk hizmetine bağlılığı paylaşır. Eksik takım üyelerini ararken yeni güvenli bölgeler inşa etmeye devam ediyorlar.
+
+<span class="section-title">BASE OF OPERATIONS:</span>
+Primary Location: YMAP c7020ef92392a41423bba9cf52d952dd Territorial Control: Atanan sektörde bölgesel hakimiyet
+Defensive Capabilities: Askeri sınıf tahkimat ve devriye sistemleri
+
+<span class="section-title">HUMAN 2.0 PATHOGEN RESEARCH:</span>
+ANALYSIS 166 drone gözetimi, Renacer Del Cementerio üyelerinin Human 2.0 patojene orta adaptasyon gösterdiğini gösterir. Koruyucu içgüdüleri ve topluluk odakları artan dirence katkıda bulunur gibi görünür. İnsani faaliyetleri mülteci nüfusları arasında patojen bulaşma kalıplarını incelemek için fırsatlar sağlar.
+
+<span class="section-title">THREAT ASSESSMENT:</span>
+Military Capability: YÜKSEK
+Research Capability: DÜŞÜK Intelligence Gathering: ORTA
+Corporate Infiltration Risk: DÜŞÜK
+
+<span class="section-title">STRATEGIC CONCERNS:</span>
+Renacer Del Cementerio, askeri yetenekleri ve bölgesel hirsları nedeniyle orta tehdit temsil eder. Ancak sivil koruma ve insani hizmete odaklanmaları, uygun şekilde yaklaşılırsa işbirliği potansiyeli önerir. Ateist inançları ve koruyucu yaklaşımları onları daha agresif hayatta kalan gruplardan ayırır. Anti-haydut operasyonları dikkatli izleme gerektirir. Orta patojen adaptasyonları ve insani çalışmaları onları değerli araştırma denekleri yapar.
+
+<span class="section-title">RECOMMENDED ACTIONS:</span>
+1. Anti-haydut operasyonlarını izle
+2. Sivil koruma girişimlerinde potansiyel işbirliğini değerlendir
+3. Askeri yeteneklerin bölgesel güvenlik üzerindeki etkisini değerlendir
+4. İnsani ortaklık fırsatlarını düşün
+5. Topluluk büyümesinin gözetimini sürdür
+6. Güvenlik personeli için işe alım olasılıklarını değerlendir
+7. Belirlenmiş savaş bölgelerindeki savaş operasyonlarını izle
+8. İnsani kanallar yoluyla Human 2.0 patojen araştırmasına devam et
+
+ANALYST: Director of Intelligence Rebecca Cross, Zone 013
+DATE: 2034-03-15
+NEXT REVIEW: 2034-04-19
+PRIORITY: ORTA TEHDİT İZLEME GEREKLİ
+`;
+
+    let currentAnimations = [];
+    let skipRequested = false;
+
+    // Display report with typing animation
+    function displayReport() {
+      const reportContent = document.getElementById('reportContent');
+      reportContent.innerHTML = '';
+      
+      const lines = reportText.split('\n');
+      let currentLine = 0;
+      
+      function typeNextLine() {
+        if (skipRequested) {
+          showAllContent();
+          return;
+        }
+
+        if (currentLine < lines.length) {
+          const lineDiv = document.createElement('div');
+          lineDiv.className = 'typing-line';
+          reportContent.appendChild(lineDiv);
+          
+          const text = lines[currentLine];
+          let charIndex = 0;
+          
+          function typeChar() {
+            if (skipRequested) {
+              showAllContent();
+              return;
+            }
+
+            if (charIndex < text.length) {
+              lineDiv.innerHTML = text.substring(0, charIndex + 1);
+              charIndex++;
+              const animId = setTimeout(typeChar, Math.random() * 10 + 10);
+              currentAnimations.push(animId);
+            } else {
+              lineDiv.style.borderRight = 'none';
+              currentLine++;
+              const animId = setTimeout(typeNextLine, 50);
+              currentAnimations.push(animId);
+              reportContent.scrollTop = reportContent.scrollHeight;
+            }
+          }
+          
+          typeChar();
+        } else {
+          finishTyping();
+        }
+      }
+      
+      typeNextLine();
+    }
+
+    function showAllContent() {
+      clearAllAnimations();
+      const reportContent = document.getElementById('reportContent');
+      reportContent.innerHTML = reportText;
+      finishTyping();
+      reportContent.scrollTop = reportContent.scrollHeight;
+    }
+
+    function finishTyping() {
+      document.getElementById('exitButton').classList.add('visible');
+      document.getElementById('skipButton').style.display = 'none';
+    }
+
+    function clearAllAnimations() {
+      currentAnimations.forEach(id => clearTimeout(id));
+      currentAnimations = [];
+    }
+
+    // Skip button functionality
+    document.getElementById('skipButton').addEventListener('click', () => {
+      skipRequested = true;
+      showAllContent();
+    });
+
+    // Start the animation
+    displayReport();
+    // Debug Tools Engelleme Scripti
+        (function() {
+            'use strict';
+            
+            let devToolsOpen = false;
+            let warningShown = false;
+            
+            // Uyarı göster
+            function showWarning() {
+                if (!warningShown) {
+                    document.getElementById('warning').style.display = 'block';
+                    warningShown = true;
+                    
+                    // Sayfayı yenile (isteğe bağlı)
+                    // setTimeout(() => location.reload(), 2000);
+                }
+            }
+            
+            // Console açık mı kontrol et
+            function detectConsole() {
+                const threshold = 160;
+                
+                if (window.outerHeight - window.innerHeight > threshold || 
+                    window.outerWidth - window.innerWidth > threshold) {
+                    if (!devToolsOpen) {
+                        devToolsOpen = true;
+                        showWarning();
+                        console.clear();
+                        console.log('%cDurdur!', 'color: red; font-size: 50px; font-weight: bold;');
+                        console.log('%cBu bir tarayıcı özelliğidir ve geliştiriciler içindir. Birisi size buraya bir şey kopyalayıp yapıştırmanızı söylediyse, bu bir dolandırıcılıktır.', 'color: red; font-size: 16px;');
+                    }
+                }
+            }
+            
+            // Sağ tıklamayı engelle
+            document.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                showWarning();
+                return false;
+            });
+            
+            // Klavye kısayollarını engelle
+            document.addEventListener('keydown', function(e) {
+                // F12
+                if (e.keyCode === 123) {
+                    e.preventDefault();
+                    showWarning();
+                    return false;
+                }
+                
+                // Ctrl+Shift+I (Developer Tools)
+                if (e.ctrlKey && e.shiftKey && e.keyCode === 73) {
+                    e.preventDefault();
+                    showWarning();
+                    return false;
+                }
+                
+                // Ctrl+Shift+J (Console)
+                if (e.ctrlKey && e.shiftKey && e.keyCode === 74) {
+                    e.preventDefault();
+                    showWarning();
+                    return false;
+                }
+                
+                // Ctrl+U (View Source)
+                if (e.ctrlKey && e.keyCode === 85) {
+                    e.preventDefault();
+                    showWarning();
+                    return false;
+                }
+                
+                // Ctrl+Shift+C (Element Inspector)
+                if (e.ctrlKey && e.shiftKey && e.keyCode === 67) {
+                    e.preventDefault();
+                    showWarning();
+                    return false;
+                }
+                
+                // Ctrl+S (Save Page)
+                if (e.ctrlKey && e.keyCode === 83) {
+                    e.preventDefault();
+                    showWarning();
+                    return false;
+                }
+            });
+            
+            // Console boyut kontrolü
+            setInterval(detectConsole, 500);
+            
+            // DevTools algılama (alternatif yöntem)
+            let devtools = {open: false, orientation: null};
+            
+            setInterval(function() {
+                if (window.outerHeight - window.innerHeight > 200 || window.outerWidth - window.innerWidth > 200) {
+                    if (!devtools.open) {
+                        devtools.open = true;
+                        showWarning();
+                    }
+                } else {
+                    devtools.open = false;
+                }
+            }, 500);
+            
+            // Console mesajlarını temizle ve uyarı ekle
+            if (window.console) {
+                console.clear();
+                console.log('%cDikkat!', 'color: red; font-size: 30px; font-weight: bold;');
+                console.log('%cBu site korunmaktadır. Yetkisiz erişim girişimleri kaydedilir.', 'color: orange; font-size: 14px;');
+            }
+            
+            // Seçim engelleme (isteğe bağlı)
+            document.addEventListener('selectstart', function(e) {
+                e.preventDefault();
+                return false;
+            });
+            
+            // Sürükleme engelleme (isteğe bağlı)
+            document.addEventListener('dragstart', function(e) {
+                e.preventDefault();
+                return false;
+            });
+            
+            // Debug durumunda sayfayı bulanıklaştır (isteğe bağlı)
+            function blurPage() {
+                document.body.style.filter = 'blur(5px)';
+                document.body.style.pointerEvents = 'none';
+            }
+            
+            // Print ekranını engelle
+            window.addEventListener('beforeprint', function(e) {
+                e.preventDefault();
+                showWarning();
+                return false;
+            });
+            
+        })();
+  </script>
+</body>
+</html>
