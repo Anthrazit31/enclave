@@ -1,52 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script>
-(function() {
-    'use strict';
-    
-    // Direkt Link Erişim Koruması
-    function checkAccess() {
-        // localStorage'da gerekli bilgiler var mı kontrol et
-        const userIdentifier = localStorage.getItem('userIdentifier');
-        const userPassword = localStorage.getItem('userPassword');
-        const userType = localStorage.getItem('userType');
-        
-        // Eğer localStorage'da bilgiler yoksa (yani index.html'den giriş yapmamış)
-        if (!userIdentifier || !userPassword || !userType) {
-            alert('⚠️ Yetkisiz erişim! Lütfen giriş yapın.');
-            window.location.replace('index.html');
-            return;
-        }
-        
-        // Session timeout kontrolü (30 dakika)
-        const loginTime = localStorage.getItem('loginTime');
-        if (loginTime) {
-            const currentTime = new Date().getTime();
-            const sessionDuration = 30 * 60 * 1000; // 30 dakika
-            
-            if (currentTime - parseInt(loginTime) > sessionDuration) {
-                alert('⏰ Oturum süreniz doldu. Lütfen tekrar giriş yapın.');
-                localStorage.clear();
-                window.location.replace('index.html');
-                return;
-            }
-        }
-        
-        // Login zamanını güncelle
-        localStorage.setItem('loginTime', new Date().getTime().toString());
-    }
-    
-    // Sayfa yüklendiğinde kontrol et
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(checkAccess, 200);
-        });
-    } else {
-        setTimeout(checkAccess, 200);
-    }
-    
-})();
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Phoenix Industries // Control Panel</title>
@@ -1102,6 +1056,7 @@ handleAction(action, name) {
 </body>
 
 </html>
+
 
 
 
