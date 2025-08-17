@@ -739,21 +739,31 @@
         this.accessGrantedSound.play().catch(console.warn);
       }
       
-      startIntroSequence() {
-        setTimeout(() => {
-          this.introScreen.classList.add('fade-out');
-          setTimeout(() => {
-            this.introScreen.style.display = 'none';
-            this.showMainContent();
-          }, 1000);
-        }, 3000);
-      }
-      
-      showMainContent() {
-        setTimeout(() => {
-          this.mainContent.classList.add('active');
-        }, 500);
-      }
+     // startIntroSequence fonksiyonunu şu şekilde değiştirin (yaklaşık 290. satır civarı):
+
+startIntroSequence() {
+  console.log('Intro sequence başlatılıyor...'); // Debug için
+  
+  setTimeout(() => {
+    console.log('Intro fade-out başlıyor...'); // Debug için
+    this.introScreen.style.opacity = '0';
+    this.introScreen.style.transition = 'opacity 1s ease';
+    
+    setTimeout(() => {
+      console.log('Intro gizleniyor, main content gösteriliyor...'); // Debug için
+      this.introScreen.style.display = 'none';
+      this.showMainContent();
+    }, 1000);
+  }, 2000); // 2 saniyeye düşürdüm, 3 saniye çok uzundu
+}
+
+// showMainContent fonksiyonunu da güncelleyin:
+showMainContent() {
+  console.log('Main content aktif ediliyor...'); // Debug için
+  this.mainContent.style.opacity = '1';
+  this.mainContent.style.visibility = 'visible';
+  this.mainContent.classList.add('active');
+}
       
       showModal(modalType) {
         const modal = document.getElementById(`modal${modalType.charAt(0).toUpperCase() + modalType.slice(1)}`);
@@ -1078,6 +1088,7 @@ handleAction(action, name) {
 </body>
 
 </html>
+
 
 
 
