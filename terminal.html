@@ -828,18 +828,16 @@ handleAction(action, name) {
   }
 }
     
-    // Initialize system when DOM is loaded
     document.addEventListener('DOMContentLoaded', () => {
-      new TerminalSystem();
-    });
-    
-    // Terminal line animation delays
-    document.addEventListener('DOMContentLoaded', () => {
-      const lines = document.querySelectorAll('.terminal-line');
-      lines.forEach((line, index) => {
-        line.style.animationDelay = `${index * 0.5}s`;
-      });
-    });
+  new TerminalSystem();
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  const lines = document.querySelectorAll('.terminal-line');
+  lines.forEach((line, index) => {
+    line.style.animationDelay = `${index * 0.5}s`;
+  });
+});
      // Debug Tools Engelleme Scripti
 (function() {
     'use strict';
@@ -1044,6 +1042,7 @@ handleAction(action, name) {
   </script>
 </body>
 </html>
+
 
 
 
