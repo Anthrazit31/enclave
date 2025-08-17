@@ -14,46 +14,37 @@
   (function() {
       'use strict';
       
-      // Sayfa yüklenir yüklenmez kontrol et
-      function checkAccess() {
-          // localStorage'da gerekli bilgiler var mı kontrol et
-          const userIdentifier = localStorage.getItem('userIdentifier');
-          const userPassword = localStorage.getItem('userPassword');
-          const userType = localStorage.getItem('userType');
-          
-          // Eğer localStorage'da bilgiler yoksa veya boşsa
-          if (!userIdentifier || !userPassword || !userType) {
-              // Hemen index.html'e yönlendir
-              alert('⚠️ Yetkisiz erişim! Lütfen giriş yapın.');
-              window.location.replace('index.html');
-              return;
-          }
-          
-          // raiden3.html için özel kontrol
-          const allowedPasswords = ['1234', '1561', '1603', 'enclave'];
-          if (!allowedPasswords.includes(userPassword)) {
-              alert('⚠️ Bu sayfaya erişim yetkiniz bulunmamaktadır!');
-              window.location.replace('index.html');
-              return;
-          }
-          
-          // Session timeout kontrolü (30 dakika)
-          const loginTime = localStorage.getItem('loginTime');
-          if (loginTime) {
-              const currentTime = new Date().getTime();
-              const sessionDuration = 30 * 60 * 1000; // 30 dakika
-              
-              if (currentTime - parseInt(loginTime) > sessionDuration) {
-                  alert('⏰ Oturum süreniz doldu. Lütfen tekrar giriş yapın.');
-                  localStorage.clear();
-                  window.location.replace('index.html');
-                  return;
-              }
-          }
-          
-          // Eğer her şey tamam ise, login zamanını güncelle
-          localStorage.setItem('loginTime', new Date().getTime().toString());
-      }
+     function checkAccess() {
+    // localStorage'da gerekli bilgiler var mı kontrol et
+    const userIdentifier = localStorage.getItem('userIdentifier');
+    const userPassword = localStorage.getItem('userPassword');
+    const userType = localStorage.getItem('userType');
+    
+    // Eğer localStorage'da bilgiler yoksa veya boşsa (yani index.html'den giriş yapmamış)
+    if (!userIdentifier || !userPassword || !userType) {
+        // Hemen index.html'e yönlendir
+        alert('⚠️ Yetkisiz erişim! Lütfen giriş yapın.');
+        window.location.replace('index.html');
+        return;
+    }
+    
+    // Session timeout kontrolü (30 dakika)
+    const loginTime = localStorage.getItem('loginTime');
+    if (loginTime) {
+        const currentTime = new Date().getTime();
+        const sessionDuration = 30 * 60 * 1000; // 30 dakika
+        
+        if (currentTime - parseInt(loginTime) > sessionDuration) {
+            alert('⏰ Oturum süreniz doldu. Lütfen tekrar giriş yapın.');
+            localStorage.clear();
+            window.location.replace('index.html');
+            return;
+        }
+    }
+    
+    // Eğer her şey tamam ise, login zamanını güncelle
+    localStorage.setItem('loginTime', new Date().getTime().toString());
+}
       
       // Sayfa yüklendiğinde kontrol et
       if (document.readyState === 'loading') {
