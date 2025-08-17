@@ -334,7 +334,7 @@
         const passwordIdentifiers = {
           "enclave": "military_enclave",
           "arastirma": "researcher_arastirma", 
-          "1234": "adam",
+          "FPPwjFUCxYMWi22MwFZzRG0bvmT6Yu8svu0mB1Fc": "kemal",
           "1561": "bokkafa", 
           "1603": "çiş"
         };
@@ -360,7 +360,11 @@
               redirectPage = 'terminal2.html';
               accessMessage = 'ACCESS GRANTED - RESEARCHER';
               break;
-            case "1234":
+            case "FPPwjFUCxYMWi22MwFZzRG0bvmT6Yu8svu0mB1Fc":
+              localStorage.setItem('userType', 'researcher');
+              redirectPage = 'terminal.html';
+              accessMessage = 'ACCESS GRANTED - MILITARY PERSONNEL';
+              break;
             case "1561":
             case "1603":
               localStorage.setItem('userType', 'special');
@@ -547,3 +551,4 @@
   </div>
 </body>
 </html>
+
