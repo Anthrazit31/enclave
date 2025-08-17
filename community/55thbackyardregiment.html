@@ -23,7 +23,7 @@ function checkAccess() {
     // Eğer localStorage'da bilgiler yoksa veya boşsa (yani index.html'den giriş yapmamış)
     if (!userIdentifier || !userPassword || !userType) {
         alert('⚠️ Yetkisiz erişim! Lütfen giriş yapın.');
-        window.location.replace('/index.html');
+        window.location.replace('/');
         return;
     }
     // Session timeout kontrolü (30 dakika)
@@ -35,7 +35,7 @@ function checkAccess() {
         if (currentTime - parseInt(loginTime) > sessionDuration) {
             alert('⏰ Oturum süreniz doldu. Lütfen tekrar giriş yapın.');
             localStorage.clear();
-            window.location.replace('index.html');
+            window.location.replace('/');
             return;
         }
     }
@@ -642,4 +642,5 @@ PRIORITY: ORTA TEHDİT İZLEME GEREKLİ
   </script>
 </body>
 </html>
+
 
