@@ -782,47 +782,51 @@
         }, 2500);
       }
       
-      handleAction(action, name) {
-        if (action === 'denied') {
-          this.showAccessDenied();
-          return;
-        }
-        
-        if (action === 'logout') {
-          this.handleLogout();
-          return;
-        }
-        
-        const overlay = this.accessOverlay;
-        const text = document.getElementById('accessText');
-        
-        // Play access granted sound for successful access
-        this.playAccessGrantedSound();
-        
-        overlay.classList.add('active');
-        
-        let redirectUrl;
-        switch(action) {
-          case 'outbreak':
-            text.textContent = 'ACCESS GRANTED';
-            redirectUrl = 'raiden3.html';
-            break;
-          case 'genz':
-            text.textContent = 'ACCESS GRANTED';
-            redirectUrl = 'genz.html';
-            break;
-          case 'zero':
-            text.textContent = 'ACCESS GRANTED';
-            redirectUrl = 'zero.html';
-            break;
-        }
-        
-        if (redirectUrl) {
-          setTimeout(() => {
-            window.location.href = redirectUrl;
-          }, 2000);
-        }
-      }
+      // terminal.html'deki handleAction fonksiyonunu bu şekilde değiştirin:
+
+handleAction(action, name) {
+  if (action === 'denied') {
+    this.showAccessDenied();
+    return;
+  }
+  
+  if (action === 'logout') {
+    this.handleLogout();
+    return;
+  }
+  
+  const overlay = this.accessOverlay;
+  const text = document.getElementById('accessText');
+  
+  // Play access granted sound for successful access
+  this.playAccessGrantedSound();
+  
+  overlay.classList.add('active');
+  
+  let redirectUrl;
+  switch(action) {
+    case 'outbreak':
+      // Raiden3 için erişim anahtarı ver
+      localStorage.setItem('raiden3_access', 'terminal_authorized');
+      text.textContent = 'ACCESSING OUTBREAK DATABASE';
+      redirectUrl = 'raiden3.html';
+      break;
+    case 'genz':
+      text.textContent = 'ACCESS GRANTED - GENZ SYSTEM';
+      redirectUrl = 'genz.html';
+      break;
+    case 'zero':
+      text.textContent = 'ACCESS GRANTED - ZERO PROTOCOL';
+      redirectUrl = 'zero.html';
+      break;
+  }
+  
+  if (redirectUrl) {
+    setTimeout(() => {
+      window.location.href = redirectUrl;
+    }, 2000);
+  }
+}
       
       handleLogout() {
         this.playCloseSound();
@@ -1089,3 +1093,4 @@
 </body>
 
 </html>
+
