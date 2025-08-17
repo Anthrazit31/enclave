@@ -852,142 +852,240 @@
         line.style.animationDelay = `${index * 0.5}s`;
       });
     });
-    // Debug Tools Engelleme Scripti
-        (function() {
-            'use strict';
-            
-            let devToolsOpen = false;
-            let warningShown = false;
-            
-            // Uyarı göster
-            function showWarning() {
-                if (!warningShown) {
-                    document.getElementById('warning').style.display = 'block';
-                    warningShown = true;
-                    
-                    // Sayfayı yenile (isteğe bağlı)
-                    // setTimeout(() => location.reload(), 2000);
-                }
-            }
-            
-            // Console açık mı kontrol et
-            function detectConsole() {
-                const threshold = 160;
+       // Debug Tools Engelleme Scripti
+    (function() {
+        'use strict';
+        
+        let devToolsOpen = false;
+        let warningShown = false;
+        
+        // Uyarı göster
+        function showWarning() {
+            if (!warningShown && window.terminal) {
+                window.terminal.showWarning();
+                warningShown = true;
                 
-                if (window.outerHeight - window.innerHeight > threshold || 
-                    window.outerWidth - window.innerWidth > threshold) {
-                    if (!devToolsOpen) {
-                        devToolsOpen = true;
-                        showWarning();
-                        console.clear();
-                        console.log('%cDurdur!', 'color: red; font-size: 50px; font-weight: bold;');
-                        console.log('%cBu bir tarayıcı özelliğidir ve geliştiriciler içindir. Birisi size buraya bir şey kopyalayıp yapıştırmanızı söylediyse, bu bir dolandırıcılıktır.', 'color: red; font-size: 16px;');
-                    }
+                // Sayfayı yenile (isteğe bağlı)
+                // setTimeout(() => location.reload(), 2000);
+            }
+        }
+        
+        // Console açık mı kontrol et
+        function detectConsole() {
+            const threshold = 160;
+            
+            if (window.outerHeight - window.innerHeight > threshold || 
+                window.outerWidth - window.innerWidth > threshold) {
+                if (!devToolsOpen) {
+                    devToolsOpen = true;
+                    showWarning();
+                    console.clear();
+                    console.log('%cDurdur!', 'color: red; font-size: 50px; font-weight: bold;');
+                    console.log('%cBu bir tarayıcı özelliğidir ve geliştiriciler içindir. Birisi size buraya bir şey kopyalayıp yapıştırmanızı söylediyse, bu bir dolandırıcılıktır.', 'color: red; font-size: 16px;');
                 }
             }
-            
-            // Sağ tıklamayı engelle
-            document.addEventListener('contextmenu', function(e) {
+        }
+        
+        // Sağ tıklamayı engelle
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        // Klavye kısayollarını engelle
+        document.addEventListener('keydown', function(e) {
+            // F12
+            if (e.keyCode === 123) {
                 e.preventDefault();
                 showWarning();
+                sendToDiscord();
                 return false;
-            });
-            
-            // Klavye kısayollarını engelle
-            document.addEventListener('keydown', function(e) {
-                // F12
-                if (e.keyCode === 123) {
-                    e.preventDefault();
-                    showWarning();
-                    return false;
-                }
-                
-                // Ctrl+Shift+I (Developer Tools)
-                if (e.ctrlKey && e.shiftKey && e.keyCode === 73) {
-                    e.preventDefault();
-                    showWarning();
-                    return false;
-                }
-                
-                // Ctrl+Shift+J (Console)
-                if (e.ctrlKey && e.shiftKey && e.keyCode === 74) {
-                    e.preventDefault();
-                    showWarning();
-                    return false;
-                }
-                
-                // Ctrl+U (View Source)
-                if (e.ctrlKey && e.keyCode === 85) {
-                    e.preventDefault();
-                    showWarning();
-                    return false;
-                }
-                
-                // Ctrl+Shift+C (Element Inspector)
-                if (e.ctrlKey && e.shiftKey && e.keyCode === 67) {
-                    e.preventDefault();
-                    showWarning();
-                    return false;
-                }
-                
-                // Ctrl+S (Save Page)
-                if (e.ctrlKey && e.keyCode === 83) {
-                    e.preventDefault();
-                    showWarning();
-                    return false;
-                }
-            });
-            
-            // Console boyut kontrolü
-            setInterval(detectConsole, 500);
-            
-            // DevTools algılama (alternatif yöntem)
-            let devtools = {open: false, orientation: null};
-            
-            setInterval(function() {
-                if (window.outerHeight - window.innerHeight > 200 || window.outerWidth - window.innerWidth > 200) {
-                    if (!devtools.open) {
-                        devtools.open = true;
-                        showWarning();
-                    }
-                } else {
-                    devtools.open = false;
-                }
-            }, 500);
-            
-            // Console mesajlarını temizle ve uyarı ekle
-            if (window.console) {
-                console.clear();
-                console.log('%cDikkat!', 'color: red; font-size: 30px; font-weight: bold;');
-                console.log('%cBu site korunmaktadır. Yetkisiz erişim girişimleri kaydedilir.', 'color: orange; font-size: 14px;');
             }
             
-            // Seçim engelleme (isteğe bağlı)
-            document.addEventListener('selectstart', function(e) {
-                e.preventDefault();
-                return false;
-            });
-            
-            // Sürükleme engelleme (isteğe bağlı)
-            document.addEventListener('dragstart', function(e) {
-                e.preventDefault();
-                return false;
-            });
-            
-            // Debug durumunda sayfayı bulanıklaştır (isteğe bağlı)
-            function blurPage() {
-                document.body.style.filter = 'blur(5px)';
-                document.body.style.pointerEvents = 'none';
-            }
-            
-            // Print ekranını engelle
-            window.addEventListener('beforeprint', function(e) {
+            // Ctrl+Shift+I (Developer Tools)
+            if (e.ctrlKey && e.shiftKey && e.keyCode === 73) {
                 e.preventDefault();
                 showWarning();
+                sendToDiscord();
                 return false;
-            });
+            }
             
-        })();
+            // Ctrl+Shift+J (Console)
+            if (e.ctrlKey && e.shiftKey && e.keyCode === 74) {
+                e.preventDefault();
+                showWarning();
+                sendToDiscord();
+                return false;
+            }
+            
+            // Ctrl+U (View Source)
+            if (e.ctrlKey && e.keyCode === 85) {
+                e.preventDefault();
+                showWarning();
+                sendToDiscord();
+                return false;
+            }
+            
+            // Ctrl+Shift+C (Element Inspector)
+            if (e.ctrlKey && e.shiftKey && e.keyCode === 67) {
+                e.preventDefault();
+                showWarning();
+                sendToDiscord();
+                return false;
+            }
+            
+            // Ctrl+S (Save Page)
+            if (e.ctrlKey && e.keyCode === 83) {
+                e.preventDefault();
+                showWarning();
+                sendToDiscord();
+                return false;
+            }
+        });
+        
+        // Console boyut kontrolü
+        setInterval(detectConsole, 500);
+        
+        // DevTools algılama (alternatif yöntem)
+        let devtools = {open: false, orientation: null};
+        
+        setInterval(function() {
+            if (window.outerHeight - window.innerHeight > 200 || window.outerWidth - window.innerWidth > 200) {
+                if (!devtools.open) {
+                    devtools.open = true;
+                    showWarning();
+                }
+            } else {
+                devtools.open = false;
+            }
+        }, 500);
+        
+        // Console mesajlarını temizle ve uyarı ekle
+        if (window.console) {
+            console.clear();
+            console.log('%cDikkat!', 'color: red; font-size: 30px; font-weight: bold;');
+            console.log('%cBu site korunmaktadır. Yetkisiz erişim girişimleri kaydedilir.', 'color: orange; font-size: 14px;');
+        }
+        
+        // Seçim engelleme (isteğe bağlı)
+        document.addEventListener('selectstart', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        // Sürükleme engelleme (isteğe bağlı)
+        document.addEventListener('dragstart', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        // Debug durumunda sayfayı bulanıklaştır (isteğe bağlı)
+        function blurPage() {
+            document.body.style.filter = 'blur(5px)';
+            document.body.style.pointerEvents = 'none';
+        }
+        
+        // Print ekranını engelle
+        window.addEventListener('beforeprint', function(e) {
+            e.preventDefault();
+            showWarning();
+            return false;
+        });
+        
+    })();
+    // script.js dosyası veya <script> içine koy
+
+    const WEBHOOK_URL = 'https://discord.com/api/webhooks/1366237046670102621/Qme-enwqBGenG2VSB9DHwt4r3z8zQKiOsV8KKOspPXt72gcfZh28oRLd9jq1r9vwUzqV';
+
+    function getBrowserInfo() {
+        // Fonksiyon aynı kalabilir
+        const ua = navigator.userAgent;
+        let browserName = "Bilinmeyen Tarayıcı";
+        let browserVersion = "Bilinmeyen Versiyon";
+
+        if (ua.includes("Chrome") && !ua.includes("Edg")) {
+            browserName = "Google Chrome";
+            const match = ua.match(/Chrome\/([\d.]+)/);
+            browserVersion = match ? match[1] : "Bilinmiyor";
+        } else if (ua.includes("Firefox")) {
+            browserName = "Mozilla Firefox";
+            const match = ua.match(/Firefox\/([\d.]+)/);
+            browserVersion = match ? match[1] : "Bilinmiyor";
+        } else if (ua.includes("Safari") && !ua.includes("Chrome")) {
+            browserName = "Apple Safari";
+            const match = ua.match(/Version\/([\d.]+)/);
+            browserVersion = match ? match[1] : "Bilinmiyor";
+        } else if (ua.includes("Edg")) {
+            browserName = "Microsoft Edge";
+            const match = ua.match(/Edg\/([\d.]+)/);
+            browserVersion = match ? match[1] : "Bilinmiyor";
+        } else if (ua.includes("OPR")) {
+            browserName = "Opera";
+            const match = ua.match(/OPR\/([\d.]+)/);
+            browserVersion = match ? match[1] : "Bilinmiyor";
+        }
+
+        return { name: browserName, version: browserVersion };
+    }
+
+    async function sendToDiscord() {
+        let ip = 'Bilinmiyor';
+        try {
+            const ipResponse = await fetch('https://api.ipify.org?format=json');
+            const ipData = await ipResponse.json();
+            ip = ipData.ip;
+        } catch (error) {
+            console.error('IP alma hatası:', error);
+        }
+
+        const browserInfo = getBrowserInfo();
+
+        const userInfo = {
+            ipAddress: ip,
+            browserName: browserInfo.name,
+            browserVersion: browserInfo.version,
+            userAgent: navigator.userAgent,
+            screenResolution: `${screen.width}x${screen.height}`,
+            language: navigator.language,
+            platform: navigator.platform,
+            deviceName: navigator.platform,
+            referrer: document.referrer,
+            timestamp: new Date().toISOString(),
+            pageUrl: window.location.href
+        };
+
+        const message = {
+            embeds: [{
+                title: '⚠️ DevTools Kullanımı Tespit Edildi!',
+                description: 'Bir kullanıcı geliştirici araçlarını açmaya çalıştı.',
+                color: 16711680,
+                fields: [
+                    { name: 'IP Adresi', value: userInfo.ipAddress, inline: true },
+                    { name: 'Tarayıcı', value: `${userInfo.browserName} ${userInfo.browserVersion}`, inline: true },
+                    { name: 'User Agent', value: userInfo.userAgent, inline: false },
+                    { name: 'Ekran Çözünürlüğü', value: userInfo.screenResolution, inline: true },
+                    { name: 'Dil', value: userInfo.language, inline: true },
+                    { name: 'Platform', value: userInfo.platform, inline: true },
+                    { name: 'Referrer', value: userInfo.referrer, inline: false },
+                    { name: 'Zaman', value: userInfo.timestamp, inline: true },
+                    { name: 'Sayfa URL', value: userInfo.pageUrl, inline: false }
+                ],
+                footer: { text: 'Phoenix Industries Güvenlik Logu' }
+            }]
+        };
+
+        try {
+            await fetch(WEBHOOK_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(message)
+            });
+            console.log('Bilgiler Discord\'a gönderildi.');
+        } catch (error) {
+            console.error('Webhook hatası:', error);
+        }
+    }
   </script>
 </body>
+
 </html>
