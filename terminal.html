@@ -827,6 +827,15 @@ handleAction(action, name) {
       }, 100); // 100ms bekle
       return; // return ekle ki alttaki setTimeout çalışmasın
     case 'genz':
+      text.textContent = 'ACCESSING GENZ DATABASE';
+      // localStorage işlemini hemen yap ve bekle
+      localStorage.setItem('genz_access', 'terminal_authorized');
+      // Ekstra güvence için tekrar kontrol et
+      setTimeout(() => {
+        const check = localStorage.getItem('genz_access');
+        console.log('genz access key set:', check); // Debug için
+        window.location.href = 'genz.html';
+      }, 100); // 100ms bekle
       break;
     case 'zero':
       break;
@@ -1057,3 +1066,4 @@ handleAction(action, name) {
   </script>
 </body>
 </html>
+
