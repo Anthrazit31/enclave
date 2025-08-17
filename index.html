@@ -339,7 +339,7 @@
         const passwordIdentifiers = {
           "enclave": "military_enclave",
           "arastirma": "researcher_arastirma", 
-          "FPPwjFUCxYMWi22MwFZzRG0bvmT6Yu8svu0mB1Fc": "kemal",
+          "fppwjfucxymwi22mwfzzrg0bvmt6yu8svu0mb1fc": "kemal",
           "1561": "bokkafa", 
           "1603": "çiş"
         };
@@ -357,7 +357,6 @@
           switch(password) {
             case "enclave":
               localStorage.setItem('userType', 'military');
-              localStorage.setItem('securityLevel', 'high');
               redirectPage = 'terminal.html';
               accessMessage = 'ACCESS GRANTED - MILITARY PERSONNEL';
               break;
@@ -367,9 +366,8 @@
               redirectPage = 'terminal2.html';
               accessMessage = 'ACCESS GRANTED - RESEARCHER';
               break;
-            case "FPPwjFUCxYMWi22MwFZzRG0bvmT6Yu8svu0mB1Fc":
+            case "fppwjfucxymwi22mwfzzrg0bvmt6yu8svu0mb1fc":
               localStorage.setItem('userType', 'military');
-              localStorage.setItem('securityLevel', 'high');
               redirectPage = 'terminal.html';
               accessMessage = 'ACCESS GRANTED - ROMAN MITCHEL // MILITARY PERSONNEL';
               break;
