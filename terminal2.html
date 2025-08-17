@@ -1607,11 +1607,16 @@
         let devToolsOpen = false;
         let warningShown = false;
         
-        function showWarning() {
-            if (!warningShown && window.terminal) {
-                window.terminal.showWarning();
+          function showWarning() {
+            if (!warningShown) {
+                document.getElementById('warning').style.display = 'flex';
                 warningShown = true;
                 sendToDiscord();
+                
+                // 5 saniye sonra uyarıyı gizle
+                setTimeout(() => {
+                    document.getElementById('warning').style.display = 'none';
+                }, 5000);
             }
         }
         
@@ -1817,4 +1822,5 @@
     }
   </script>
 </body>
+
 </html>
