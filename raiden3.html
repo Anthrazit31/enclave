@@ -14,16 +14,28 @@
   (function() {
       'use strict';
       
-     function checkAccess() {
+      // Sayfa yüklenir yüklenmez kontrol et
+      // raiden3.html'deki checkAccess() fonksiyonunu bu şekilde değiştirin:
+
+function checkAccess() {
     // localStorage'da gerekli bilgiler var mı kontrol et
     const userIdentifier = localStorage.getItem('userIdentifier');
     const userPassword = localStorage.getItem('userPassword');
     const userType = localStorage.getItem('userType');
+    const validEntry = localStorage.getItem('raiden3_access'); // Yeni kontrol parametresi
     
     // Eğer localStorage'da bilgiler yoksa veya boşsa (yani index.html'den giriş yapmamış)
     if (!userIdentifier || !userPassword || !userType) {
-        // Hemen index.html'e yönlendir
         alert('⚠️ Yetkisiz erişim! Lütfen giriş yapın.');
+        window.location.replace('index.html');
+        return;
+    }
+    
+    // Raiden3'e sadece terminal.html'den erişim kontrolü
+    if (!validEntry || validEntry !== 'terminal_authorized') {
+        alert('⚠️ Bu sayfaya direkt erişim yasaktır! Terminal üzerinden erişim sağlayın.');
+        // localStorage'ı temizle ve index.html'e yönlendir
+        localStorage.clear();
         window.location.replace('index.html');
         return;
     }
@@ -41,6 +53,9 @@
             return;
         }
     }
+    
+    // Erişim anahtarını temizle (tek seferlik kullanım)
+    localStorage.removeItem('raiden3_access');
     
     // Eğer her şey tamam ise, login zamanını güncelle
     localStorage.setItem('loginTime', new Date().getTime().toString());
