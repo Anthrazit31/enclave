@@ -1,0 +1,14 @@
+User-agent: *
+Disallow: /terminal.html
+Disallow: /terminal2.html
+Disallow: /raiden3.html
+Disallow: /zero.html
+Disallow: /genz.html
+Disallow: /community/
+Disallow: /communityleaders/
+Disallow: /drones/
+Allow: /index.html
+Allow: /
+
+# Sitemap
+Sitemap: https://yourdomain.com/sitemap.xml

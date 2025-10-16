@@ -3,9 +3,38 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Phoenix Industries Secure Access Control System - ENCLAVE Terminal">
+  <meta name="keywords" content="Phoenix Industries, ENCLAVE, Access Control, Security Terminal">
+  <meta name="author" content="Phoenix Industries">
+  <meta name="robots" content="noindex, nofollow">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  
+  <!-- Security Headers -->
+  <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+  
+  <!-- PWA Support -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#00ff00">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Phoenix ENCLAVE">
+  
+  <!-- Open Graph / Social Media -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Phoenix Industries - ENCLAVE Access Control">
+  <meta property="og:description" content="Secure access control system for Phoenix Industries personnel">
+  <meta property="og:site_name" content="Phoenix Industries">
+  
   <title>Phoenix Industries // Access Control</title>
+  
+  <!-- Preconnect for performance -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://api.ipify.org">
+  <link rel="dns-prefetch" href="https://discord.com">
+  
+  <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
   <style>
@@ -447,7 +476,7 @@
                 }
             }
         }
-        this.warningSound.play().catch(console.warn);
+        
         document.addEventListener('contextmenu', function(e) {
             e.preventDefault();
             return false;
