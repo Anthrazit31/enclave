@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phoenix Industries Backend Test</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: #00ff00;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .container {
+            border: 1px solid #00ff00;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 10px;
+            border: 1px solid #003300;
+            border-radius: 3px;
+        }
+        button {
+            background: #003300;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        button:hover {
+            background: #00ff00;
+            color: #000;
+        }
+        .result {
+            background: #001100;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 3px;
+            white-space: pre-wrap;
+            font-size: 12px;
+        }
+        .error {
+            color: #ff3333;
+        }
+        .success {
+            color: #00ff00;
+        }
+        .status {
+            padding: 5px 10px;
+            margin: 5px 0;
+            border-radius: 3px;
+        }
+        .status.online {
+            background: #003300;
+            border: 1px solid #00ff00;
+        }
+        .status.offline {
+            background: #330000;
+            border: 1px solid #ff3333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Phoenix Industries Backend Integration Test</h1>
+        <div class="status" id="serverStatus">Checking server status...</div>
+
+        <div class="test-section">
+            <h3>Authentication Test</h3>
+            <button onclick="testLogin()">Test Admin Login</button>
+            <button onclick="testTerminalSession()">Create Terminal Session</button>
+            <button onclick="testCommand()">Test Command</button>
+            <div id="authResult" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>User Management Test</h3>
+            <button onclick="testGetCurrentUser()">Get Current User</button>
+            <button onclick="testUserStats()">Get User Stats</button>
+            <div id="userResult" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Security Test</h3>
+            <button onclick="testSecurityLogs()">Get Security Logs</button>
+            <button onclick="testSecurityStats()">Get Security Stats</button>
+            <div id="securityResult" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Legacy Compatibility</h3>
+            <button onclick="testLegacyAuth()">Test Legacy Access Codes</button>
+            <div id="legacyResult" class="result"></div>
+        </div>
+    </div>
+
+    <!-- Socket.io Client -->
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+    <!-- API Scripts -->
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/terminal-integration.js"></script>
+
+    <script>
+        let currentToken = null;
+        let currentSessionId = null;
+
+        // Check server status
+        async function checkServerStatus() {
+            const statusDiv = document.getElementById('serverStatus');
+            try {
+                const response = await fetch('http://localhost:3000/health');
+                const data = await response.json();
+                statusDiv.textContent = `Server ONLINE - Uptime: ${Math.floor(data.uptime)}s`;
+                statusDiv.className = 'status online';
+            } catch (error) {
+                statusDiv.textContent = 'Server OFFLINE';
+                statusDiv.className = 'status offline';
+            }
+        }
+
+        async function testLogin() {
+            const resultDiv = document.getElementById('authResult');
+            resultDiv.textContent = 'Testing login...';
+
+            try {
+                const result = await window.phoenixAPI.login('admin', 'admin123');
+                currentToken = result.data.accessToken;
+
+                resultDiv.textContent = `✓ Login successful!\nUser: ${result.data.user.username}\nAccess Level: ${result.data.user.accessLevel}\nToken Expires: ${result.data.expiresIn}`;
+                resultDiv.className = 'result success';
+            } catch (error) {
+                resultDiv.textContent = `✗ Login failed: ${error.message}`;
+                resultDiv.className = 'result error';
+            }
+        }
+
+        async function testTerminalSession() {
+            const resultDiv = document.getElementById('authResult');
+
+            if (!currentToken) {
+                resultDiv.textContent = '✗ Please login first';
+                resultDiv.className = 'result error';
+                return;
+            }
+
+            resultDiv.textContent = 'Creating terminal session...';
+
+            try {
+                const result = await window.phoenixAPI.createTerminalSession('MILITARY');
+                currentSessionId = result.data.sessionId;
+
+                resultDiv.textContent = `✓ Terminal session created!\nSession ID: ${result.data.sessionId}\nType: ${result.data.terminalType}\nDirectory: ${result.data.currentDirectory}`;
+                resultDiv.className = 'result success';
+            } catch (error) {
+                resultDiv.textContent = `✗ Session creation failed: ${error.message}`;
+                resultDiv.className = 'result error';
+            }
+        }
+
+        async function testCommand() {
+            const resultDiv = document.getElementById('authResult');
+
+            if (!currentSessionId) {
+                resultDiv.textContent = '✗ Please create terminal session first';
+                resultDiv.className = 'result error';
+                return;
+            }
+
+            resultDiv.textContent = 'Executing command...';
+
+            try {
+                const result = await window.phoenixAPI.executeTerminalCommand(currentSessionId, 'help');
+
+                resultDiv.textContent = `✓ Command executed!\nOutput:\n${result.output}`;
+                resultDiv.className = 'result success';
+            } catch (error) {
+                resultDiv.textContent = `✗ Command failed: ${error.message}`;
+                resultDiv.className = 'result error';
+            }
+        }
+
+        async function testGetCurrentUser() {
+            const resultDiv = document.getElementById('userResult');
+            resultDiv.textContent = 'Getting current user...';
+
+            try {
+                const result = await window.phoenixAPI.getCurrentUser();
+
+                resultDiv.textContent = `✓ Current user info:\nUsername: ${result.data.user.username}\nEmail: ${result.data.user.email}\nAccess Level: ${result.data.user.accessLevel}\nActive: ${result.data.user.isActive}`;
+                resultDiv.className = 'result success';
+            } catch (error) {
+                resultDiv.textContent = `✗ Failed to get user: ${error.message}`;
+                resultDiv.className = 'result error';
+            }
+        }
+
+        async function testUserStats() {
+            const resultDiv = document.getElementById('userResult');
+            resultDiv.textContent = 'Getting user stats...';
+
+            try {
+                const result = await window.phoenixAPI.getUsers();
+
+                resultDiv.textContent = `✓ User stats:\nTotal Users: ${result.data.pagination.total}\nShowing: ${result.data.users.length} users`;
+                resultDiv.className = 'result success';
+            } catch (error) {
+                resultDiv.textContent = `✗ Failed to get stats: ${error.message}`;
+                resultDiv.className = 'result error';
+            }
+        }
+
+        async function testSecurityLogs() {
+            const resultDiv = document.getElementById('securityResult');
+            resultDiv.textContent = 'Getting security logs...';
+
+            try {
+                const result = await window.phoenixAPI.getSecurityLogs({ limit: 5 });
+
+                resultDiv.textContent = `✓ Recent security logs:\n`;
+                result.data.logs.forEach((log, index) => {
+                    resultDiv.textContent += `${index + 1}. ${log.eventType} - ${log.description} (${new Date(log.timestamp).toLocaleString()})\n`;
+                });
+                resultDiv.className = 'result success';
+            } catch (error) {
+                resultDiv.textContent = `✗ Failed to get logs: ${error.message}`;
+                resultDiv.className = 'result error';
+            }
+        }
+
+        async function testSecurityStats() {
+            const resultDiv = document.getElementById('securityResult');
+            resultDiv.textContent = 'Getting security stats...';
+
+            try {
+                const result = await window.phoenixAPI.getSecurityStats();
+
+                resultDiv.textContent = `✓ Security Statistics:\nTotal Logs: ${result.data.totalLogs}\nRecent Logs: ${result.data.recentLogs}\nFailed Logins: ${result.data.failedLogins}\nSuspicious Activity: ${result.data.suspiciousActivity}\nUnique IPs: ${result.data.uniqueIPs}`;
+                resultDiv.className = 'result success';
+            } catch (error) {
+                resultDiv.textContent = `✗ Failed to get stats: ${error.message}`;
+                resultDiv.className = 'result error';
+            }
+        }
+
+        async function testLegacyAuth() {
+            const resultDiv = document.getElementById('legacyResult');
+            resultDiv.textContent = 'Testing legacy authentication...';
+
+            // Test different legacy access codes
+            const testCodes = ['admin123', 'military123', 'researcher123', 'hybrid123'];
+            let results = [];
+
+            for (const code of testCodes) {
+                try {
+                    // Map legacy codes to access codes expected by the API
+                    let accessCode = '';
+                    switch(code) {
+                        case 'admin123': accessCode = 'PHOENIX2024'; break;
+                        case 'military123': accessCode = 'MILITARY2024'; break;
+                        case 'researcher123': accessCode = 'RESEARCH2024'; break;
+                        case 'hybrid123': accessCode = 'HYBRID2024'; break;
+                    }
+
+                    const result = await window.phoenixAPI.authenticateWithPassword(accessCode);
+                    if (result.success) {
+                        results.push(`✓ ${code}: Success (${result.data.user.accessLevel})`);
+                    } else {
+                        results.push(`✗ ${code}: Failed`);
+                    }
+                } catch (error) {
+                    results.push(`✗ ${code}: Error - ${error.message}`);
+                }
+            }
+
+            resultDiv.textContent = results.join('\n');
+            resultDiv.className = 'result';
+        }
+
+        // Initialize
+        checkServerStatus();
+        setInterval(checkServerStatus, 10000); // Check every 10 seconds
+    </script>
+</body>
+</html>
