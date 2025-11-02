@@ -15,3 +15,6 @@
 2025-11-02 21:49:20 [INFO]:   - Username: military, Password: military123, Access: MILITARY {"service":"phoenix-industries"}
 2025-11-02 21:49:20 [INFO]:   - Username: researcher, Password: researcher123, Access: RESEARCHER {"service":"phoenix-industries"}
 2025-11-02 21:49:20 [INFO]:   - Username: hybrid, Password: hybrid123, Access: MILITARYRESEARCHER {"service":"phoenix-industries"}
+2025-11-02 21:54:55 [INFO]: Phoenix Industries server running on port 3000 {"service":"phoenix-industries"}
+2025-11-02 21:54:55 [INFO]: Environment: development {"service":"phoenix-industries"}
+2025-11-02 21:54:55 [INFO]: CORS origin: http://localhost:8000 {"service":"phoenix-industries"}
