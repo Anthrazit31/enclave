@@ -36,3 +36,7 @@
 2025-11-02 21:56:27 [WARN]: Validation error {"service":"phoenix-industries","property":"body","errors":[{"message":"\"terminalType\" must be one of [MILITARY, RESEARCHER, FILESYSTEM, EMERGENCY]","path":["terminalType"],"type":"any.only","context":{"valids":["MILITARY","RESEARCHER","FILESYSTEM","EMERGENCY"],"label":"terminalType","value":"ADMIN","key":"terminalType"}}],"input":{"terminalType":"ADMIN"}}
 2025-11-02 21:56:27 [INFO]: [API] POST /sessions - 400 {"service":"phoenix-industries","ip":"::1","duration":"7ms","contentLength":"188"}
 2025-11-02 21:56:27 [WARN]: HTTP Error: POST /sessions - 400 {"service":"phoenix-industries","ip":"::1","duration":"7ms"}
+2025-11-02 21:56:31 [WARN]: [SECURITY] Suspicious request detected {"service":"phoenix-industries","ip":"::1","userAgent":"curl/8.14.1","method":"POST","url":"/api/terminal/sessions","headers":{"host":"localhost:3000","user-agent":"curl/8.14.1","accept":"*/*","content-type":"application/json","authorization":"Bearer","content-length":"27"}}
+2025-11-02 21:56:31 [INFO]: [API] POST /api/terminal/sessions {"service":"phoenix-industries","ip":"::1","userAgent":"curl/8.14.1","contentType":"application/json","contentLength":"27"}
+2025-11-02 21:56:31 [INFO]: [API] POST /sessions - 401 {"service":"phoenix-industries","ip":"::1","duration":"1ms","contentLength":"49"}
+2025-11-02 21:56:31 [WARN]: HTTP Error: POST /sessions - 401 {"service":"phoenix-industries","ip":"::1","duration":"1ms"}
