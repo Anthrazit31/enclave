@@ -24,3 +24,9 @@
 2025-11-02 21:55:03 [WARN]: [SECURITY] Suspicious request detected {"service":"phoenix-industries","ip":"::1","userAgent":"curl/8.14.1","method":"GET","url":"/health","headers":{"host":"localhost:3000","user-agent":"curl/8.14.1","accept":"*/*"}}
 2025-11-02 21:55:03 [INFO]: [API] GET /health {"service":"phoenix-industries","ip":"::1","userAgent":"curl/8.14.1"}
 2025-11-02 21:55:03 [INFO]: [API] GET /health - 200 {"service":"phoenix-industries","ip":"::1","duration":"1ms","contentLength":"103"}
+2025-11-02 21:56:20 [WARN]: [SECURITY] Suspicious request detected {"service":"phoenix-industries","ip":"::1","userAgent":"curl/8.14.1","method":"POST","url":"/api/auth/login","headers":{"host":"localhost:3000","user-agent":"curl/8.14.1","accept":"*/*","content-type":"application/json","content-length":"42"}}
+2025-11-02 21:56:20 [INFO]: [API] POST /api/auth/login {"service":"phoenix-industries","ip":"::1","userAgent":"curl/8.14.1","contentType":"application/json","contentLength":"42"}
+2025-11-02 21:56:20 [INFO]: [AUTH] Login attempt: admin from ::1 {"service":"phoenix-industries"}
+2025-11-02 21:56:21 [WARN]: [SECURITY] Security event logged: LOGIN {"service":"phoenix-industries","userId":"8b4a53d7-5112-4185-82e9-a5e1a19c5246","ip":"::1","description":"User logged in successfully"}
+2025-11-02 21:56:21 [INFO]: [AUTH] User authenticated: admin (8b4a53d7-5112-4185-82e9-a5e1a19c5246) from ::1 {"service":"phoenix-industries"}
+2025-11-02 21:56:21 [INFO]: [API] POST /login - 200 {"service":"phoenix-industries","ip":"::1","duration":"394ms","contentLength":"580"}
