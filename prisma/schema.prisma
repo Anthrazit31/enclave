@@ -1,0 +1,118 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(uuid())
+  username    String   @unique @db.Text
+  email       String   @unique @db.Text
+  passwordHash String  @map("password_hash") @db.Text
+  accessLevel AccessLevel @map("access_level") @default(RESEARCHER)
+  isActive    Boolean  @default(true) @map("is_active")
+  lastLogin   DateTime? @map("last_login")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  sessions      UserSession[]
+  terminalSessions TerminalSession[]
+  securityLogs  SecurityLog[]
+
+  @@map("users")
+}
+
+model UserSession {
+  id               String   @id @default(uuid())
+  userId           String   @map("user_id") @db.Text
+  tokenHash        String   @map("token_hash") @db.Text
+  refreshTokenHash String   @map("refresh_token_hash") @db.Text
+  expiresAt        DateTime @map("expires_at")
+  ipAddress        String   @map("ip_address") @db.Text
+  userAgent        String?  @map("user_agent") @db.Text
+  isActive         Boolean  @default(true) @map("is_active")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_sessions")
+}
+
+model TerminalSession {
+  id             String   @id @default(uuid())
+  userId         String   @map("user_id") @db.Text
+  terminalType   TerminalType @map("terminal_type")
+  sessionData    String   @map("session_data") @db.Text
+  commandHistory String   @map("command_history") @db.Text
+  currentDirectory String @map("current_directory") @db.Text @default("/")
+  isActive       Boolean  @default(true) @map("is_active")
+  startedAt      DateTime @default(now()) @map("started_at")
+  lastActivity   DateTime @default(now()) @map("last_activity")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("terminal_sessions")
+}
+
+model SecurityLog {
+  id          String       @id @default(uuid())
+  userId      String?      @map("user_id") @db.Text
+  eventType   SecurityEventType @map("event_type")
+  description String       @db.Text
+  ipAddress   String       @map("ip_address") @db.Text
+  userAgent   String?      @map("user_agent") @db.Text
+  metadata    String?      @map("metadata") @db.Text
+  createdAt   DateTime     @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("security_logs")
+}
+
+model FileSystem {
+  id         String     @id @default(uuid())
+  name       String     @db.Text
+  path       String     @unique @map("path") @db.Text
+  type       FileType   @default(FILE)
+  content    String?    @db.Text
+  parentId   String?    @map("parent_id") @db.Text
+  accessLevel AccessLevel @map("access_level") @default(PUBLIC)
+  isActive   Boolean    @default(true) @map("is_active")
+  createdAt  DateTime   @default(now()) @map("created_at")
+  updatedAt  DateTime   @updatedAt @map("updated_at")
+
+  @@map("filesystem")
+}
+
+enum AccessLevel {
+  MILITARY
+  RESEARCHER
+  MILITARYRESEARCHER
+  ADMIN
+}
+
+enum TerminalType {
+  MILITARY
+  RESEARCHER
+  FILESYSTEM
+  EMERGENCY
+}
+
+enum SecurityEventType {
+  LOGIN
+  LOGOUT
+  COMMAND
+  ACCESS_DENIED
+  SUSPICIOUS
+}
+
+enum FileType {
+  FILE
+  DIRECTORY
+}
