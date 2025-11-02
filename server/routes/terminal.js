@@ -369,7 +369,7 @@ router.put('/filesystem/:id', require('../middleware/auth').requireAdmin, valida
  * DELETE /api/terminal/filesystem/:id
  * Delete file or directory (admin only)
  */
-router.delete('/filesystem/:id', require('./auth').requireAdmin, validators.uuid, asyncHandler(async (req, res) => {
+router.delete('/filesystem/:id', require('../middleware/auth').requireAdmin, validators.uuid, asyncHandler(async (req, res) => {
   const { id } = req.params;
   const userId = req.user.id;
 
