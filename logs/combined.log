@@ -57,3 +57,8 @@
 2025-11-02 21:57:21 [INFO]: [API] POST /api/terminal/sessions/722bc6f5-e147-413f-bfd3-3d0579ab3b13/commands {"service":"phoenix-industries","ip":"::1","userAgent":"curl/8.14.1","contentType":"application/json","contentLength":"71"}
 2025-11-02 21:57:21 [INFO]: [API] POST /sessions/722bc6f5-e147-413f-bfd3-3d0579ab3b13/commands - 401 {"service":"phoenix-industries","ip":"::1","duration":"1ms","contentLength":"49"}
 2025-11-02 21:57:21 [WARN]: HTTP Error: POST /sessions/722bc6f5-e147-413f-bfd3-3d0579ab3b13/commands - 401 {"service":"phoenix-industries","ip":"::1","duration":"1ms"}
+2025-11-02 21:57:40 [WARN]: [SECURITY] Suspicious request detected {"service":"phoenix-industries","ip":"::1","userAgent":"curl/8.14.1","method":"GET","url":"/api/security/stats","headers":{"host":"localhost:3000","user-agent":"curl/8.14.1","accept":"*/*","authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI4YjRhNTNkNy01MTEyLTQxODUtODJlOS1hNWUxYTE5YzUyNDYiLCJ1c2VybmFtZSI6ImFkbWluIiwiYWNjZXNzTGV2ZWwiOiJBRE1JTiIsImlhdCI6MTc2MjEyMDYxMCwiZXhwIjoxNzYyMTIxNTEwLCJhdWQiOiJwaG9lbml4LXRlcm1pbmFsIiwiaXNzIjoicGhvZW5peC1pbmR1c3RyaWVzIn0.uecbmZ00Z4045khNHPX-0MakmMfjuXTv2su784a01p8"}}
+2025-11-02 21:57:40 [INFO]: [API] GET /api/security/stats {"service":"phoenix-industries","ip":"::1","userAgent":"curl/8.14.1"}
+2025-11-02 21:57:40 [INFO]: [AUTH] Authenticated user: admin (8b4a53d7-5112-4185-82e9-a5e1a19c5246) {"service":"phoenix-industries"}
+2025-11-02 21:57:40 [INFO]: [AUTH] Access granted for user admin with level ADMIN {"service":"phoenix-industries"}
+2025-11-02 21:57:40 [INFO]: [API] GET /stats - 200 {"service":"phoenix-industries","ip":"::1","duration":"10ms","contentLength":"1132"}
