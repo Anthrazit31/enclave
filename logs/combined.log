@@ -40,3 +40,9 @@
 2025-11-02 21:56:31 [INFO]: [API] POST /api/terminal/sessions {"service":"phoenix-industries","ip":"::1","userAgent":"curl/8.14.1","contentType":"application/json","contentLength":"27"}
 2025-11-02 21:56:31 [INFO]: [API] POST /sessions - 401 {"service":"phoenix-industries","ip":"::1","duration":"1ms","contentLength":"49"}
 2025-11-02 21:56:31 [WARN]: HTTP Error: POST /sessions - 401 {"service":"phoenix-industries","ip":"::1","duration":"1ms"}
+2025-11-02 21:56:49 [WARN]: [SECURITY] Suspicious request detected {"service":"phoenix-industries","ip":"::1","userAgent":"curl/8.14.1","method":"POST","url":"/api/auth/login","headers":{"host":"localhost:3000","user-agent":"curl/8.14.1","accept":"*/*","content-type":"application/json","content-length":"42"}}
+2025-11-02 21:56:49 [INFO]: [API] POST /api/auth/login {"service":"phoenix-industries","ip":"::1","userAgent":"curl/8.14.1","contentType":"application/json","contentLength":"42"}
+2025-11-02 21:56:49 [INFO]: [AUTH] Login attempt: admin from ::1 {"service":"phoenix-industries"}
+2025-11-02 21:56:50 [WARN]: [SECURITY] Security event logged: LOGIN {"service":"phoenix-industries","userId":"8b4a53d7-5112-4185-82e9-a5e1a19c5246","ip":"::1","description":"User logged in successfully"}
+2025-11-02 21:56:50 [INFO]: [AUTH] User authenticated: admin (8b4a53d7-5112-4185-82e9-a5e1a19c5246) from ::1 {"service":"phoenix-industries"}
+2025-11-02 21:56:50 [INFO]: [API] POST /login - 200 {"service":"phoenix-industries","ip":"::1","duration":"587ms","contentLength":"602"}
