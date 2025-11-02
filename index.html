@@ -311,7 +311,7 @@
   </div>
 
   <!-- API Scripts -->
-  <script src="assets/js/api.js?v=2.1"></script>
+  <script src="assets/js/api.js?v=2.2"></script>
   <script src="assets/js/terminal-integration.js"></script>
   <script src="assets/js/security.js"></script>
 
@@ -526,6 +526,7 @@
               break;
             case "enclave":
               localStorage.setItem('userType', 'military');
+              localStorage.setItem('securityLevel', 'high');
               redirectPage = 'terminal.html';
               accessMessage = 'ACCESS GRANTED - MILITARY PERSONNEL';
               break;
