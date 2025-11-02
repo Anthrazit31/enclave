@@ -1,0 +1,227 @@
+/* Phoenix Industries - Animation Library */
+
+/* Glitch Effects */
+@keyframes glitch-text {
+  0%, 20%, 100% { 
+    text-shadow: none; 
+  }
+  5%, 15% { 
+    text-shadow: 2px 0 var(--accent), -2px 0 var(--error); 
+  }
+  10% { 
+    text-shadow: -2px 0 var(--accent), 2px 0 var(--error); 
+  }
+}
+
+@keyframes glitch-bg {
+  0% {
+    background-position: 0 0;
+  }
+  20% {
+    background-position: -2px 2px;
+  }
+  40% {
+    background-position: 2px -2px;
+  }
+  60% {
+    background-position: -2px -2px;
+  }
+  80% {
+    background-position: 2px 2px;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}
+
+/* Fade Animations */
+@keyframes fadeIn {
+  from { 
+    opacity: 0; 
+  }
+  to { 
+    opacity: 1; 
+  }
+}
+
+@keyframes fadeOut {
+  from { 
+    opacity: 1; 
+  }
+  to { 
+    opacity: 0; 
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Pulse Animations */
+@keyframes pulse {
+  0%, 100% { 
+    text-shadow: 0 0 10px currentColor; 
+  }
+  50% { 
+    text-shadow: 0 0 20px currentColor; 
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 5px var(--primary);
+  }
+  50% {
+    box-shadow: 0 0 20px var(--primary);
+  }
+}
+
+/* Typing Animation */
+@keyframes typing {
+  from { 
+    width: 0; 
+  }
+  to { 
+    width: 100%; 
+  }
+}
+
+@keyframes blink-caret {
+  from, to { 
+    border-color: transparent; 
+  }
+  50% { 
+    border-color: var(--primary); 
+  }
+}
+
+/* Flicker Animation */
+@keyframes flicker {
+  0%, 100% { 
+    opacity: 1; 
+  }
+  41%, 43% { 
+    opacity: 0.8; 
+  }
+  45%, 47% { 
+    opacity: 0.9; 
+  }
+  50% { 
+    opacity: 0.7; 
+  }
+}
+
+/* Scan Line Animation */
+@keyframes scan {
+  0% {
+    top: 0;
+  }
+  100% {
+    top: 100%;
+  }
+}
+
+/* Rotate Animation */
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Shake Animation */
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-5px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(5px);
+  }
+}
+
+/* Slide Animations */
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Utility Classes */
+.animate-glitch {
+  animation: glitch-text 5s infinite alternate;
+}
+
+.animate-pulse {
+  animation: pulse 2s infinite;
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-in-out forwards;
+}
+
+.animate-fadeOut {
+  animation: fadeOut 0.5s ease-in-out forwards;
+}
+
+.animate-shake {
+  animation: shake 0.5s;
+}
+
+.animate-flicker {
+  animation: flicker 0.15s infinite;
+}
+
+/* Performance optimization for animations */
+.animate-glitch,
+.animate-pulse,
+.animate-flicker {
+  will-change: text-shadow, opacity;
+}
+
+.animate-fadeIn,
+.animate-fadeOut {
+  will-change: opacity;
+}
+
+.animate-shake {
+  will-change: transform;
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

