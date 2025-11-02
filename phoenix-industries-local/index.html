@@ -395,6 +395,12 @@
                 redirectPage = 'terminal.html';
                 accessMessage = 'ACCESS GRANTED - MILITARY PERSONNEL';
                 break;
+              case "admin":
+                localStorage.setItem('userType', 'admin');
+                localStorage.setItem('accessLevel', 'ADMIN');
+                redirectPage = 'terminal.html';
+                accessMessage = 'ACCESS GRANTED - ADMIN ENCLAVE';
+                break;
               case "arastirma":
                 localStorage.setItem('userType', 'researcher');
                 localStorage.setItem('securityLevel', 'high');

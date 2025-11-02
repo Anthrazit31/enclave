@@ -303,14 +303,26 @@ class PhoenixAPI {
       'MILITARY2024': { username: 'military', password: 'military123' },
       'RESEARCH2024': { username: 'researcher', password: 'researcher123' },
       'HYBRID2024': { username: 'hybrid', password: 'hybrid123' },
-      'SYSTEM2024': { username: 'researcher', password: 'researcher123' }
+      'SYSTEM2024': { username: 'researcher', password: 'researcher123' },
+      'ADMIN': { username: 'admin', password: 'admin123' }  // Admin enclave giriş şifresi
     };
 
-    const creds = credentials[password.toUpperCase()];
+    // Legacy şifre desteği için küçük harfe dönüştürme
+    const legacyPasswords = {
+      'enclave': { username: 'military', password: 'military123' },
+      'arastirma': { username: 'researcher', password: 'researcher123' },
+      'admin': { username: 'admin', password: 'admin123' }
+    };
+
+    // Önce büyük harfle kontrol et, sonra küçük harfle
+    let creds = credentials[password.toUpperCase()] || legacyPasswords[password.toLowerCase()];
+    
     if (!creds) {
+      console.log('Giriş başarısız: Geçersiz şifre', password);
       throw new Error('Invalid access credentials');
     }
 
+    console.log('Giriş deneniyor:', creds.username);
     return this.login(creds.username, creds.password);
   }
 

@@ -71,9 +71,11 @@ async function authenticateToken(req, res, next) {
       });
     }
 
+    logger.error(`Kimlik doğrulama hatası: ${error.message}`, { stack: error.stack });
     return res.status(500).json({
       success: false,
-      error: 'Authentication failed'
+      error: 'Authentication failed',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 }

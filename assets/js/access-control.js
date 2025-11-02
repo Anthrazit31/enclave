@@ -3,10 +3,12 @@ function checkAccess() {
     const userIdentifier = localStorage.getItem('userIdentifier');
     const userPassword = localStorage.getItem('userPassword');
     const userType = localStorage.getItem('userType');
+    const accessLevel = localStorage.getItem('accessLevel');
     
     // Check if user is authenticated
     if (!userIdentifier || !userPassword || !userType) {
-        alert('⚠️ Unauthorized access! Please login.');
+        console.log('Kimlik doğrulama başarısız: Eksik kullanıcı bilgileri');
+        alert('⚠️ Yetkisiz erişim! Lütfen giriş yapın.');
         window.location.replace('index.html');
         return false;
     }
@@ -18,16 +20,36 @@ function checkAccess() {
         const sessionDuration = 30 * 60 * 1000; // 30 minutes
         
         if (currentTime - parseInt(loginTime) > sessionDuration) {
-            alert('⏰ Session expired. Please login again.');
-            localStorage.clear();
-            window.location.replace('index.html');
+            console.log('Oturum süresi doldu');
+            alert('⏰ Oturum süresi doldu. Lütfen tekrar giriş yapın.');
+            logoutUser();
             return false;
         }
+    }
+    
+    // Admin kontrolü
+    if (accessLevel === 'ADMIN') {
+        console.log('Admin erişimi doğrulandı');
     }
     
     // Update login time
     localStorage.setItem('loginTime', new Date().getTime().toString());
     return true;
+}
+
+// Kullanıcı çıkış fonksiyonu
+function logoutUser() {
+    // Tüm oturum verilerini temizle
+    localStorage.clear();
+    sessionStorage.clear();
+    
+    // Çerezleri temizle
+    document.cookie.split(";").forEach(function(c) {
+        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+    });
+    
+    // Ana sayfaya yönlendir
+    window.location.replace('index.html');
 }
 
 // Set security-based access for terminal2.html
