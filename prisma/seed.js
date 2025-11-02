@@ -154,7 +154,7 @@ async function main() {
           type: 'FILE',
           content: 'CLASSIFIED: Military Deployment Orders\n\nStatus: All units on standby\nLocation: Phoenix Base\nNext briefing: TBD',
           accessLevel: 'MILITARY',
-          parentId: military.id
+          parentId: militaryDir.id
         },
         {
           name: 'research_notes.md',
@@ -162,7 +162,7 @@ async function main() {
           type: 'FILE',
           content: '# Research Notes\n\n## Current Projects\n1. Project Phoenix - Main system development\n2. Security Protocol Analysis\n3. Terminal Interface Optimization\n\n## Recent Findings\n- System performance improved by 47%\n- Security protocols holding strong\n- User feedback positive',
           accessLevel: 'RESEARCHER',
-          parentId: research.id
+          parentId: researchDir.id
         }
       ]
     });
