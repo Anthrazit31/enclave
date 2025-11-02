@@ -326,7 +326,7 @@ router.post('/filesystem', require('../middleware/auth').requireAdmin, validator
  * PUT /api/terminal/filesystem/:id
  * Update file or directory (admin only)
  */
-router.put('/filesystem/:id', require('./auth').requireAdmin, validators.uuid, validators.updateFile, asyncHandler(async (req, res) => {
+router.put('/filesystem/:id', require('../middleware/auth').requireAdmin, validators.uuid, validators.updateFile, asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { name, content, accessLevel } = req.body;
   const userId = req.user.id;
