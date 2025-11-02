@@ -311,7 +311,7 @@
   </div>
 
   <!-- API Scripts -->
-  <script src="assets/js/api.js"></script>
+  <script src="assets/js/api.js?v=2.0"></script>
   <script src="assets/js/terminal-integration.js"></script>
   <script src="assets/js/security.js"></script>
 
@@ -477,22 +477,9 @@
         } catch (error) {
           console.error('Authentication error:', error);
 
-          // Fallback to legacy system if backend is unavailable
-          if (error.message.includes('fetch') || error.message.includes('Network')) {
-            // Backend is down, use legacy hardcoded authentication
-            this.legacyAuthenticate(password);
-          } else {
-            // Authentication failed
-            input.style.borderColor = 'var(--error)';
-            input.value = '';
-            input.placeholder = 'ACCESS DENIED';
-            input.disabled = false;
-
-            setTimeout(() => {
-              input.style.borderColor = 'var(--primary)';
-              input.placeholder = 'Enter Access Code';
-            }, 2000);
-          }
+          // Always fallback to legacy authentication if backend fails
+          // This ensures the system works even without backend
+          this.legacyAuthenticate(password);
         }
       }
 

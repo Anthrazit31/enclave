@@ -299,10 +299,22 @@ class PhoenixAPI {
   async authenticateWithPassword(password) {
     // Map old hardcoded passwords to new authentication system
     const credentials = {
+      // Admin access
       'ADMIN': { username: 'admin', password: 'admin123' },
       'PHOENIX2024': { username: 'admin', password: 'admin123' },
+      
+      // Military access
+      'ENCLAVE': { username: 'military', password: 'military123' },
       'MILITARY2024': { username: 'military', password: 'military123' },
+      'FPPWJFUCXYMWI22MWFZZRG0BVMT6YU8SVU0MB1FC': { username: 'military', password: 'military123' },
+      
+      // Research access
+      'ARASTIRMA': { username: 'researcher', password: 'researcher123' },
       'RESEARCH2024': { username: 'researcher', password: 'researcher123' },
+      '1561': { username: 'researcher', password: 'researcher123' },
+      '1603': { username: 'researcher', password: 'researcher123' },
+      
+      // Hybrid access
       'HYBRID2024': { username: 'hybrid', password: 'hybrid123' },
       'SYSTEM2024': { username: 'researcher', password: 'researcher123' }
     };
