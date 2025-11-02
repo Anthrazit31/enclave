@@ -367,31 +367,154 @@
         }, 3000);
       }
       
-      authenticate() {
+      async authenticate() {
         const password = document.getElementById('passwordInput').value.toLowerCase();
         const input = document.getElementById('passwordInput');
         const overlay = this.accessOverlay;
         const text = document.getElementById('accessText');
-        
+
+        // Show loading state
+        input.disabled = true;
+        input.placeholder = 'AUTHENTICATING...';
+
+        try {
+          // Try to authenticate with the new backend API
+          // Map old access codes to new backend credentials
+          const result = await window.phoenixAPI.authenticateWithPassword(password);
+
+          if (result.success) {
+            const userInfo = window.phoenixAPI.getUserInfo();
+
+            // Farklı şifreler için farklı yönlendirmeler (legacy compatibility)
+            let redirectPage = '';
+            let accessMessage = '';
+
+            switch(password) {
+              case "enclave":
+                localStorage.setItem('userType', 'military');
+                redirectPage = 'terminal.html';
+                accessMessage = 'ACCESS GRANTED - MILITARY PERSONNEL';
+                break;
+              case "arastirma":
+                localStorage.setItem('userType', 'researcher');
+                localStorage.setItem('securityLevel', 'high');
+                redirectPage = 'terminal2.html';
+                accessMessage = 'ACCESS GRANTED - RESEARCHER';
+                break;
+              case "fppwjfucxymwi22mwfzzrg0bvmt6yu8svu0mb1fc":
+                localStorage.setItem('userType', 'militaryresearcher');
+                localStorage.setItem('securityLevel', 'low');
+                redirectPage = 'terminal.html';
+                accessMessage = 'ACCESS GRANTED - ROMAN MITCHEL // MILITARY PERSONNEL';
+                break;
+              case "1561":
+                localStorage.setItem('userType', 'arastirmacimicheal');
+                localStorage.setItem('securityLevel', 'low');
+                redirectPage = 'terminal2.html';
+                accessMessage = `ACCESS GRANTED - MICHEAL SCHOFIELD // RESEARCHER`;
+                break;
+              case "1603":
+                localStorage.setItem('userType', 'arastirmacijohn');
+                localStorage.setItem('securityLevel', 'high');
+                redirectPage = 'terminal2.html';
+                accessMessage = `ACCESS GRANTED - JOHN SMITH // RESEARCHER`;
+                break;
+              default:
+                // Default based on user access level from backend
+                const accessLevel = userInfo.accessLevel.toUpperCase();
+                switch(accessLevel) {
+                  case 'MILITARY':
+                    redirectPage = 'terminal.html';
+                    accessMessage = 'ACCESS GRANTED - MILITARY PERSONNEL';
+                    break;
+                  case 'RESEARCHER':
+                    redirectPage = 'terminal2.html';
+                    accessMessage = 'ACCESS GRANTED - RESEARCHER';
+                    break;
+                  case 'MILITARYRESEARCHER':
+                    redirectPage = 'terminal.html';
+                    accessMessage = 'ACCESS GRANTED - HYBRID PERSONNEL';
+                    break;
+                  case 'ADMIN':
+                    redirectPage = 'terminal.html';
+                    accessMessage = 'ACCESS GRANTED - SYSTEM ADMINISTRATOR';
+                    break;
+                  default:
+                    redirectPage = 'terminal2.html';
+                    accessMessage = 'ACCESS GRANTED';
+                }
+            }
+
+            // Store session info
+            localStorage.setItem('userPassword', password);
+            localStorage.setItem('loginTime', new Date().getTime().toString());
+            localStorage.setItem('userType', userInfo.accessLevel.toLowerCase());
+            localStorage.setItem('username', userInfo.username);
+
+            this.loginContainer.classList.remove('active');
+
+            // Play access granted sound
+            this.accessGrantedSound.currentTime = 0;
+            this.accessGrantedSound.play().catch(console.warn);
+
+            text.textContent = accessMessage;
+            overlay.classList.add('active');
+
+            setTimeout(() => {
+              window.location.href = redirectPage;
+            }, 2000);
+
+          } else {
+            throw new Error(result.error || 'Authentication failed');
+          }
+
+        } catch (error) {
+          console.error('Authentication error:', error);
+
+          // Fallback to legacy system if backend is unavailable
+          if (error.message.includes('fetch') || error.message.includes('Network')) {
+            // Backend is down, use legacy hardcoded authentication
+            this.legacyAuthenticate(password);
+          } else {
+            // Authentication failed
+            input.style.borderColor = 'var(--error)';
+            input.value = '';
+            input.placeholder = 'ACCESS DENIED';
+            input.disabled = false;
+
+            setTimeout(() => {
+              input.style.borderColor = 'var(--primary)';
+              input.placeholder = 'Enter Access Code';
+            }, 2000);
+          }
+        }
+      }
+
+      // Legacy authentication fallback
+      legacyAuthenticate(password) {
+        const input = document.getElementById('passwordInput');
+        const overlay = this.accessOverlay;
+        const text = document.getElementById('accessText');
+
         // Şifre tanımlayıcıları
         const passwordIdentifiers = {
           "enclave": "military_enclave",
-          "arastirma": "researcher_arastirma", 
+          "arastirma": "researcher_arastirma",
           "fppwjfucxymwi22mwfzzrg0bvmt6yu8svu0mb1fc": "kemal",
-          "1561": "bokkafa", 
+          "1561": "bokkafa",
           "1603": "çiş"
         };
-        
+
         if (passwordIdentifiers[password]) {
           // Şifreyi ve tanımlayıcıyı localStorage'a kaydet
           localStorage.setItem('userPassword', password);
           localStorage.setItem('userIdentifier', passwordIdentifiers[password]);
           localStorage.setItem('loginTime', new Date().getTime().toString());
-          
+
           // Farklı şifreler için farklı yönlendirmeler
           let redirectPage = '';
           let accessMessage = '';
-          
+
           switch(password) {
             case "enclave":
               localStorage.setItem('userType', 'military');
@@ -408,41 +531,42 @@
               localStorage.setItem('userType', 'militaryresearcher');
               localStorage.setItem('securityLevel', 'low');
               redirectPage = 'terminal.html';
-              accessMessage = 'ACCESS GRANTED - ROMAN MITCHEL // MILITARY PERSONNEL'; 
+              accessMessage = 'ACCESS GRANTED - ROMAN MITCHEL // MILITARY PERSONNEL';
               break;
             case "1561":
               localStorage.setItem('userType', 'arastirmacimicheal');
-              localStorage.setItem('securityLevel', 'low'); // Düşük güvenlik seviyesi
+              localStorage.setItem('securityLevel', 'low');
               redirectPage = 'terminal2.html';
               accessMessage = `ACCESS GRANTED - MICHEAL SCHOFIELD // RESEARCHER ${passwordIdentifiers[password].toUpperCase()}`;
               break;
             case "1603":
               localStorage.setItem('userType', 'arastirmacijohn');
-              localStorage.setItem('securityLevel', 'high'); // Yüksek güvenlik seviyesi
+              localStorage.setItem('securityLevel', 'high');
               redirectPage = 'terminal2.html';
               accessMessage = `ACCESS GRANTED - JOHN SMITH // RESEARCHER ${passwordIdentifiers[password].toUpperCase()}`;
               break;
           }
-          
+
           this.loginContainer.classList.remove('active');
-          
+
           // Play access granted sound
           this.accessGrantedSound.currentTime = 0;
           this.accessGrantedSound.play().catch(console.warn);
-          
+
           text.textContent = accessMessage;
           overlay.classList.add('active');
-          
+
           setTimeout(() => {
             window.location.href = redirectPage;
           }, 2000);
-          
+
         } else {
           // Error animation
           input.style.borderColor = 'var(--error)';
           input.value = '';
           input.placeholder = 'ACCESS DENIED';
-          
+          input.disabled = false;
+
           setTimeout(() => {
             input.style.borderColor = 'var(--primary)';
             input.placeholder = 'Enter Access Code';
