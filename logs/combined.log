@@ -53,3 +53,7 @@
 2025-11-02 21:57:17 [WARN]: [SECURITY] Security event logged: LOGIN {"service":"phoenix-industries","userId":"8b4a53d7-5112-4185-82e9-a5e1a19c5246","ip":"::1","description":"Terminal session created: MILITARY"}
 2025-11-02 21:57:17 [INFO]: [TERMINAL] Terminal session created: 722bc6f5-e147-413f-bfd3-3d0579ab3b13 for user 8b4a53d7-5112-4185-82e9-a5e1a19c5246 (MILITARY) {"service":"phoenix-industries"}
 2025-11-02 21:57:17 [INFO]: [API] POST /sessions - 201 {"service":"phoenix-industries","ip":"::1","duration":"7ms","contentLength":"214"}
+2025-11-02 21:57:21 [WARN]: [SECURITY] Suspicious request detected {"service":"phoenix-industries","ip":"::1","userAgent":"curl/8.14.1","method":"POST","url":"/api/terminal/sessions/722bc6f5-e147-413f-bfd3-3d0579ab3b13/commands","headers":{"host":"localhost:3000","user-agent":"curl/8.14.1","accept":"*/*","content-type":"application/json","authorization":"Bearer","content-length":"71"}}
+2025-11-02 21:57:21 [INFO]: [API] POST /api/terminal/sessions/722bc6f5-e147-413f-bfd3-3d0579ab3b13/commands {"service":"phoenix-industries","ip":"::1","userAgent":"curl/8.14.1","contentType":"application/json","contentLength":"71"}
+2025-11-02 21:57:21 [INFO]: [API] POST /sessions/722bc6f5-e147-413f-bfd3-3d0579ab3b13/commands - 401 {"service":"phoenix-industries","ip":"::1","duration":"1ms","contentLength":"49"}
+2025-11-02 21:57:21 [WARN]: HTTP Error: POST /sessions/722bc6f5-e147-413f-bfd3-3d0579ab3b13/commands - 401 {"service":"phoenix-industries","ip":"::1","duration":"1ms"}
