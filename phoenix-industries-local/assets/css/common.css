@@ -1,0 +1,136 @@
+/* Phoenix Industries - Common Styles */
+:root {
+  --primary: #00ff00;
+  --secondary: #003300;
+  --accent: #00cc00;
+  --error: #ff3333;
+  --bg: #000;
+  --text: #00ff00;
+  --transition: all 0.3s ease;
+  --research: #0099ff;
+  --research-dark: #003366;
+  --success: #00ff00;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Share Tech Mono', monospace;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* CRT Effect - Optimized */
+.crt-effect::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    linear-gradient(rgba(0, 255, 0, 0.03) 50%, rgba(0, 0, 0, 0.1) 50%),
+    linear-gradient(90deg, rgba(0, 255, 0, 0.03), rgba(0, 255, 0, 0.02), rgba(0, 255, 0, 0.03));
+  background-size: 100% 3px, 3px 100%;
+  pointer-events: none;
+  z-index: 100;
+  will-change: opacity;
+}
+
+.crt-effect::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.1);
+  opacity: 0.1;
+  pointer-events: none;
+  z-index: 100;
+  animation: flicker 0.15s infinite;
+  will-change: opacity;
+}
+
+@keyframes flicker {
+  0%, 100% { opacity: 0.1; }
+  50% { opacity: 0.05; }
+}
+
+/* Form Elements */
+input, button {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid var(--primary);
+  background: transparent;
+  color: var(--primary);
+  font-family: inherit;
+  font-size: 1rem;
+  outline: none;
+  transition: var(--transition);
+}
+
+input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 10px var(--primary);
+}
+
+button {
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  text-transform: uppercase;
+}
+
+button:hover {
+  background: var(--secondary);
+  box-shadow: 0 0 15px var(--primary);
+}
+
+button::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(0, 255, 0, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+button:hover::after {
+  left: 100%;
+}
+
+/* Focus indicators for accessibility */
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  input, button {
+    font-size: 0.9rem;
+    padding: 10px 12px;
+  }
+}
+
+/* Performance optimizations */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
