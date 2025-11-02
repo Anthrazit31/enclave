@@ -91,6 +91,7 @@ model FileSystem {
 }
 
 enum AccessLevel {
+  PUBLIC
   MILITARY
   RESEARCHER
   MILITARYRESEARCHER
