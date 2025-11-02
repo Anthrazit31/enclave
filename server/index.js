@@ -89,9 +89,9 @@ app.get('/health', (req, res) => {
 
 // API routes
 app.use('/api/auth', authRoutes);
-app.use('/api/users', authMiddleware, userRoutes);
-app.use('/api/terminal', authMiddleware, terminalRoutes);
-app.use('/api/security', authMiddleware, securityRoutes);
+app.use('/api/users', authenticateToken, userRoutes);
+app.use('/api/terminal', authenticateToken, terminalRoutes);
+app.use('/api/security', authenticateToken, securityRoutes);
 
 // Static file serving for frontend
 app.use(express.static('public'));
