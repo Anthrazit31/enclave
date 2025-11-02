@@ -21,3 +21,6 @@
 2025-11-02 21:55:01 [WARN]: [SECURITY] Suspicious request detected {"service":"phoenix-industries","ip":"::1","userAgent":"curl/8.14.1","method":"GET","url":"/health","headers":{"host":"localhost:3000","user-agent":"curl/8.14.1","accept":"*/*"}}
 2025-11-02 21:55:01 [INFO]: [API] GET /health {"service":"phoenix-industries","ip":"::1","userAgent":"curl/8.14.1"}
 2025-11-02 21:55:01 [INFO]: [API] GET /health - 200 {"service":"phoenix-industries","ip":"::1","duration":"3ms","contentLength":"103"}
+2025-11-02 21:55:03 [WARN]: [SECURITY] Suspicious request detected {"service":"phoenix-industries","ip":"::1","userAgent":"curl/8.14.1","method":"GET","url":"/health","headers":{"host":"localhost:3000","user-agent":"curl/8.14.1","accept":"*/*"}}
+2025-11-02 21:55:03 [INFO]: [API] GET /health {"service":"phoenix-industries","ip":"::1","userAgent":"curl/8.14.1"}
+2025-11-02 21:55:03 [INFO]: [API] GET /health - 200 {"service":"phoenix-industries","ip":"::1","duration":"1ms","contentLength":"103"}
