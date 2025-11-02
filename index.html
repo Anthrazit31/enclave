@@ -390,6 +390,12 @@
             let accessMessage = '';
 
             switch(password) {
+              case "admin":
+                localStorage.setItem('userType', 'admin');
+                localStorage.setItem('securityLevel', 'high');
+                redirectPage = 'terminal.html';
+                accessMessage = 'ACCESS GRANTED - SYSTEM ADMINISTRATOR';
+                break;
               case "enclave":
                 localStorage.setItem('userType', 'military');
                 redirectPage = 'terminal.html';
@@ -498,6 +504,7 @@
 
         // Şifre tanımlayıcıları
         const passwordIdentifiers = {
+          "admin": "admin_system",
           "enclave": "military_enclave",
           "arastirma": "researcher_arastirma",
           "fppwjfucxymwi22mwfzzrg0bvmt6yu8svu0mb1fc": "kemal",
@@ -516,6 +523,12 @@
           let accessMessage = '';
 
           switch(password) {
+            case "admin":
+              localStorage.setItem('userType', 'admin');
+              localStorage.setItem('securityLevel', 'high');
+              redirectPage = 'terminal.html';
+              accessMessage = 'ACCESS GRANTED - SYSTEM ADMINISTRATOR';
+              break;
             case "enclave":
               localStorage.setItem('userType', 'military');
               redirectPage = 'terminal.html';

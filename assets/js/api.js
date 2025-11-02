@@ -299,6 +299,7 @@ class PhoenixAPI {
   async authenticateWithPassword(password) {
     // Map old hardcoded passwords to new authentication system
     const credentials = {
+      'ADMIN': { username: 'admin', password: 'admin123' },
       'PHOENIX2024': { username: 'admin', password: 'admin123' },
       'MILITARY2024': { username: 'military', password: 'military123' },
       'RESEARCH2024': { username: 'researcher', password: 'researcher123' },
