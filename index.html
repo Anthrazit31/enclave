@@ -389,22 +389,34 @@
             let redirectPage = '';
             let accessMessage = '';
 
+            // Çerez ayarlama fonksiyonu
+            function setCookie(name, value, days) {
+                let expires = "";
+                if (days) {
+                    const date = new Date();
+                    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                    expires = "; expires=" + date.toUTCString();
+                }
+                document.cookie = name + "=" + encodeURIComponent(value) + expires + "; path=/; SameSite=Strict; Secure";
+            }
+            
             switch(password) {
               case "admin":
-                localStorage.setItem('userType', 'admin');
-                localStorage.setItem('securityLevel', 'high');
+                setCookie('userType', 'admin', 1);
+                setCookie('securityLevel', 'high', 1);
+                setCookie('accessLevel', 'ADMIN', 1);
                 redirectPage = 'terminal.html';
                 accessMessage = 'ACCESS GRANTED - SYSTEM ADMINISTRATOR';
                 break;
               case "enclave":
-                localStorage.setItem('userType', 'military');
-                localStorage.setItem('securityLevel', 'high');
+                setCookie('userType', 'military', 1);
+                setCookie('securityLevel', 'high', 1);
                 redirectPage = 'terminal.html';
                 accessMessage = 'ACCESS GRANTED - MILITARY PERSONNEL';
                 break;
               case "arastirma":
-                localStorage.setItem('userType', 'researcher');
-                localStorage.setItem('securityLevel', 'high');
+                setCookie('userType', 'researcher', 1);
+                setCookie('securityLevel', 'high', 1);
                 redirectPage = 'terminal2.html';
                 accessMessage = 'ACCESS GRANTED - RESEARCHER';
                 break;
@@ -458,12 +470,11 @@
             }
 
             // Store session info
-            localStorage.setItem('userPassword', password);
-            localStorage.setItem('loginTime', new Date().getTime().toString());
-            localStorage.setItem('userType', userInfo.accessLevel.toLowerCase());
-            localStorage.setItem('username', userInfo.username);
+            setCookie('loginTime', new Date().getTime().toString(), 1);
+            setCookie('userType', userInfo.accessLevel.toLowerCase(), 1);
+            setCookie('username', userInfo.username, 1);
             // Set userIdentifier for terminal compatibility
-            localStorage.setItem('userIdentifier', `${userInfo.accessLevel.toLowerCase()}_${password}`);
+            setCookie('userIdentifier', `${userInfo.accessLevel.toLowerCase()}_${password}`, 1);
 
             this.loginContainer.classList.remove('active');
 

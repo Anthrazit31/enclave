@@ -1,12 +1,33 @@
 // Phoenix Industries - Access Control Module
+// Çerez işlemleri için yardımcı fonksiyonlar
+function setCookie(name, value, days) {
+    let expires = "";
+    if (days) {
+        const date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + encodeURIComponent(value) + expires + "; path=/; SameSite=Strict; Secure";
+}
+
+function getCookie(name) {
+    const nameEQ = name + "=";
+    const ca = document.cookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) === 0) return decodeURIComponent(c.substring(nameEQ.length, c.length));
+    }
+    return null;
+}
+
 function checkAccess() {
-    const userIdentifier = localStorage.getItem('userIdentifier');
-    const userPassword = localStorage.getItem('userPassword');
-    const userType = localStorage.getItem('userType');
-    const accessLevel = localStorage.getItem('accessLevel');
+    const userIdentifier = getCookie('userIdentifier');
+    const userType = getCookie('userType');
+    const accessLevel = getCookie('accessLevel');
     
     // Check if user is authenticated
-    if (!userIdentifier || !userPassword || !userType) {
+    if (!userIdentifier || !userType) {
         console.log('Kimlik doğrulama başarısız: Eksik kullanıcı bilgileri');
         alert('⚠️ Yetkisiz erişim! Lütfen giriş yapın.');
         window.location.replace('index.html');
@@ -14,7 +35,7 @@ function checkAccess() {
     }
     
     // Session timeout check (30 minutes)
-    const loginTime = localStorage.getItem('loginTime');
+    const loginTime = getCookie('loginTime');
     if (loginTime) {
         const currentTime = new Date().getTime();
         const sessionDuration = 30 * 60 * 1000; // 30 minutes
@@ -33,17 +54,13 @@ function checkAccess() {
     }
     
     // Update login time
-    localStorage.setItem('loginTime', new Date().getTime().toString());
+    setCookie('loginTime', new Date().getTime().toString(), 1); // 1 günlük çerez
     return true;
 }
 
 // Kullanıcı çıkış fonksiyonu
 function logoutUser() {
-    // Tüm oturum verilerini temizle
-    localStorage.clear();
-    sessionStorage.clear();
-    
-    // Çerezleri temizle
+    // Tüm çerezleri temizle
     document.cookie.split(";").forEach(function(c) {
         document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
     });
@@ -89,7 +106,7 @@ function setSecurityBasedAccess(securityLevel) {
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', function() {
             if (checkAccess()) {
-                const securityLevel = localStorage.getItem('securityLevel');
+                const securityLevel = getCookie('securityLevel');
                 if (securityLevel) {
                     setSecurityBasedAccess(securityLevel);
                 }
@@ -97,7 +114,7 @@ function setSecurityBasedAccess(securityLevel) {
         });
     } else {
         if (checkAccess()) {
-            const securityLevel = localStorage.getItem('securityLevel');
+            const securityLevel = getCookie('securityLevel');
             if (securityLevel) {
                 setSecurityBasedAccess(securityLevel);
             }
