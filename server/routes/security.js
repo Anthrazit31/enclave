@@ -499,7 +499,7 @@ router.delete('/sessions/:id', validators.uuid, asyncHandler(async (req, res) =>
       req,
       terminalSession.userId,
       'LOGOUT',
-      `Terminal session terminated by admin: ${req.user.username}`,
+      'Terminal session terminated by admin: ' + req.user.username,
       { sessionId: id, terminalType: terminalSession.terminalType, adminAction: true }
     });
 
