@@ -283,7 +283,7 @@ router.get('/filesystem/*', asyncHandler(async (req, res) => {
  * POST /api/terminal/filesystem
  * Create new file or directory (admin only)
  */
-router.post('/filesystem', require('./auth').requireAdmin, validators.createFile, asyncHandler(async (req, res) => {
+router.post('/filesystem', require('../middleware/auth').requireAdmin, validators.createFile, asyncHandler(async (req, res) => {
   const { name, path, type, content, parentId, accessLevel } = req.body;
   const userId = req.user.id;
 
