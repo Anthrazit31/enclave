@@ -99,7 +99,7 @@ async function main() {
       }
     });
 
-    const military = await prisma.fileSystem.create({
+    const militaryDir = await prisma.fileSystem.create({
       data: {
         name: 'military',
         path: '/military',
@@ -109,7 +109,7 @@ async function main() {
       }
     });
 
-    const research = await prisma.fileSystem.create({
+    const researchDir = await prisma.fileSystem.create({
       data: {
         name: 'research',
         path: '/research',
