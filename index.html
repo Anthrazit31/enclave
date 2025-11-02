@@ -311,7 +311,7 @@
   </div>
 
   <!-- API Scripts -->
-  <script src="assets/js/api.js?v=2.0"></script>
+  <script src="assets/js/api.js?v=2.1"></script>
   <script src="assets/js/terminal-integration.js"></script>
   <script src="assets/js/security.js"></script>
 
@@ -398,6 +398,7 @@
                 break;
               case "enclave":
                 localStorage.setItem('userType', 'military');
+                localStorage.setItem('securityLevel', 'high');
                 redirectPage = 'terminal.html';
                 accessMessage = 'ACCESS GRANTED - MILITARY PERSONNEL';
                 break;
@@ -430,22 +431,27 @@
                 const accessLevel = userInfo.accessLevel.toUpperCase();
                 switch(accessLevel) {
                   case 'MILITARY':
+                    localStorage.setItem('securityLevel', 'high');
                     redirectPage = 'terminal.html';
                     accessMessage = 'ACCESS GRANTED - MILITARY PERSONNEL';
                     break;
                   case 'RESEARCHER':
+                    localStorage.setItem('securityLevel', 'high');
                     redirectPage = 'terminal2.html';
                     accessMessage = 'ACCESS GRANTED - RESEARCHER';
                     break;
                   case 'MILITARYRESEARCHER':
+                    localStorage.setItem('securityLevel', 'high');
                     redirectPage = 'terminal.html';
                     accessMessage = 'ACCESS GRANTED - HYBRID PERSONNEL';
                     break;
                   case 'ADMIN':
+                    localStorage.setItem('securityLevel', 'high');
                     redirectPage = 'terminal.html';
                     accessMessage = 'ACCESS GRANTED - SYSTEM ADMINISTRATOR';
                     break;
                   default:
+                    localStorage.setItem('securityLevel', 'high');
                     redirectPage = 'terminal2.html';
                     accessMessage = 'ACCESS GRANTED';
                 }
@@ -456,6 +462,8 @@
             localStorage.setItem('loginTime', new Date().getTime().toString());
             localStorage.setItem('userType', userInfo.accessLevel.toLowerCase());
             localStorage.setItem('username', userInfo.username);
+            // Set userIdentifier for terminal compatibility
+            localStorage.setItem('userIdentifier', `${userInfo.accessLevel.toLowerCase()}_${password}`);
 
             this.loginContainer.classList.remove('active');
 
