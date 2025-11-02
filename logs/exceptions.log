@@ -122,3 +122,34 @@ SyntaxError: missing ) after argument list
     at Module.require (node:internal/modules/cjs/loader:1503:12)
     at require (node:internal/modules/helpers:152:16)
     at Object.<anonymous> (/workspace/cmhi89og304fqtmimcdw2wqiv/enclave/server/index.js:20:24)
+2025-11-02 21:53:16 [ERROR]: uncaughtException: missing ) after argument list
+/workspace/cmhi89og304fqtmimcdw2wqiv/enclave/server/routes/security.js:477
+      { sessionId: id, adminAction: true }
+                                         ^
+
+SyntaxError: missing ) after argument list
+    at wrapSafe (node:internal/modules/cjs/loader:1691:18)
+    at Module._compile (node:internal/modules/cjs/loader:1734:20)
+    at Object..js (node:internal/modules/cjs/loader:1893:10)
+    at Module.load (node:internal/modules/cjs/loader:1480:32)
+    at Module._load (node:internal/modules/cjs/loader:1299:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:244:24)
+    at Module.require (node:internal/modules/cjs/loader:1503:12)
+    at require (node:internal/modules/helpers:152:16)
+    at Object.<anonymous> (/workspace/cmhi89og304fqtmimcdw2wqiv/enclave/server/index.js:20:24) {"error":{},"exception":true,"date":"Sun Nov 02 2025 21:53:16 GMT+0000 (Coordinated Universal Time)","process":{"pid":5192,"uid":0,"gid":0,"cwd":"/workspace/cmhi89og304fqtmimcdw2wqiv/enclave","execPath":"/usr/bin/node","version":"v24.11.0","argv":["/usr/bin/node","/workspace/cmhi89og304fqtmimcdw2wqiv/enclave/server/index.js"],"memoryUsage":{"rss":85286912,"heapTotal":33808384,"heapUsed":15425600,"external":2291664,"arrayBuffers":19351}},"os":{"loadavg":[0.33,1.53,1.12],"uptime":1345.05},"trace":[{"column":18,"file":"node:internal/modules/cjs/loader","function":"wrapSafe","line":1691,"method":null,"native":false},{"column":20,"file":"node:internal/modules/cjs/loader","function":"Module._compile","line":1734,"method":"_compile","native":false},{"column":10,"file":"node:internal/modules/cjs/loader","function":"Object..js","line":1893,"method":".js","native":false},{"column":32,"file":"node:internal/modules/cjs/loader","function":"Module.load","line":1480,"method":"load","native":false},{"column":12,"file":"node:internal/modules/cjs/loader","function":"Module._load","line":1299,"method":"_load","native":false},{"column":14,"file":"node:diagnostics_channel","function":"TracingChannel.traceSync","line":328,"method":"traceSync","native":false},{"column":24,"file":"node:internal/modules/cjs/loader","function":"wrapModuleLoad","line":244,"method":null,"native":false},{"column":12,"file":"node:internal/modules/cjs/loader","function":"Module.require","line":1503,"method":"require","native":false},{"column":16,"file":"node:internal/modules/helpers","function":"require","line":152,"method":null,"native":false},{"column":24,"file":"/workspace/cmhi89og304fqtmimcdw2wqiv/enclave/server/index.js","function":null,"line":20,"method":null,"native":false}],"service":"phoenix-industries"}
+/workspace/cmhi89og304fqtmimcdw2wqiv/enclave/server/routes/security.js:477
+      { sessionId: id, adminAction: true }
+                                         ^
+
+SyntaxError: missing ) after argument list
+    at wrapSafe (node:internal/modules/cjs/loader:1691:18)
+    at Module._compile (node:internal/modules/cjs/loader:1734:20)
+    at Object..js (node:internal/modules/cjs/loader:1893:10)
+    at Module.load (node:internal/modules/cjs/loader:1480:32)
+    at Module._load (node:internal/modules/cjs/loader:1299:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:244:24)
+    at Module.require (node:internal/modules/cjs/loader:1503:12)
+    at require (node:internal/modules/helpers:152:16)
+    at Object.<anonymous> (/workspace/cmhi89og304fqtmimcdw2wqiv/enclave/server/index.js:20:24)
