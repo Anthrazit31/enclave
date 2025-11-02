@@ -153,3 +153,26 @@ SyntaxError: missing ) after argument list
     at Module.require (node:internal/modules/cjs/loader:1503:12)
     at require (node:internal/modules/helpers:152:16)
     at Object.<anonymous> (/workspace/cmhi89og304fqtmimcdw2wqiv/enclave/server/index.js:20:24)
+2025-11-02 21:54:41 [ERROR]: uncaughtException: Router.use() requires a middleware function but got a Object
+TypeError: Router.use() requires a middleware function but got a Object
+    at router.use (/workspace/cmhi89og304fqtmimcdw2wqiv/enclave/node_modules/express/lib/router/index.js:469:13)
+    at app.<anonymous> (/workspace/cmhi89og304fqtmimcdw2wqiv/enclave/node_modules/express/lib/application.js:227:21)
+    at Array.forEach (<anonymous>)
+    at app.use (/workspace/cmhi89og304fqtmimcdw2wqiv/enclave/node_modules/express/lib/application.js:224:7)
+    at Object.<anonymous> (/workspace/cmhi89og304fqtmimcdw2wqiv/enclave/server/index.js:92:5)
+    at Module._compile (node:internal/modules/cjs/loader:1760:14)
+    at Object..js (node:internal/modules/cjs/loader:1893:10)
+    at Module.load (node:internal/modules/cjs/loader:1480:32)
+    at Module._load (node:internal/modules/cjs/loader:1299:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14) {"error":{},"exception":true,"date":"Sun Nov 02 2025 21:54:41 GMT+0000 (Coordinated Universal Time)","process":{"pid":6344,"uid":0,"gid":0,"cwd":"/workspace/cmhi89og304fqtmimcdw2wqiv/enclave","execPath":"/usr/bin/node","version":"v24.11.0","argv":["/usr/bin/node","/workspace/cmhi89og304fqtmimcdw2wqiv/enclave/server/index.js"],"memoryUsage":{"rss":88506368,"heapTotal":34476032,"heapUsed":18554240,"external":3458244,"arrayBuffers":19773}},"os":{"loadavg":[0.1,1.16,1.02],"uptime":1430.13},"trace":[{"column":13,"file":"/workspace/cmhi89og304fqtmimcdw2wqiv/enclave/node_modules/express/lib/router/index.js","function":"router.use","line":469,"method":"use","native":false},{"column":21,"file":"/workspace/cmhi89og304fqtmimcdw2wqiv/enclave/node_modules/express/lib/application.js","function":null,"line":227,"method":null,"native":false},{"column":null,"file":null,"function":"Array.forEach","line":null,"method":"forEach","native":false},{"column":7,"file":"/workspace/cmhi89og304fqtmimcdw2wqiv/enclave/node_modules/express/lib/application.js","function":"app.use","line":224,"method":"use","native":false},{"column":5,"file":"/workspace/cmhi89og304fqtmimcdw2wqiv/enclave/server/index.js","function":null,"line":92,"method":null,"native":false},{"column":14,"file":"node:internal/modules/cjs/loader","function":"Module._compile","line":1760,"method":"_compile","native":false},{"column":10,"file":"node:internal/modules/cjs/loader","function":"Object..js","line":1893,"method":".js","native":false},{"column":32,"file":"node:internal/modules/cjs/loader","function":"Module.load","line":1480,"method":"load","native":false},{"column":12,"file":"node:internal/modules/cjs/loader","function":"Module._load","line":1299,"method":"_load","native":false},{"column":14,"file":"node:diagnostics_channel","function":"TracingChannel.traceSync","line":328,"method":"traceSync","native":false}],"service":"phoenix-industries"}
+TypeError: Router.use() requires a middleware function but got a Object
+    at router.use (/workspace/cmhi89og304fqtmimcdw2wqiv/enclave/node_modules/express/lib/router/index.js:469:13)
+    at app.<anonymous> (/workspace/cmhi89og304fqtmimcdw2wqiv/enclave/node_modules/express/lib/application.js:227:21)
+    at Array.forEach (<anonymous>)
+    at app.use (/workspace/cmhi89og304fqtmimcdw2wqiv/enclave/node_modules/express/lib/application.js:224:7)
+    at Object.<anonymous> (/workspace/cmhi89og304fqtmimcdw2wqiv/enclave/server/index.js:92:5)
+    at Module._compile (node:internal/modules/cjs/loader:1760:14)
+    at Object..js (node:internal/modules/cjs/loader:1893:10)
+    at Module.load (node:internal/modules/cjs/loader:1480:32)
+    at Module._load (node:internal/modules/cjs/loader:1299:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
