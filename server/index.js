@@ -9,7 +9,7 @@ require('dotenv').config();
 
 const logger = require('./utils/logger');
 const errorHandler = require('./middleware/errorHandler');
-const authMiddleware = require('./middleware/auth');
+const { authenticateToken } = require('./middleware/auth');
 const securityMiddleware = require('./middleware/security');
 const loggingMiddleware = require('./middleware/logging');
 
