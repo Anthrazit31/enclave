@@ -8,7 +8,45 @@
     
   <!-- Direkt Link Erişim Koruması -->
   <script>
-  
+  (function() {
+      'use strict';
+      
+function checkAccess() {
+    const userIdentifier = localStorage.getItem('userIdentifier');
+    const userPassword = localStorage.getItem('userPassword');
+    const userType = localStorage.getItem('userType');
+    const validEntry = localStorage.getItem('leader_marcus_access');
+    
+    if (!userIdentifier || !userPassword || !userType) {
+        alert('⚠️ Yetkisiz erişim! Lütfen giriş yapın.');
+        window.location.replace('../index.html');
+        return;
+    }
+      
+    const loginTime = localStorage.getItem('loginTime');
+    if (loginTime) {
+        const currentTime = new Date().getTime();
+        const sessionDuration = 30 * 60 * 1000;
+        
+        if (currentTime - parseInt(loginTime) > sessionDuration) {
+            alert('⏰ Oturum süreniz doldu. Lütfen tekrar giriş yapın.');
+            localStorage.clear();
+            window.location.replace('../index.html');
+            return;
+        }
+    }
+    
+    localStorage.removeItem('leader_marcus_access');
+    localStorage.setItem('loginTime', new Date().getTime().toString());
+}
+      
+      if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', checkAccess);
+      } else {
+          checkAccess();
+      }
+      
+  })();
   </script>
 </body>
 </html>
