@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ENCLAVE - MILITARY COMMAND SYSTEM</title>
+    
+    <!-- Core Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/TextPlugin.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: #0f0;
+            overflow: hidden;
+            line-height: 1.6;
+        }
+
+        /* ========== LOADER SCREEN ========== */
+        .loader-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, #0a0a0a, #000);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            backdrop-filter: blur(5px);
+        }
+
+        .loader-content {
+            text-align: center;
+            position: relative;
+        }
+
+        .enclave-logo {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 40px;
+            position: relative;
+            filter: drop-shadow(0 0 20px #0f0);
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+
+        .enclave-logo svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { filter: drop-shadow(0 0 20px #0f0); }
+            50% { filter: drop-shadow(0 0 40px #0f0); }
+        }
+
+        .loading-text {
+            font-size: 18px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            color: #0f0;
+            text-shadow: 0 0 10px #0f0;
+        }
+
+        .loading-bar-container {
+            width: 300px;
+            height: 3px;
+            background: #111;
+            border: 1px solid #0f0;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+        }
+
+        .loading-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #0f0, #00ff00);
+            width: 0%;
+            box-shadow: 0 0 10px #0f0;
+        }
+
+        .loading-percentage {
+            font-size: 14px;
+            margin-top: 15px;
+            letter-spacing: 2px;
+            color: #0f0;
+        }
+
+        /* ========== LOGIN SCREEN ========== */
+        .login-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9998;
+            flex-direction: column;
+        }
+
+        .login-container.active {
+            display: flex;
+        }
+
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 255, 0, 0.05) 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 1000;
+            animation: scanline-scroll 8s linear infinite;
+        }
+
+        @keyframes scanline-scroll {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(10px); }
+        }
+
+        .login-panel {
+            background: rgba(0, 20, 0, 0.8);
+            border: 2px solid #0f0;
+            border-radius: 5px;
+            padding: 40px;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: 
+                0 0 30px rgba(0, 255, 0, 0.3),
+                inset 0 0 20px rgba(0, 255, 0, 0.1);
+            backdrop-filter: blur(10px);
+            position: relative;
+            z-index: 100;
+        }
+
+        .login-panel h1 {
+            font-size: 24px;
+            margin-bottom: 30px;
+            text-align: center;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px #0f0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #0f0;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 255, 0, 0.05);
+            border: 1px solid #0f0;
+            border-radius: 3px;
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 0 5px rgba(0, 255, 0, 0.2);
+        }
+
+        .form-group input:focus {
+            outline: none;
+            background: rgba(0, 255, 0, 0.1);
+            box-shadow: 
+                inset 0 0 5px rgba(0, 255, 0, 0.2),
+                0 0 15px rgba(0, 255, 0, 0.5);
+        }
+
+        .form-group input::placeholder {
+            color: rgba(0, 255, 0, 0.5);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 255, 0, 0.1);
+            border: 2px solid #0f0;
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+        }
+
+        .login-btn:hover {
+            background: rgba(0, 255, 0, 0.2);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.6);
+            transform: translateY(-2px);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .system-status {
+            margin-top: 30px;
+            font-size: 12px;
+            text-align: center;
+            color: rgba(0, 255, 0, 0.7);
+            letter-spacing: 1px;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #0f0;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: blink 1.5s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* ========== THREE.JS CANVAS ========== */
+        canvas {
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+
+        .canvas-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: radial-gradient(ellipse at center, transparent 0%, rgba(0, 0, 0, 0.7) 100%);
+        }
+
+        /* ========== ERROR MESSAGE ========== */
+        .error-message {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background: rgba(255, 0, 0, 0.1);
+            border: 2px solid #ff0000;
+            color: #ff0000;
+            border-radius: 3px;
+            z-index: 1001;
+            display: none;
+            font-size: 12px;
+            text-shadow: 0 0 10px #ff0000;
+            max-width: 300px;
+        }
+
+        .error-message.show {
+            display: block;
+            animation: slideInRight 0.3s ease;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* ========== AMBIENT EFFECTS ========== */
+        .ambient-lines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 500;
+        }
+
+        .ambient-line {
+            position: absolute;
+            background: linear-gradient(90deg, transparent, #0f0, transparent);
+            height: 1px;
+            width: 100%;
+            opacity: 0.1;
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Three.js Canvas -->
+    <canvas id="bgCanvas"></canvas>
+    <div class="canvas-overlay"></div>
+
+    <!-- Scanlines Overlay -->
+    <div class="scanlines"></div>
+
+    <!-- Loader Screen -->
+    <div class="loader-container" id="loaderContainer">
+        <div class="loader-content">
+            <!-- Logo SVG (Placeholder) -->
+            <div class="enclave-logo">
+                <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Dış Daire -->
+                    <circle cx="100" cy="100" r="95" fill="none" stroke="currentColor" stroke-width="2"/>
+                    
+                    <!-- Yıldız (Üst) -->
+                    <polygon points="100,20 110,50 140,50 115,70 125,100 100,80 75,100 85,70 60,50 90,50" 
+                             fill="currentColor" stroke="currentColor" stroke-width="1"/>
+                    
+                    <!-- Kartal Gövdesi -->
+                    <circle cx="100" cy="130" r="20" fill="currentColor"/>
+                    
+                    <!-- Kartal Başı -->
+                    <circle cx="100" cy="110" r="12" fill="currentColor"/>
+                    
+                    <!-- Kartal Gagası -->
+                    <polygon points="108,108 120,105 115,110" fill="currentColor"/>
+                    
+                    <!-- Sol Kanat -->
+                    <path d="M 85 125 Q 60 110 50 140 Q 65 125 75 130" fill="currentColor"/>
+                    
+                    <!-- Sağ Kanat -->
+                    <path d="M 115 125 Q 140 110 150 140 Q 135 125 125 130" fill="currentColor"/>
+                    
+                    <!-- Tüfekler (Sol) -->
+                    <rect x="35" y="145" width="25" height="4" fill="currentColor" transform="rotate(-30 35 147)"/>
+                    
+                    <!-- Tüfekler (Sağ) -->
+                    <rect x="140" y="145" width="25" height="4" fill="currentColor" transform="rotate(30 152 147)"/>
+                    
+                    <!-- Kalkan Deseni -->
+                    <g>
+                        <circle cx="100" cy="135" r="15" fill="none" stroke="currentColor" stroke-width="1"/>
+                        <line x1="85" y1="135" x2="115" y2="135" stroke="currentColor" stroke-width="1"/>
+                        <line x1="100" y1="120" x2="100" y2="150" stroke="currentColor" stroke-width="1"/>
+                    </g>
+                </svg>
+            </div>
+
+            <div class="loading-text" id="loadingText">INITIALIZING...</div>
+            
+            <div class="loading-bar-container">
+                <div class="loading-bar" id="loadingBar"></div>
+            </div>
+
+            <div class="loading-percentage" id="loadingPercentage">0%</div>
+        </div>
+    </div>
+
+    <!-- Login Screen -->
+    <div class="login-container" id="loginContainer">
+        <div class="login-panel">
+            <h1>ENCLAVE</h1>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Personel Kimliği</label>
+                    <input 
+                        type="text" 
+                        id="username" 
+                        name="username" 
+                        placeholder="Enter ID..."
+                        autocomplete="off"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Erişim Kodu</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        placeholder="Enter Code..."
+                        autocomplete="off"
+                    >
+                </div>
+
+                <button type="submit" class="login-btn">Erişim İste</button>
+            </form>
+
+            <div class="system-status">
+                <span class="status-indicator"></span>
+                SİSTEM HAZIR - v3.14.159
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Message -->
+    <div class="error-message" id="errorMessage"></div>
+
+    <!-- Ambient Effects -->
+    <div class="ambient-lines" id="ambientLines"></div>
+
+    <!-- ========== CORE SCRIPTS ========== -->
+    <script>
+        // ========== CONFIGURATION ==========
+        const CONFIG = {
+            colors: {
+                primary: '#0f0',
+                secondary: '#00ff00',
+                error: '#ff0000',
+                bg: '#000',
+                accent: '#00ff00'
+            },
+            audio: {
+                typeSound: 'assets/audio/type.mp3',
+                backgroundMusic: 'assets/audio/backgroundmusic.mp3',
+                accessGranted: 'assets/audio/accessgranted.mp3',
+                errorSound: 'assets/audio/error.mp3'
+            },
+            timing: {
+                loaderDuration: 4000,
+                textScrambleDuration: 1.5
+            }
+        };
+
+        // ========== AUDIO ENGINE ==========
+        class AudioEngine {
+            constructor() {
+                this.sounds = {};
+                this.master = new Audio();
+                this.master.volume = 0.5;
+                this.currentTrack = null;
+            }
+
+            async loadSound(key, path) {
+                const audio = new Audio(path);
+                audio.volume = 0.7;
+                this.sounds[key] = audio;
+            }
+
+            async init() {
+                try {
+                    await this.loadSound('type', CONFIG.audio.typeSound);
+                    await this.loadSound('access', CONFIG.audio.accessGranted);
+                    await this.loadSound('error', CONFIG.audio.errorSound);
+                } catch (e) {
+                    console.log('Audio files not found - continuing without audio');
+                }
+            }
+
+            play(key, volume = 1) {
+                if (this.sounds[key]) {
+                    this.sounds[key].volume = volume;
+                    this.sounds[key].currentTime = 0;
+                    this.sounds[key].play().catch(e => {
+                        console.log('Audio play failed:', e);
+                    });
+                }
+            }
+
+            stop(key) {
+                if (this.sounds[key]) {
+                    this.sounds[key].pause();
+                    this.sounds[key].currentTime = 0;
+                }
+            }
+
+            fadeOut(key, duration = 1) {
+                const audio = this.sounds[key];
+                if (!audio) return;
+                
+                gsap.to(audio, {
+                    volume: 0,
+                    duration: duration,
+                    onComplete: () => {
+                        audio.pause();
+                    }
+                });
+            }
+        }
+
+        // ========== THREE.JS INITIALIZATION ==========
+        class BackgroundScene {
+            constructor() {
+                this.scene = null;
+                this.camera = null;
+                this.renderer = null;
+                this.globe = null;
+                this.particles = [];
+            }
+
+            init() {
+                const canvas = document.getElementById('bgCanvas');
+                const width = window.innerWidth;
+                const height = window.innerHeight;
+
+                // Scene Setup
+                this.scene = new THREE.Scene();
+                this.camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+                this.camera.position.z = 2;
+
+                // Renderer
+                this.renderer = new THREE.WebGLRenderer({ 
+                    canvas, 
+                    antialias: true, 
+                    alpha: true 
+                });
+                this.renderer.setSize(width, height);
+                this.renderer.setClearColor(0x000000, 0.1);
+                this.renderer.setPixelRatio(window.devicePixelRatio);
+
+                // Lighting
+                const light = new THREE.PointLight(0x00ff00, 0.8);
+                light.position.set(5, 5, 5);
+                this.scene.add(light);
+
+                const ambientLight = new THREE.AmbientLight(0x00ff00, 0.3);
+                this.scene.add(ambientLight);
+
+                // Create Globe
+                this.createGlobe();
+
+                // Create Particles
+                this.createParticles();
+
+                // Handle Resize
+                window.addEventListener('resize', () => this.onWindowResize());
+
+                // Mouse Interaction
+                document.addEventListener('mousemove', (e) => this.onMouseMove(e));
+
+                // Start Animation Loop
+                this.animate();
+            }
+
+            createGlobe() {
+                const geometry = new THREE.IcosahedronGeometry(1, 4);
+                const material = new THREE.MeshPhongMaterial({
+                    color: 0x00ff00,
+                    wireframe: true,
+                    emissive: 0x00ff00,
+                    emissiveIntensity: 0.3
+                });
+                this.globe = new THREE.Mesh(geometry, material);
+                this.scene.add(this.globe);
+            }
+
+            createParticles() {
+                const particleCount = 300;
+                const geometry = new THREE.BufferGeometry();
+                const positions = new Float32Array(particleCount * 3);
+
+                for (let i = 0; i < particleCount; i++) {
+                    positions[i * 3] = (Math.random() - 0.5) * 4;
+                    positions[i * 3 + 1] = (Math.random() - 0.5) * 4;
+                    positions[i * 3 + 2] = (Math.random() - 0.5) * 4;
+                }
+
+                geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+                const material = new THREE.PointsMaterial({
+                    color: 0x00ff00,
+                    size: 0.02,
+                    sizeAttenuation: true,
+                    transparent: true,
+                    opacity: 0.6
+                });
+
+                const particles = new THREE.Points(geometry, material);
+                this.scene.add(particles);
+                this.particles = particles;
+            }
+
+            onWindowResize() {
+                const width = window.innerWidth;
+                const height = window.innerHeight;
+                this.camera.aspect = width / height;
+                this.camera.updateProjectionMatrix();
+                this.renderer.setSize(width, height);
+            }
+
+            onMouseMove(event) {
+                if (!this.globe) return;
+                const x = (event.clientX / window.innerWidth) * 2 - 1;
+                const y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+                gsap.to(this.globe.rotation, {
+                    x: y * 0.3,
+                    y: x * 0.3,
+                    duration: 2,
+                    ease: 'power2.out'
+                });
+            }
+
+            animate() {
+                requestAnimationFrame(() => this.animate());
+
+                if (this.globe) {
+                    this.globe.rotation.x += 0.0001;
+                    this.globe.rotation.y += 0.0003;
+                }
+
+                if (this.particles) {
+                    this.particles.rotation.x += 0.0001;
+                    this.particles.rotation.y += 0.0002;
+                }
+
+                this.renderer.render(this.scene, this.camera);
+            }
+        }
+
+        // ========== TEXT SCRAMBLE EFFECT ==========
+        class TextScramble {
+            constructor(el, duration = 0.8) {
+                this.el = el;
+                this.chars = '!<>-_\\/[]{}—=+*^?#________'.split('');
+                this.update = this.update.bind(this);
+                this.duration = duration * 1000;
+                this.progress = 0;
+                this.startTime = 0;
+            }
+
+            setText(newText) {
+                const oldText = this.el.innerText;
+                const length = Math.max(oldText.length, newText.length);
+                const promise = new Promise((resolve) => {
+                    this.resolve = resolve;
+                });
+                this.progress = 0;
+                this.startTime = Date.now();
+                this.newText = newText;
+                this.oldText = oldText;
+                this.update();
+                return promise;
+            }
+
+            update() {
+                let progress = Math.min((Date.now() - this.startTime) / this.duration, 1);
+                this.progress = progress;
+
+                let text = '';
+                for (let i = 0; i < this.newText.length; i++) {
+                    let index = Math.floor(Math.random() * this.chars.length);
+                    if (i < this.newText.length * progress) {
+                        text += this.newText[i];
+                    } else {
+                        text += this.chars[index];
+                    }
+                }
+                this.el.innerText = text;
+
+                if (progress < 1) {
+                    requestAnimationFrame(this.update);
+                } else {
+                    this.el.innerText = this.newText;
+                    this.resolve();
+                }
+            }
+        }
+
+        // ========== MAIN APP CONTROLLER ==========
+        class EnclaveApp {
+            constructor() {
+                this.audioEngine = new AudioEngine();
+                this.bgScene = new BackgroundScene();
+                this.textScramble = null;
+                this.isLoggedIn = false;
+            }
+
+            async init() {
+                // Initialize Audio
+                await this.audioEngine.init();
+
+                // Initialize Three.js Background
+                this.bgScene.init();
+
+                // Setup UI Elements
+                this.setupLoader();
+                this.setupLogin();
+            }
+
+            setupLoader() {
+                const loaderContainer = document.getElementById('loaderContainer');
+                const loadingBar = document.getElementById('loadingBar');
+                const loadingPercentage = document.getElementById('loadingPercentage');
+                const loadingText = document.getElementById('loadingText');
+
+                // Animate Progress Bar
+                gsap.to(loadingBar, {
+                    width: '100%',
+                    duration: CONFIG.timing.loaderDuration / 1000,
+                    ease: 'power1.inOut'
+                });
+
+                // Animate Percentage Counter
+                let currentPercent = 0;
+                const percentInterval = setInterval(() => {
+                    currentPercent = Math.min(currentPercent + Math.random() * 25, 99);
+                    loadingPercentage.innerText = Math.floor(currentPercent) + '%';
+
+                    if (currentPercent >= 99) {
+                        clearInterval(percentInterval);
+                        loadingPercentage.innerText = '100%';
+                    }
+                }, 300);
+
+                // Hide Loader & Show Login
+                setTimeout(() => {
+                    gsap.to(loaderContainer, {
+                        opacity: 0,
+                        duration: 0.8,
+                        onComplete: () => {
+                            loaderContainer.style.display = 'none';
+                            this.showLoginScreen();
+                        }
+                    });
+                }, CONFIG.timing.loaderDuration);
+            }
+
+            setupLogin() {
+                const form = document.getElementById('loginForm');
+                const usernameInput = document.getElementById('username');
+                const passwordInput = document.getElementById('password');
+
+                // Text Scramble Effect on Focus
+                usernameInput.addEventListener('focus', () => {
+                    this.audioEngine.play('type', 0.2);
+                });
+
+                passwordInput.addEventListener('focus', () => {
+                    this.audioEngine.play('type', 0.2);
+                });
+
+                // Form Submit
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.handleLogin(usernameInput.value, passwordInput.value);
+                });
+            }
+
+            showLoginScreen() {
+                const loginContainer = document.getElementById('loginContainer');
+                loginContainer.classList.add('active');
+
+                gsap.from(loginContainer, {
+                    opacity: 0,
+                    scale: 0.9,
+                    duration: 0.8,
+                    ease: 'back.out'
+                });
+            }
+
+            handleLogin(username, password) {
+                if (!username || !password) {
+                    this.showError('Lütfen tüm alanları doldurunuz.');
+                    this.audioEngine.play('error');
+                    return;
+                }
+
+                // Store Credentials
+                localStorage.setItem('userIdentifier', username);
+                localStorage.setItem('userPassword', password);
+                localStorage.setItem('userType', 'OPERATIVE');
+                localStorage.setItem('loginTime', new Date().getTime().toString());
+
+                // Play Success Sound
+                this.audioEngine.play('access');
+
+                // Redirect to OS
+                setTimeout(() => {
+                    window.location.href = 'os.html';
+                }, 1000);
+            }
+
+            showError(message) {
+                const errorEl = document.getElementById('errorMessage');
+                errorEl.innerText = '⚠️ ' + message;
+                errorEl.classList.add('show');
+
+                setTimeout(() => {
+                    errorEl.classList.remove('show');
+                }, 3000);
+            }
+        }
+
+        // ========== APP STARTUP ==========
+        window.addEventListener('DOMContentLoaded', () => {
+            const app = new EnclaveApp();
+            app.init();
+        });
+    </script>
+</body>
+</html>

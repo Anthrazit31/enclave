@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ENCLAVE MILITARY OS - COMMAND CENTER</title>
+    
+    <!-- Core Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/TextPlugin.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: #0f0;
+            overflow: hidden;
+            line-height: 1.4;
+        }
+
+        /* ========== SCANLINES & EFFECTS ========== */
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 255, 0, 0.05) 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 999;
+            animation: scanline-scroll 8s linear infinite;
+        }
+
+        @keyframes scanline-scroll {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(10px); }
+        }
+
+        .glitch-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 998;
+            opacity: 0;
+        }
+
+        /* ========== GLASSMORPHIC CONTAINERS ========== */
+        .glass-panel {
+            background: rgba(0, 20, 0, 0.6);
+            border: 2px solid #0f0;
+            border-radius: 3px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 
+                0 0 20px rgba(0, 255, 0, 0.2),
+                inset 0 0 15px rgba(0, 255, 0, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #0f0, transparent);
+            opacity: 0.5;
+        }
+
+        /* ========== LAYOUT ==========  */
+        .os-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: grid;
+            grid-template-columns: 20% 1fr 20%;
+            grid-template-rows: 10% 1fr 10%;
+            gap: 10px;
+            padding: 10px;
+        }
+
+        .header {
+            grid-column: 1 / -1;
+            grid-row: 1;
+        }
+
+        .sidebar-left {
+            grid-column: 1;
+            grid-row: 2;
+            overflow-y: auto;
+        }
+
+        .main-content {
+            grid-column: 2;
+            grid-row: 2;
+            overflow-y: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sidebar-right {
+            grid-column: 3;
+            grid-row: 2;
+            overflow-y: auto;
+        }
+
+        .footer {
+            grid-column: 1 / -1;
+            grid-row: 3;
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 255, 0, 0.1);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #0f0;
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+
+        /* ========== HEADER ========== */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(0, 10, 0, 0.8);
+            border-bottom: 2px solid #0f0;
+            padding: 0 20px;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.2);
+        }
+
+        .header-title {
+            font-size: 20px;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px #0f0;
+            animation: pulse-text 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-text {
+            0%, 100% { text-shadow: 0 0 10px #0f0; }
+            50% { text-shadow: 0 0 20px #0f0, 0 0 30px #0f0; }
+        }
+
+        .system-clock {
+            font-size: 12px;
+            letter-spacing: 1px;
+            color: #0f0;
+        }
+
+        .system-status {
+            display: flex;
+            gap: 15px;
+            font-size: 11px;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            background: #0f0;
+            border-radius: 50%;
+            animation: blink 1.5s ease-in-out infinite;
+            box-shadow: 0 0 5px #0f0;
+        }
+
+        /* ========== MAIN PANELS ========== */
+        .panel-title {
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #0f0;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(0, 255, 0, 0.3);
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+
+        .panel-item {
+            padding: 12px;
+            margin: 8px 0;
+            background: rgba(0, 255, 0, 0.05);
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            border-radius: 2px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 12px;
+            letter-spacing: 1px;
+            position: relative;
+        }
+
+        .panel-item:hover {
+            background: rgba(0, 255, 0, 0.1);
+            border-color: #0f0;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+            transform: translateX(5px);
+        }
+
+        .panel-item::before {
+            content: '▶ ';
+            color: #0f0;
+            font-weight: bold;
+        }
+
+        /* ========== INTERACTIVE CARDS (3D) ========== */
+        .card-container {
+            perspective: 1200px;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .flip-card {
+            background-color: transparent;
+            width: 300px;
+            height: 400px;
+            perspective: 1000px;
+        }
+
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+
+        .flip-card:hover .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .flip-card-front,
+        .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .flip-card-front {
+            background: rgba(0, 20, 0, 0.8);
+            border: 2px solid #0f0;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+        }
+
+        .flip-card-back {
+            background: rgba(0, 40, 0, 0.9);
+            border: 2px solid #0f0;
+            transform: rotateY(180deg);
+            overflow-y: auto;
+            font-size: 12px;
+            text-align: left;
+            line-height: 1.6;
+        }
+
+        .card-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 2px solid #0f0;
+            margin-bottom: 15px;
+            background: radial-gradient(circle at 30% 30%, rgba(0, 255, 0, 0.3), transparent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+        }
+
+        .card-name {
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px #0f0;
+        }
+
+        .card-title {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-bottom: 15px;
+        }
+
+        .card-content {
+            font-size: 11px;
+            line-height: 1.8;
+            color: rgba(0, 255, 0, 0.9);
+        }
+
+        /* ========== FOOTER (SYSTEM INFO) ========== */
+        .footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(0, 10, 0, 0.8);
+            border-top: 2px solid #0f0;
+            padding: 0 20px;
+            font-size: 11px;
+            letter-spacing: 1px;
+        }
+
+        .footer-left,
+        .footer-right {
+            display: flex;
+            gap: 20px;
+        }
+
+        .footer-item {
+            color: rgba(0, 255, 0, 0.8);
+        }
+
+        .footer-value {
+            color: #0f0;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+
+        /* ========== BUTTONS ========== */
+        .btn {
+            padding: 10px 20px;
+            background: rgba(0, 255, 0, 0.1);
+            border: 2px solid #0f0;
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 2px;
+            margin: 5px;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+        }
+
+        .btn:hover {
+            background: rgba(0, 255, 0, 0.2);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-danger {
+            border-color: #ff0000;
+            color: #ff0000;
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.2);
+        }
+
+        .btn-danger:hover {
+            background: rgba(255, 0, 0, 0.1);
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+        }
+
+        /* ========== MODAL ========== */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        /* ========== GLITCH EFFECT (System Shutdown) ========== */
+        .shutdown-sequence {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .shutdown-sequence.active {
+            display: flex;
+        }
+
+        .glitch-text {
+            font-size: 48px;
+            font-weight: bold;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #ff0000;
+            text-shadow: 0 0 20px #ff0000;
+            animation: glitch-animation 0.3s infinite;
+        }
+
+        @keyframes glitch-animation {
+            0% {
+                text-shadow: 
+                    3px 0 0 #ff0000,
+                    -3px 0 0 #00ff00,
+                    0 0 20px #ff0000;
+            }
+            20% {
+                text-shadow: 
+                    -3px 0 0 #ff0000,
+                    3px 0 0 #00ff00,
+                    0 0 20px #ff0000;
+            }
+            40% {
+                text-shadow: 
+                    3px 3px 0 #ff0000,
+                    -3px -3px 0 #00ff00,
+                    0 0 20px #ff0000;
+            }
+            60% {
+                text-shadow: 
+                    -3px 3px 0 #ff0000,
+                    3px -3px 0 #00ff00,
+                    0 0 20px #ff0000;
+            }
+            80% {
+                text-shadow: 
+                    3px 0 0 #ff0000,
+                    -3px 0 0 #00ff00,
+                    0 0 20px #ff0000;
+            }
+            100% {
+                text-shadow: 
+                    -3px 0 0 #ff0000,
+                    3px 0 0 #00ff00,
+                    0 0 20px #ff0000;
+            }
+        }
+
+        .crt-off {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #000 0%, #fff 50%, #000 100%);
+            display: none;
+            z-index: 2001;
+            animation: crt-turnoff 2s ease-in forwards;
+        }
+
+        @keyframes crt-turnoff {
+            0% {
+                clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+            }
+            50% {
+                clip-path: polygon(0% 45%, 100% 55%, 100% 55%, 0% 45%);
+                opacity: 1;
+            }
+            100% {
+                clip-path: polygon(0% 50%, 100% 50%, 100% 50%, 0% 50%);
+                opacity: 1;
+            }
+        }
+
+        /* ========== ANIMATIONS ========== */
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* Slideshow Container */
+        .slideshow-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .slide {
+            display: none;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+        }
+
+        .slide.active {
+            display: flex;
+            opacity: 1;
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Scanlines -->
+    <div class="scanlines"></div>
+
+    <!-- Glitch Overlay -->
+    <div class="glitch-overlay" id="glitchOverlay"></div>
+
+    <!-- Main OS Container -->
+    <div class="os-container">
+        <!-- HEADER -->
+        <div class="header glass-panel">
+            <div>
+                <div class="header-title">⚙ ENCLAVE COMMAND SYSTEM v3.14.159</div>
+            </div>
+            <div style="display: flex; gap: 30px; align-items: center;">
+                <div class="system-status">
+                    <div class="status-item">
+                        <span class="status-indicator"></span>
+                        <span>SISTEM OPERATIF</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-indicator"></span>
+                        <span>BAĞLANTI KURULU</span>
+                    </div>
+                </div>
+                <div class="system-clock" id="systemClock">00:00:00</div>
+            </div>
+        </div>
+
+        <!-- LEFT SIDEBAR - MENU -->
+        <div class="sidebar-left glass-panel">
+            <div class="panel-title">► MENU</div>
+            <div class="panel-item" data-action="personnel">📊 Personel Veritabanı</div>
+            <div class="panel-item" data-action="directives">📋 Gizli Emirler</div>
+            <div class="panel-item" data-action="terminal">🖥️ Terminal Erişimi</div>
+            <div class="panel-item" data-action="systems">⚡ Sistem Kontrol</div>
+            <div class="panel-item" data-action="logout" style="margin-top: 20px; border-color: #ff0000; color: #ff0000;">🚪 Çıkış Yap</div>
+        </div>
+
+        <!-- MAIN CONTENT -->
+        <div class="main-content glass-panel">
+            <div class="slideshow-container">
+                <!-- Welcome Screen -->
+                <div class="slide active" id="welcomeSlide">
+                    <div style="text-align: center;">
+                        <div style="font-size: 32px; margin-bottom: 20px; text-shadow: 0 0 20px #0f0;">
+                            🦅 ENCLAVE
+                        </div>
+                        <div style="font-size: 14px; letter-spacing: 2px; margin-bottom: 30px;">
+                            PHOENIX INDUSTRIES COMMAND CENTER
+                        </div>
+                        <div style="font-size: 12px; opacity: 0.8; margin-bottom: 40px; max-width: 400px;">
+                            Hoşgeldiniz, <span id="userGreeting" style="color: #0f0; font-weight: bold;">Operative</span>
+                        </div>
+                        <div style="font-size: 11px; opacity: 0.7;">
+                            Soldaki menüden bir seçim yapın...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Personnel Cards -->
+                <div class="slide" id="personnelSlide" style="flex-wrap: wrap; justify-content: center; gap: 20px; overflow-y: auto;">
+                </div>
+
+                <!-- Directives Panel -->
+                <div class="slide" id="directivesSlide">
+                </div>
+
+                <!-- Systems Control -->
+                <div class="slide" id="systemsSlide" style="flex-direction: column; align-items: center; justify-content: center; gap: 20px;">
+                    <button class="btn" id="shutdownBtn" style="margin-top: 20px;">🔴 SİSTEM KAPATMA</button>
+                    <p style="font-size: 11px; margin-top: 30px; opacity: 0.7; text-align: center;">
+                        Sistem kapatılması geri alınamaz ve tüm bağlantıları sonlandıracaktır.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT SIDEBAR - STATUS -->
+        <div class="sidebar-right glass-panel">
+            <div class="panel-title">► DURUM</div>
+            <div style="font-size: 11px; line-height: 2;">
+                <div>🔐 GÜVENLIK: <span style="color: #0f0; font-weight: bold;">AKTIF</span></div>
+                <div>📡 BAĞLANTI: <span style="color: #0f0; font-weight: bold;">%100</span></div>
+                <div>💾 HAFIZA: <span style="color: #0f0; font-weight: bold;">64.2GB</span></div>
+                <div>🌐 İP ADRESİ: <span style="color: #0f0; font-weight: bold;">███.███.███.███</span></div>
+                <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(0, 255, 0, 0.3);">
+                    <div>ERIŞIM SEVİYESİ:</div>
+                    <div style="font-size: 13px; color: #0f0; font-weight: bold; margin-top: 5px;" id="accessLevel">TOP SECRET</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer glass-panel">
+            <div class="footer-left">
+                <div class="footer-item">GÜVENLİK SEVIYESI: <span class="footer-value">GIZLI</span></div>
+                <div class="footer-item">BAĞLANTI HALİ: <span class="footer-value" style="color: #0f0;">KURULUDUR</span></div>
+            </div>
+            <div class="footer-right">
+                <div class="footer-item">SİSTEM SÜRÜMÜ: <span class="footer-value">3.14.159</span></div>
+                <div class="footer-item">UPTIME: <span class="footer-value" id="systemUptime">00:00:00</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Directives -->
+    <div class="modal" id="directiveModal">
+        <div class="modal-content glass-panel" id="directiveContent">
+        </div>
+    </div>
+
+    <!-- Shutdown Sequence -->
+    <div class="shutdown-sequence" id="shutdownSequence">
+        <div class="glitch-text">KRITIK HATA</div>
+        <div style="font-size: 24px; color: #0f0; text-shadow: 0 0 15px #0f0;">SİSTEM KAPATILIYOR...</div>
+    </div>
+
+    <!-- CRT Off Effect -->
+    <div class="crt-off" id="crtOff"></div>
+
+    <!-- ========== CORE SCRIPT ========== -->
+    <script>
+        // Check Access
+        function checkAccess() {
+            const user = localStorage.getItem('userIdentifier');
+            const password = localStorage.getItem('userPassword');
+            
+            if (!user || !password) {
+                window.location.href = 'index-masterpiece.html';
+            }
+        }
+
+        // Initialize on Load
+        checkAccess();
+
+        // System Clock
+        setInterval(() => {
+            const now = new Date();
+            const time = now.toLocaleTimeString('tr-TR', { hour12: false });
+            document.getElementById('systemClock').innerText = time;
+        }, 1000);
+
+        // System Uptime
+        let startTime = Date.now();
+        setInterval(() => {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const hours = Math.floor(elapsed / 3600);
+            const minutes = Math.floor((elapsed % 3600) / 60);
+            const seconds = elapsed % 60;
+            const uptime = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            document.getElementById('systemUptime').innerText = uptime;
+        }, 1000);
+
+        // User Greeting
+        const username = localStorage.getItem('userIdentifier') || 'Operative';
+        document.getElementById('userGreeting').innerText = username.toUpperCase();
+
+        // ========== AUDIO ENGINE ==========
+        class AudioEngine {
+            constructor() {
+                this.sounds = {};
+            }
+
+            async loadSound(key, path) {
+                const audio = new Audio(path);
+                audio.volume = 0.5;
+                this.sounds[key] = audio;
+            }
+
+            async init() {
+                try {
+                    await this.loadSound('click', 'assets/audio/type.mp3');
+                    await this.loadSound('access', 'assets/audio/accessgranted.mp3');
+                    await this.loadSound('error', 'assets/audio/error.mp3');
+                } catch (e) {
+                    console.log('Audio initialization skipped');
+                }
+            }
+
+            play(key, volume = 1) {
+                if (this.sounds[key]) {
+                    this.sounds[key].volume = volume;
+                    this.sounds[key].currentTime = 0;
+                    this.sounds[key].play().catch(e => console.log('Audio play skipped'));
+                }
+            }
+
+            fadeOut(key, duration = 1) {
+                const audio = this.sounds[key];
+                if (!audio) return Promise.resolve();
+                
+                return new Promise((resolve) => {
+                    gsap.to(audio, {
+                        volume: 0,
+                        duration: duration,
+                        onComplete: () => {
+                            audio.pause();
+                            resolve();
+                        }
+                    });
+                });
+            }
+        }
+
+        const audioEngine = new AudioEngine();
+        audioEngine.init();
+
+        // ========== PERSONNEL DATA ==========
+        const personnelData = [
+            {
+                name: 'DR. SIMON',
+                role: 'BİYOLOJİK UZMAN',
+                emoji: '🧬',
+                profile: 'Biyoloji ve Genetik alanında doktora derecesine sahiptir. Enclave\'ın biyolojik deney programında başlıca yetkililerdendir. Psikolojik Profil: Sakin ve objektif, ancak bazen bilimsel hedefler için etik sınırlarını aşabilir.'
+            },
+            {
+                name: 'LT. RAMIREZ',
+                role: 'ASKERİ KOMUTAN',
+                emoji: '🎖️',
+                profile: 'Deneyimli askeri lider. Enclave operasyonlarının taktik yönetiminden sorumludur. Psikolojik Profil: Disiplinli, kararlı ve görevine bağlı. Yüksek stres altında iyi performans gösterir.'
+            }
+        ];
+
+        // ========== DIRECTIVES DATA ==========
+        const directivesData = [
+            {
+                title: 'OPERATIONAL DIRECTIVE - PHOENIX INDUSTRIES',
+                code: 'DOC-PHX-2024-077',
+                classification: 'TOP SECRET',
+                content: `
+                    DISTRIBUTION: Jürgen Schwartz - Operasyon Koordinatörü
+                    FROM: The Enclave Command Authority
+                    RE: Roxwood County Enclave Military Compound
+                    
+                    AUTHORIZED SUPPORT PROVISIONS:
+                    ✓ Helicopter Transport - Personel ve ekipman taşımacılığı
+                    ✓ Close Air Support - Taktik destek
+                    ✓ Medical Evacuation - Acil tıbbi nakiye
+                    ✓ Supply Drops - Gerektiğinde havadan ikmal
+                    
+                    EQUIPMENT PROVISIONED:
+                    ✓ Tactical Uniforms
+                    ✓ Protective Gear
+                    ✓ Communication Equipment
+                    ✓ Specialized Gear
+                    
+                    AUTHORIZED SUPPORT DURATION: Derhal - Görev tamamlanana kadar
+                    REVIEW DATE: 30 gün sonra
+                    
+                    Authorization Code: PHX-ENC-ALPHA-7799
+                `
+            }
+        ];
+
+        // ========== MAIN APP CONTROLLER ==========
+        class EnclaveOS {
+            constructor() {
+                this.currentSlide = 'welcome';
+            }
+
+            init() {
+                this.setupMenuItems();
+                this.setupShutdownButton();
+                this.setupPersonnelSlide();
+                this.setupDirectivesSlide();
+            }
+
+            setupMenuItems() {
+                document.querySelectorAll('.panel-item[data-action]').forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        audioEngine.play('click', 0.3);
+                        const action = item.dataset.action;
+                        this.handleMenuAction(action);
+                    });
+                });
+            }
+
+            handleMenuAction(action) {
+                this.hideAllSlides();
+
+                switch(action) {
+                    case 'personnel':
+                        this.showSlide('personnel');
+                        break;
+                    case 'directives':
+                        this.showSlide('directives');
+                        break;
+                    case 'terminal':
+                        window.location.href = 'terminal.html';
+                        break;
+                    case 'systems':
+                        this.showSlide('systems');
+                        break;
+                    case 'logout':
+                        this.logout();
+                        break;
+                }
+            }
+
+            hideAllSlides() {
+                document.querySelectorAll('.slide').forEach(slide => {
+                    slide.classList.remove('active');
+                });
+            }
+
+            showSlide(name) {
+                const slide = document.getElementById(name + 'Slide');
+                if (slide) {
+                    gsap.from(slide, {
+                        opacity: 0,
+                        duration: 0.5,
+                        onStart: () => {
+                            slide.classList.add('active');
+                        }
+                    });
+                }
+            }
+
+            setupPersonnelSlide() {
+                const slide = document.getElementById('personnelSlide');
+                personnelData.forEach(person => {
+                    const card = document.createElement('div');
+                    card.className = 'flip-card';
+                    card.innerHTML = `
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front">
+                                <div class="card-avatar">${person.emoji}</div>
+                                <div class="card-name">${person.name}</div>
+                                <div class="card-title">${person.role}</div>
+                                <div style="font-size: 11px; margin-top: 15px; opacity: 0.7;">Tıkla - Detayları Gör</div>
+                            </div>
+                            <div class="flip-card-back">
+                                <div class="card-content">${person.profile}</div>
+                            </div>
+                        </div>
+                    `;
+                    slide.appendChild(card);
+                });
+            }
+
+            setupDirectivesSlide() {
+                const slide = document.getElementById('directivesSlide');
+                directivesData.forEach((directive, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'panel-item';
+                    item.style.cursor = 'pointer';
+                    item.innerHTML = `📄 ${directive.title}`;
+                    item.addEventListener('click', () => {
+                        audioEngine.play('click', 0.3);
+                        this.showDirectiveModal(directive);
+                    });
+                    slide.appendChild(item);
+                });
+            }
+
+            showDirectiveModal(directive) {
+                const modal = document.getElementById('directiveModal');
+                const content = document.getElementById('directiveContent');
+                
+                content.innerHTML = `
+                    <div class="panel-title">${directive.title}</div>
+                    <div style="font-size: 11px; line-height: 1.8; color: rgba(0, 255, 0, 0.9);">
+                        <div style="margin-bottom: 15px;">
+                            <strong>Sınıflandırma:</strong> ${directive.classification}
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <strong>Kod:</strong> ${directive.code}
+                        </div>
+                        <div style="border-top: 1px solid rgba(0, 255, 0, 0.3); padding-top: 15px;">
+                            ${directive.content}
+                        </div>
+                        <button class="btn" style="margin-top: 20px; width: 100%;" onclick="document.getElementById('directiveModal').classList.remove('active');">
+                            Kapat
+                        </button>
+                    </div>
+                `;
+
+                modal.classList.add('active');
+                audioEngine.play('access', 0.3);
+            }
+
+            setupShutdownButton() {
+                const btn = document.getElementById('shutdownBtn');
+                btn.addEventListener('click', () => {
+                    if (confirm('UYARI: SİSTEM KAPATMA GERİ ALINAMAZ!\n\nDevam etmek istiyor musunuz?')) {
+                        this.systemShutdown();
+                    }
+                });
+            }
+
+            async systemShutdown() {
+                const shutdown = document.getElementById('shutdownSequence');
+                const crtOff = document.getElementById('crtOff');
+
+                // Show Shutdown Sequence
+                shutdown.classList.add('active');
+                audioEngine.play('error');
+
+                // Fade Out Background Music (if playing)
+                await audioEngine.fadeOut('background', 2);
+
+                // Wait for glitch animation
+                await new Promise(resolve => setTimeout(resolve, 3000));
+
+                // CRT Turn Off Effect
+                crtOff.style.display = 'block';
+
+                // Redirect after CRT effect
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                window.location.href = 'index-masterpiece.html';
+            }
+
+            logout() {
+                localStorage.clear();
+                window.location.href = 'index-masterpiece.html';
+            }
+        }
+
+        // Initialize App
+        const app = new EnclaveOS();
+        app.init();
+
+        // Add Glitch Effect on Hover
+        document.querySelectorAll('.panel-item[data-action]').forEach(item => {
+            item.addEventListener('mouseenter', () => {
+                audioEngine.play('click', 0.1);
+            });
+        });
+    </script>
+</body>
+</html>
