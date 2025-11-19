@@ -794,7 +794,7 @@
 
                 // Redirect to OS
                 setTimeout(() => {
-                    window.location.href = 'os.html';
+                    window.location.href = 'os-masterpiece.html';
                 }, 1000);
             }
 
@@ -810,10 +810,15 @@
         }
 
         // ========== APP STARTUP ==========
-        window.addEventListener('DOMContentLoaded', () => {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                const app = new EnclaveApp();
+                app.init();
+            });
+        } else {
             const app = new EnclaveApp();
             app.init();
-        });
+        }
     </script>
 </body>
 </html>

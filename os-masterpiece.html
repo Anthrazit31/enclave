@@ -665,14 +665,28 @@
         function checkAccess() {
             const user = localStorage.getItem('userIdentifier');
             const password = localStorage.getItem('userPassword');
+            const loginTime = localStorage.getItem('loginTime');
             
             if (!user || !password) {
                 window.location.href = 'index-masterpiece.html';
+                return false;
             }
+            
+            // Check Session Timeout (30 minutes)
+            const SESSION_TIMEOUT = 30 * 60 * 1000;
+            if (loginTime && (Date.now() - parseInt(loginTime)) > SESSION_TIMEOUT) {
+                localStorage.clear();
+                alert('Oturum süresi doldu. Lütfen tekrar giriş yapınız.');
+                window.location.href = 'index-masterpiece.html';
+                return false;
+            }
+            return true;
         }
 
         // Initialize on Load
-        checkAccess();
+        if (!checkAccess()) {
+            throw new Error('Access Denied');
+        }
 
         // System Clock
         setInterval(() => {
@@ -827,7 +841,7 @@
                         this.showSlide('directives');
                         break;
                     case 'terminal':
-                        window.location.href = 'terminal.html';
+                        window.location.href = 'terminal-masterpiece.html';
                         break;
                     case 'systems':
                         this.showSlide('systems');
@@ -932,28 +946,46 @@
             async systemShutdown() {
                 const shutdown = document.getElementById('shutdownSequence');
                 const crtOff = document.getElementById('crtOff');
+                const osContainer = document.querySelector('.os-container');
 
-                // Show Shutdown Sequence
-                shutdown.classList.add('active');
-                audioEngine.play('error');
+                try {
+                    // Hide OS Container
+                    gsap.to(osContainer, { opacity: 0, duration: 0.5 });
+                    
+                    // Show Shutdown Sequence
+                    shutdown.classList.add('active');
+                    audioEngine.play('error');
 
-                // Fade Out Background Music (if playing)
-                await audioEngine.fadeOut('background', 2);
+                    // Fade Out Background Music (if playing)
+                    await audioEngine.fadeOut('background', 2);
 
-                // Wait for glitch animation
-                await new Promise(resolve => setTimeout(resolve, 3000));
+                    // Wait for glitch animation
+                    await new Promise(resolve => setTimeout(resolve, 3000));
 
-                // CRT Turn Off Effect
-                crtOff.style.display = 'block';
+                    // CRT Turn Off Effect
+                    crtOff.style.display = 'block';
 
-                // Redirect after CRT effect
-                await new Promise(resolve => setTimeout(resolve, 2000));
-                window.location.href = 'index-masterpiece.html';
+                    // Redirect after CRT effect
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    
+                    // Clear Session
+                    localStorage.clear();
+                    window.location.href = 'index-masterpiece.html';
+                } catch (error) {
+                    console.error('Shutdown error:', error);
+                    window.location.href = 'index-masterpiece.html';
+                }
             }
 
             logout() {
-                localStorage.clear();
-                window.location.href = 'index-masterpiece.html';
+                gsap.to(document.querySelector('.os-container'), {
+                    opacity: 0,
+                    duration: 0.5,
+                    onComplete: () => {
+                        localStorage.clear();
+                        window.location.href = 'index-masterpiece.html';
+                    }
+                });
             }
         }
 
