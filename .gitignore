@@ -1,0 +1,47 @@
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+
+# Environment variables
+.env
+.env.local
+.env.example
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build outputs
+dist/
+build/
+
+# Assets (local CSS/JS)
+assets/
+
+# Local development
+.htaccess
+manifest.json
+robots.txt
+sitemap.xml
+sw.js
+phoenix-industries-local/
+prisma/
+server/
+
+# Misc
+*.md
+!IMPORTANT.md
+start_servers.bat
+download_package.sh
