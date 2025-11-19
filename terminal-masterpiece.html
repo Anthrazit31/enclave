@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ENCLAVE MILITARY TERMINAL - COMMAND CENTER</title>
+    
+    <!-- Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/TextPlugin.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: #0f0;
+            overflow: hidden;
+            line-height: 1.4;
+        }
+
+        /* ========== SCANLINES ========== */
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 255, 0, 0.03) 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 999;
+            animation: scanline-scroll 8s linear infinite;
+        }
+
+        @keyframes scanline-scroll {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(10px); }
+        }
+
+        /* ========== CONTAINER ========== */
+        .terminal-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            gap: 10px;
+        }
+
+        /* ========== HEADER ========== */
+        .terminal-header {
+            background: rgba(0, 10, 0, 0.8);
+            border: 2px solid #0f0;
+            border-radius: 3px;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.2);
+            min-height: 60px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .header-title {
+            font-size: 18px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px #0f0;
+            animation: pulse-text 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-text {
+            0%, 100% { text-shadow: 0 0 10px #0f0; }
+            50% { text-shadow: 0 0 20px #0f0, 0 0 30px #0f0; }
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            background: rgba(0, 255, 0, 0.1);
+            border: 1px solid #0f0;
+            border-radius: 2px;
+            font-size: 11px;
+            letter-spacing: 1px;
+        }
+
+        .header-right {
+            display: flex;
+            gap: 15px;
+            font-size: 11px;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            background: #0f0;
+            border-radius: 50%;
+            animation: blink 1.5s ease-in-out infinite;
+            box-shadow: 0 0 5px #0f0;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* ========== MAIN CONTENT ========== */
+        .terminal-content {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            overflow: hidden;
+        }
+
+        .terminal-panel {
+            background: rgba(0, 20, 0, 0.6);
+            border: 2px solid #0f0;
+            border-radius: 3px;
+            padding: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .terminal-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #0f0, transparent);
+            opacity: 0.5;
+        }
+
+        .panel-title {
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(0, 255, 0, 0.3);
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+
+        /* ========== TERMINAL OUTPUT ========== */
+        .terminal-output {
+            flex: 2;
+            position: relative;
+        }
+
+        .output-content {
+            height: 100%;
+            overflow-y: auto;
+            font-size: 12px;
+            line-height: 1.8;
+            color: rgba(0, 255, 0, 0.9);
+        }
+
+        .output-line {
+            padding: 5px 0;
+            border-left: 2px solid transparent;
+            padding-left: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .output-line:hover {
+            border-left-color: #0f0;
+            background: rgba(0, 255, 0, 0.05);
+        }
+
+        .output-line.error {
+            color: #ff0000;
+            text-shadow: 0 0 5px #ff0000;
+        }
+
+        .output-line.success {
+            color: #00ff00;
+            text-shadow: 0 0 5px #00ff00;
+        }
+
+        .output-line.warning {
+            color: #ffff00;
+            text-shadow: 0 0 5px #ffff00;
+        }
+
+        /* ========== COMMAND PANEL ========== */
+        .command-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .command-list {
+            list-style: none;
+        }
+
+        .command-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: rgba(0, 255, 0, 0.05);
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            border-radius: 2px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 11px;
+            letter-spacing: 1px;
+        }
+
+        .command-item:hover {
+            background: rgba(0, 255, 0, 0.1);
+            border-color: #0f0;
+            transform: translateX(5px);
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+        }
+
+        .command-item::before {
+            content: '▶ ';
+            color: #0f0;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        /* ========== SYSTEM INFO ========== */
+        .system-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 11px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px;
+            border-bottom: 1px dashed rgba(0, 255, 0, 0.2);
+        }
+
+        .info-label {
+            opacity: 0.8;
+        }
+
+        .info-value {
+            font-weight: bold;
+            color: #0f0;
+            text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+        }
+
+        /* ========== FOOTER ========== */
+        .terminal-footer {
+            background: rgba(0, 10, 0, 0.8);
+            border-top: 2px solid #0f0;
+            border-radius: 3px;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            letter-spacing: 1px;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.2);
+            min-height: 50px;
+        }
+
+        .footer-left,
+        .footer-right {
+            display: flex;
+            gap: 20px;
+        }
+
+        .footer-item {
+            color: rgba(0, 255, 0, 0.8);
+        }
+
+        .footer-value {
+            color: #0f0;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+
+        /* ========== BUTTONS ========== */
+        .btn {
+            padding: 8px 15px;
+            background: rgba(0, 255, 0, 0.1);
+            border: 2px solid #0f0;
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 2px;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+            margin: 5px 0;
+        }
+
+        .btn:hover {
+            background: rgba(0, 255, 0, 0.2);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            border-color: #ff0000;
+            color: #ff0000;
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.2);
+        }
+
+        .btn-danger:hover {
+            background: rgba(255, 0, 0, 0.1);
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+        }
+
+        /* ========== SCROLLBAR ========== */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 255, 0, 0.1);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #0f0;
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Scanlines -->
+    <div class="scanlines"></div>
+
+    <!-- Terminal Container -->
+    <div class="terminal-container">
+        
+        <!-- HEADER -->
+        <div class="terminal-header">
+            <div class="header-left">
+                <div class="header-title">🖥️ ENCLAVE MILITARY TERMINAL</div>
+                <div class="status-badge">
+                    <span class="status-indicator"></span>
+                    CONNECTED
+                </div>
+            </div>
+            <div class="header-right">
+                <div><span class="status-indicator"></span>NETWORK ACTIVE</div>
+                <div id="systemTime">00:00:00</div>
+            </div>
+        </div>
+
+        <!-- MAIN CONTENT -->
+        <div class="terminal-content">
+            
+            <!-- LEFT: TERMINAL OUTPUT -->
+            <div class="terminal-panel" style="grid-column: 1; grid-row: 1 / 3;">
+                <div class="panel-title">► SYSTEM OUTPUT</div>
+                <div class="output-content" id="terminalOutput">
+                    <div class="output-line">ENCLAVE MILITARY TERMINAL v3.14.159</div>
+                    <div class="output-line">═══════════════════════════════════════</div>
+                    <div class="output-line"></div>
+                    <div class="output-line">SYSTEM STATUS: <span class="success">OPERATIONAL</span></div>
+                    <div class="output-line">SECURITY LEVEL: <span style="color: #ffff00;">CLASSIFIED</span></div>
+                    <div class="output-line">CONNECTION: <span class="success">SECURE</span></div>
+                    <div class="output-line"></div>
+                    <div class="output-line">Waiting for command input...</div>
+                </div>
+            </div>
+
+            <!-- RIGHT TOP: COMMANDS -->
+            <div class="terminal-panel">
+                <div class="panel-title">► AVAILABLE COMMANDS</div>
+                <ul class="command-list" id="commandList">
+                    <li class="command-item" data-cmd="status">SYSTEM STATUS</li>
+                    <li class="command-item" data-cmd="personnel">PERSONNEL DATABASE</li>
+                    <li class="command-item" data-cmd="resources">RESOURCE ALLOCATION</li>
+                    <li class="command-item" data-cmd="logs">SYSTEM LOGS</li>
+                    <li class="command-item" data-cmd="diagnostics">RUN DIAGNOSTICS</li>
+                    <li class="command-item" data-cmd="broadcast">BROADCAST MESSAGE</li>
+                </ul>
+            </div>
+
+            <!-- RIGHT BOTTOM: SYSTEM INFO -->
+            <div class="terminal-panel">
+                <div class="panel-title">► SYSTEM INFORMATION</div>
+                <div class="system-info">
+                    <div class="info-row">
+                        <span class="info-label">UPTIME:</span>
+                        <span class="info-value" id="systemUptime">00:00:00</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">CPU USAGE:</span>
+                        <span class="info-value">42.3%</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">MEMORY:</span>
+                        <span class="info-value">12.4GB / 16GB</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">NETWORK:</span>
+                        <span class="info-value">↑ 2.5MB/s</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">SECURITY:</span>
+                        <span class="info-value" style="color: #00ff00;">ACTIVE</span>
+                    </div>
+                </div>
+                <button class="btn" id="backBtn" style="margin-top: 20px;">← BACK TO OS</button>
+            </div>
+
+        </div>
+
+        <!-- FOOTER -->
+        <div class="terminal-footer">
+            <div class="footer-left">
+                <div class="footer-item">USER: <span class="footer-value" id="currentUser">OPERATIVE</span></div>
+                <div class="footer-item">SESSION: <span class="footer-value" id="sessionId">█████████</span></div>
+            </div>
+            <div class="footer-right">
+                <div class="footer-item">PROTOCOL: <span class="footer-value">SECURE</span></div>
+                <div class="footer-item">VERSION: <span class="footer-value">3.14.159</span></div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ========== CORE SCRIPT ========== -->
+    <script>
+        // Access Control
+        function checkAccess() {
+            const user = localStorage.getItem('userIdentifier');
+            const password = localStorage.getItem('userPassword');
+            const loginTime = localStorage.getItem('loginTime');
+            
+            if (!user || !password) {
+                window.location.href = 'index-masterpiece.html';
+                return false;
+            }
+            
+            // Check Session Timeout (30 minutes)
+            const SESSION_TIMEOUT = 30 * 60 * 1000;
+            if (loginTime && (Date.now() - parseInt(loginTime)) > SESSION_TIMEOUT) {
+                localStorage.clear();
+                alert('Oturum süresi doldu. Lütfen tekrar giriş yapınız.');
+                window.location.href = 'index-masterpiece.html';
+                return false;
+            }
+            return true;
+        }
+
+        if (!checkAccess()) {
+            throw new Error('Access Denied');
+        }
+
+        // ========== AUDIO ENGINE ==========
+        class AudioEngine {
+            constructor() {
+                this.sounds = {};
+            }
+
+            async loadSound(key, path) {
+                const audio = new Audio(path);
+                audio.volume = 0.5;
+                this.sounds[key] = audio;
+            }
+
+            async init() {
+                try {
+                    await this.loadSound('click', 'assets/audio/type.mp3');
+                    await this.loadSound('access', 'assets/audio/accessgranted.mp3');
+                } catch (e) {
+                    console.log('Audio initialization skipped');
+                }
+            }
+
+            play(key, volume = 1) {
+                if (this.sounds[key]) {
+                    this.sounds[key].volume = volume;
+                    this.sounds[key].currentTime = 0;
+                    this.sounds[key].play().catch(e => console.log('Audio play skipped'));
+                }
+            }
+        }
+
+        const audioEngine = new AudioEngine();
+        audioEngine.init();
+
+        // ========== TERMINAL APP ==========
+        class MilitaryTerminal {
+            constructor() {
+                this.startTime = Date.now();
+                this.isProcessing = false;
+            }
+
+            init() {
+                this.setupUI();
+                this.setupEventListeners();
+                this.setupSystemClock();
+            }
+
+            setupUI() {
+                // Set current user
+                const username = localStorage.getItem('userIdentifier') || 'OPERATIVE';
+                document.getElementById('currentUser').innerText = username.toUpperCase();
+                
+                // Generate session ID
+                const sessionId = Math.random().toString(36).substring(2, 11).toUpperCase();
+                document.getElementById('sessionId').innerText = sessionId;
+            }
+
+            setupEventListeners() {
+                // Command items
+                document.querySelectorAll('.command-item').forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        audioEngine.play('click', 0.3);
+                        const cmd = item.dataset.cmd;
+                        this.executeCommand(cmd);
+                    });
+                });
+
+                // Back button
+                document.getElementById('backBtn').addEventListener('click', () => {
+                    audioEngine.play('click', 0.3);
+                    gsap.to(document.body, {
+                        opacity: 0,
+                        duration: 0.5,
+                        onComplete: () => {
+                            window.location.href = 'os-masterpiece.html';
+                        }
+                    });
+                });
+            }
+
+            setupSystemClock() {
+                // Update time
+                setInterval(() => {
+                    const now = new Date();
+                    const time = now.toLocaleTimeString('tr-TR', { hour12: false });
+                    document.getElementById('systemTime').innerText = time;
+                }, 1000);
+
+                // Update uptime
+                setInterval(() => {
+                    const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
+                    const hours = Math.floor(elapsed / 3600);
+                    const minutes = Math.floor((elapsed % 3600) / 60);
+                    const seconds = elapsed % 60;
+                    const uptime = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                    document.getElementById('systemUptime').innerText = uptime;
+                }, 1000);
+            }
+
+            executeCommand(cmd) {
+                if (this.isProcessing) return;
+                this.isProcessing = true;
+
+                const output = document.getElementById('terminalOutput');
+                const now = new Date().toLocaleTimeString('tr-TR', { hour12: false });
+
+                // Add command to output
+                const cmdLine = document.createElement('div');
+                cmdLine.className = 'output-line';
+                cmdLine.textContent = `[${now}] $ ${cmd.toUpperCase()}`;
+                output.appendChild(cmdLine);
+
+                // Simulate processing
+                setTimeout(() => {
+                    let result = '';
+                    switch(cmd) {
+                        case 'status':
+                            result = `✓ SYSTEM STATUS: ALL SYSTEMS OPERATIONAL\n✓ UPTIME: 14h 32m 15s\n✓ MEMORY: OK\n✓ NETWORK: OK`;
+                            break;
+                        case 'personnel':
+                            result = `✓ PERSONNEL DATABASE ACCESS\n  - DR. SIMON: VERIFIED\n  - LT. RAMIREZ: VERIFIED\n  - OPERATIVES: 24 ACTIVE`;
+                            break;
+                        case 'resources':
+                            result = `✓ RESOURCE ALLOCATION\n  - WEAPONS: SECURED\n  - SUPPLIES: 87%\n  - PERSONNEL: 100%\n  - ENERGY: 94%`;
+                            break;
+                        case 'logs':
+                            result = `✓ SYSTEM LOGS (Last 5 entries):\n  [12:45] System initialized\n  [12:46] Security scan complete\n  [12:47] Personnel database synced\n  [12:48] Network connection established\n  [12:49] Terminal access granted`;
+                            break;
+                        case 'diagnostics':
+                            result = `✓ RUNNING DIAGNOSTICS...\n  Hardware: OK\n  Memory: OK\n  CPU: OK\n  Network: OK\n  Storage: OK\n  DIAGNOSTICS COMPLETE - NO ERRORS`;
+                            break;
+                        case 'broadcast':
+                            result = `✓ BROADCAST MESSAGE SENT\n  Recipients: 47\n  Delivery: CONFIRMED\n  Status: ALL UNITS RECEIVED`;
+                            break;
+                        default:
+                            result = `✗ COMMAND NOT FOUND: ${cmd}`;
+                    }
+
+                    // Add result
+                    result.split('\n').forEach(line => {
+                        const resultLine = document.createElement('div');
+                        resultLine.className = 'output-line success';
+                        resultLine.textContent = line;
+                        output.appendChild(resultLine);
+                    });
+
+                    // Scroll to bottom
+                    output.scrollTop = output.scrollHeight;
+                    this.isProcessing = false;
+                }, 500);
+            }
+        }
+
+        // Initialize Terminal
+        const terminal = new MilitaryTerminal();
+        terminal.init();
+
+        // Add hover sound to commands
+        document.querySelectorAll('.command-item').forEach(item => {
+            item.addEventListener('mouseenter', () => {
+                audioEngine.play('click', 0.1);
+            });
+        });
+
+    </script>
+</body>
+</html>
