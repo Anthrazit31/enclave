@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -24,7 +23,7 @@
       --accent: #00cc00;
       --error: #ff3333;
       --bg: #000;
-      --text: #00ff00;
+      --text: #FFFFFF; /* Okunabilirlik için ana metin rengini beyaz yaptım */
       --transition: all 0.3s ease;
     }
     
@@ -43,16 +42,6 @@
       position: relative;
     }
 
-    /* Three.js Canvas */
-    #bg-canvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: -1;
-    }
-    
     /* CRT Effect - Optimized */
     .crt-effect::before {
       content: "";
@@ -126,14 +115,35 @@
     .login-container {
       position: fixed;
       top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+      right: 10vw; /* Sağa yasladım */
+      transform: translateY(-50%); /* Sadece dikeyde ortaladım */
       width: 90%;
       max-width: 400px;
-      z-index: 999;
+      z-index: 1; /* Arka plan logosu için z-index ayarı */
       opacity: 0;
       visibility: hidden;
       transition: var(--transition);
+      padding: 40px; /* İçerik için boşluk */
+      background: rgba(0, 10, 0, 0.5); /* Hafif bir arka plan rengi */
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(5px); /* Arka planı hafifçe bulanıklaştır */
+    }
+
+    /* Login panelinin arkasına opak kartal logosunu ekliyoruz */
+    .login-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('asset/img/kartal.png');
+      background-size: 80%;
+      background-position: center;
+      background-repeat: no-repeat;
+      opacity: 0.5; /* Opaklığı düşürdüm */
+      filter: blur(2px); /* Hafifçe bulanıklaştırdım */
+      z-index: -1;
     }
     
     .login-container.active {
@@ -162,7 +172,7 @@
     input, button {
       width: 100%;
       padding: 12px 15px;
-      border: 1px solid var(--primary);
+      border: 1px solid var(--text);
       background: transparent;
       color: var(--primary);
       font-family: inherit;
@@ -173,7 +183,7 @@
     
     input:focus {
       border-color: var(--accent);
-      box-shadow: 0 0 10px var(--primary);
+      box-shadow: 0 0 10px var(--text);
     }
     
     button {
@@ -185,7 +195,7 @@
     
     button:hover {
       background: var(--secondary);
-      box-shadow: 0 0 15px var(--primary);
+      box-shadow: 0 0 15px var(--text);
     }
     
     button::after {
@@ -238,44 +248,96 @@
     /* Focus indicators */
     button:focus-visible,
     input:focus-visible {
-      outline: 2px solid var(--accent);
+      outline: 2px solid var(--text);
       outline-offset: 2px;
     }
+
+    /* Pixel Map Background */
+    .map-container {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: grid;
+      grid-template-columns: repeat(55, 1fr);
+      grid-template-rows: repeat(35, 1fr);
+      z-index: -1;
+      font-size: 12px; /* Hücre boyutunu belirler */
+    }
+
+    .cell {
+      width: 1em;
+      height: 1em;
+    }
+
+    .cell.dot {
+      background-color: #222;
+      font-size: 0.5em;
+      border-radius: 50%;
+      margin: auto; /* Hücre içinde ortalamak için */
+    }
+
+    /* North America */
+    .cell.na { animation: north-america 4s linear infinite; }
+    @keyframes north-america { 0% { background-color: #11f801; } 100% { background-color: #222; } }
+
+    /* South America */
+    .cell.sa { animation: south-america 3s linear infinite; }
+    @keyframes south-america { 0% { background-color: cyan; } 100% { background-color: #222; } }
+
+    /* Europe */
+    .cell.eu { animation: europe 3s linear infinite; }
+    @keyframes europe { 0% { background-color: #f80001; } 100% { background-color: #222; } }
+
+    /* Africa */
+    .cell.af { animation: africa 4s linear infinite; }
+    @keyframes africa { 0% { background-color: #eaf803; } 100% { background-color: #222; } }
+
+    /* Asia */
+    .cell.as { animation: asia 5s linear infinite; }
+    @keyframes asia { 0% { background-color: orange; } 100% { background-color: #222; } }
+
+    /* Australia */
+    .cell.au { animation: australia 2s linear infinite; }
+    @keyframes australia { 0% { background-color: #9503c4; } 100% { background-color: #222; } }
+
   </style>
   <!-- GSAP & Three.js CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrambleTextPlugin.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/plugins/ScrambleTextPlugin.min.js"></script>
 </head>
 <body class="crt-effect">
-  <!-- Three.js Canvas -->
-  <canvas id="bg-canvas"></canvas>
+  <!-- Pixel Map Background Container -->
+  <div class="map-container" id="mapContainer"></div>
 
   <!-- Audio elements -->
   <audio id="bgMusic" loop preload="none">
-    <source src="assets/sounds/backgroundmusic.mp3" type="audio/mpeg">
+    <source src="sounds/backgroundmusic.mp3" type="audio/mpeg">
   </audio>
   
   <audio id="accessGrantedSound" preload="none">
-    <source src="assets/sounds/accessgranted.mp3" type="audio/mpeg">
+    <source src="sounds/accessgranted.mp3" type="audio/mpeg">
   </audio>
   <audio id="accessDeniedSound" preload="none">
-    <source src="assets/sounds/accessdenied.mp3" type="audio/mpeg">
+    <source src="sounds/accessdenied.mp3" type="audio/mpeg">
   </audio>
   <audio id="hoverSound" preload="none">
-    <source src="assets/sounds/pda.mp3" type="audio/mpeg">
+    <source src="sounds/pda.mp3" type="audio/mpeg">
   </audio>
   <audio id="clickSound" preload="none">
-    <source src="assets/sounds/open.mp3" type="audio/mpeg">
+    <source src="sounds/open.mp3" type="audio/mpeg">
+  </audio>
+  <audio id="clickCloseSound" preload="none">
+    <source src="sounds/close.mp3" type="audio/mpeg">
   </audio>
   <audio id="shutdownSound" preload="none">
-    <source src="assets/sounds/shutdown.mp3" type="audio/mpeg">
+    <source src="sounds/shutdown.mp3" type="audio/mpeg">
   </audio>
 
   <!-- Loading Screen -->
   <div class="loading-screen" id="loadingScreen">
     <div class="logo-container">
-      <img src="assets/img/Kartal_ve_Yıldız_Arması.png" alt="Enclave Logo" id="enclave-logo">
+      <img src="asset/img/kartal.png" alt="Enclave Logo" id="enclave-logo">
       <div id="loading-text">INITIALIZING OS...</div>
     </div>
   </div>
@@ -306,6 +368,11 @@
   </div>
 
   <script>
+    // Eklentiyi, sınıf tanımlanmadan önce en başta kaydederek "undefined" hatasını önleyelim.
+    if (typeof ScrambleTextPlugin !== 'undefined') {
+      gsap.registerPlugin(ScrambleTextPlugin);
+    }
+
     class EnclaveOS {
       constructor() {
         // DOM Elements
@@ -322,6 +389,7 @@
           loadingText: document.getElementById('loading-text'),
           loginTitle: document.querySelector('.login-title'),
           body: document.body,
+          mapContainer: document.getElementById('mapContainer'),
         };
 
         // Audio Engine
@@ -331,6 +399,7 @@
           denied: document.getElementById('accessDeniedSound'),
           hover: document.getElementById('hoverSound'),
           click: document.getElementById('clickSound'),
+          clickClose: document.getElementById('clickCloseSound'),
           shutdown: document.getElementById('shutdownSound'),
         };
 
@@ -339,20 +408,13 @@
           shutdown: null,
         };
 
-        // Three.js Scene
-        this.scene = null;
-        this.camera = null;
-        this.renderer = null;
-        this.globe = null;
-
-        gsap.registerPlugin(ScrambleTextPlugin);
         this.init();
       }
       
       init() {
         this.setupAudio();
-        this.setupThreeJS();
         this.setupEventListeners();
+        this.setupPixelMap();
         this.startLoadingSequence();
       }
       
@@ -362,6 +424,7 @@
         this.sounds.denied.volume = 0.6;
         this.sounds.hover.volume = 0.4;
         this.sounds.click.volume = 0.7;
+        this.sounds.clickClose.volume = 0.7;
         this.sounds.shutdown.volume = 0.8;
 
         const startMusic = () => {
@@ -373,46 +436,34 @@
         document.addEventListener('keydown', startMusic);
       }
 
-      setupThreeJS() {
-        this.scene = new THREE.Scene();
-        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        this.renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('bg-canvas'), alpha: true });
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
-        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-        const geometry = new THREE.SphereGeometry(1.5, 32, 32);
-        const material = new THREE.MeshBasicMaterial({
-            color: 0x00ff00,
-            wireframe: true,
-        });
-        this.globe = new THREE.Mesh(geometry, material);
-        this.scene.add(this.globe);
-
-        this.camera.position.z = 3;
-
-        const animate = () => {
-            requestAnimationFrame(animate);
-            this.globe.rotation.y += 0.0005;
-            this.renderer.render(this.scene, this.camera);
+      setupPixelMap() {
+        const continents = {
+          na: [19, 20, 21, 73, 74, 75, 76, 77, 123, 124, 127, 128, 129, 130, 131, 132, 177, 178, 179, 181, 182, 183, 184, 185, 186, 187, 188, 228, 229, 230, 231, 232, 233, 234, 237, 238, 239, 240, 241, 242, 243, 283, 284, 285, 286, 287, 288, 289, 293, 294, 295, 296, 297, 332, 333, 334, 337, 339, 340, 341, 342, 343, 348, 349, 350, 351, 352, 387, 388, 389, 390, 391, 392, 393, 394, 395, 396, 397, 398, 399, 404, 405, 406, 407, 441, 442, 443, 444, 445, 446, 447, 448, 449, 450, 451, 452, 453, 454, 455, 459, 460, 497, 498, 499, 500, 501, 502, 503, 504, 505, 506, 507, 509, 510, 511, 514, 552, 553, 554, 555, 556, 557, 558, 559, 560, 561, 562, 564, 565, 566, 607, 610, 611, 612, 613, 614, 615, 619, 620, 621, 622, 666, 667, 668, 669, 670, 671, 672, 674, 675, 676, 722, 723, 724, 725, 726, 727, 728, 729, 730, 731, 778, 779, 780, 781, 782, 783, 784, 785, 786, 834, 835, 836, 837, 838, 839, 889, 890, 891, 892, 893, 894, 944, 945, 946, 947, 948, 949, 1000, 1001, 1002, 1005, 1056, 1057, 1112, 1113, 1114, 1169],
+          sa: [1225, 1226, 1227, 1228, 1229, 1281, 1282, 1283, 1284, 1285, 1335, 1336, 1337, 1338, 1339, 1340, 1341, 1342, 1390, 1391, 1392, 1393, 1394, 1395, 1396, 1397, 1446, 1447, 1448, 1449, 1450, 1451, 1502, 1503, 1504, 1505, 1506, 1557, 1558, 1559, 1560, 1612, 1613, 1614, 1666, 1667, 1668, 1721, 1722, 1776, 1777, 1831, 1832, 1887],
+          eu: [361, 362, 415, 416, 417, 469, 470, 471, 472, 523, 524, 525, 527, 582, 580, 579, 578, 632, 634, 636, 631, 311, 312, 251, 519, 520, 686, 687, 689, 688, 690, 691, 692, 637, 638, 583, 528, 473, 418, 474, 475, 365, 421, 476, 477, 531, 530, 529, 584, 585, 586, 639, 640, 641, 693, 694, 695, 696, 795, 796, 850, 851, 797, 742, 743, 744, 745, 746, 747, 748, 749, 750, 751, 805, 804, 803, 802, 801, 799, 798, 800, 854, 856, 857, 911],
+          af: [961, 962, 963, 965, 1020, 1021, 1019, 1018, 1017, 1016, 1015, 1069, 1070, 1071, 1072, 1073, 1074, 1075, 1076, 1077, 1124, 1125, 1126, 1127, 1128, 1129, 1130, 1131, 1132, 1133, 1179, 1180, 1181, 1182, 1183, 1184, 1185, 1186, 1187, 1188, 1189, 1235, 1236, 1237, 1238, 1239, 1240, 1241, 1242, 1243, 1244, 1293, 1294, 1295, 1296, 1297, 1298, 1348, 1349, 1350, 1351, 1352, 1404, 1405, 1406, 1407, 1459, 1460, 1461, 1462, 1514, 1515, 1516, 1518, 1573, 1569, 1570, 1571, 1624, 1625],
+          as: [154, 208, 209, 210, 262, 263, 264, 265, 314, 315, 316, 317, 318, 319, 320, 321, 322, 323, 325, 326, 369, 370, 371, 372, 373, 374, 375, 376, 377, 378, 379, 380, 381, 382, 423, 424, 425, 426, 427, 428, 429, 430, 431, 432, 433, 434, 435, 436, 437, 438, 439, 440, 478, 479, 480, 481, 482, 483, 484, 485, 486, 487, 488, 489, 490, 491, 492, 493, 494, 495, 532, 533, 534, 535, 536, 537, 538, 539, 540, 541, 542, 543, 544, 545, 546, 547, 548, 549, 550, 587, 588, 589, 590, 591, 592, 593, 594, 595, 596, 597, 598, 599, 600, 601, 603, 642, 643, 644, 645, 646, 647, 648, 649, 650, 651, 652, 653, 654, 657, 658, 697, 698, 699, 700, 701, 702, 703, 704, 705, 706, 707, 708, 709, 712, 752, 753, 754, 755, 756, 757, 758, 759, 760, 761, 762, 763, 764, 807, 808, 809, 810, 811, 812, 813, 814, 815, 816, 817, 818, 819, 821, 859, 860, 861, 862, 863, 864, 865, 866, 867, 868, 869, 870, 871, 872, 873, 876, 913, 914, 916, 917, 918, 919, 920, 921, 922, 923, 924, 925, 926, 928, 930, 967, 968, 969, 970, 972, 973, 974, 975, 976, 977, 978, 979, 980, 981, 982, 1022, 1023, 1024, 1025, 1026, 1027, 1029, 1030, 1031, 1034, 1035, 1036, 1037, 1079, 1080, 1081, 1085, 1089, 1090, 1135, 1144, 1145, 1200, 1202, 1203, 1255, 1256, 1257, 1311],
+          au: [1206, 1262, 1263, 1317, 1369, 1370, 1372, 1422, 1423, 1424, 1425, 1426, 1427, 1428, 1476, 1477, 1478, 1479, 1480, 1481, 1482, 1483, 1531, 1532, 1533, 1534, 1535, 1536, 1537, 1538, 1586, 1587, 1590, 1591, 1592, 1645, 1646, 1650, 1705],
         };
-        animate();
 
-        window.addEventListener('resize', () => {
-            this.camera.aspect = window.innerWidth / window.innerHeight;
-            this.camera.updateProjectionMatrix();
-            this.renderer.setSize(window.innerWidth, window.innerHeight);
-        });
+        const fragment = document.createDocumentFragment();
+        const totalCells = 55 * 35;
 
-        window.addEventListener('mousemove', (event) => {
-            const x = (event.clientX / window.innerWidth) * 2 - 1;
-            const y = -(event.clientY / window.innerHeight) * 2 + 1;
-            gsap.to(this.globe.rotation, {
-                y: this.globe.rotation.y + x * 0.1,
-                x: this.globe.rotation.x + y * 0.1,
-                duration: 1,
-                ease: 'power2.out'
-            });
-        });
+        for (let i = 1; i <= totalCells; i++) {
+            const cell = document.createElement('div');
+            cell.classList.add('cell');
+            
+            for (const continentKey in continents) {
+                if (continents[continentKey].includes(i)) {
+                    cell.classList.add('dot', continentKey);
+                    const delay = Math.random() * -4000; // Random delay
+                    cell.style.animationDelay = `${delay}ms`;
+                    break;
+                }
+            }
+            fragment.appendChild(cell);
+        }
+        this.elements.mapContainer.appendChild(fragment);
       }
       
       setupEventListeners() {
@@ -442,7 +493,7 @@
           }, "-=0.5")
           .to(this.elements.loadingText, {
             duration: 2,
-            scrambleText: { text: "SYSTEM BOOT SEQUENCE COMPLETE", chars: "01" },
+            ...(typeof ScrambleTextPlugin !== 'undefined' && { scrambleText: { text: "SYSTEM BOOT SEQUENCE COMPLETE", chars: "01" } }),
             ease: "none"
           }, "-=1.5")
           .to(this.elements.loadingScreen, {
@@ -456,7 +507,7 @@
                 { 
                   opacity: 1,
                   duration: 1.5,
-                  scrambleText: { text: "SYSTEM ACCESS", chars: "X-?*#" },
+                  ...(typeof ScrambleTextPlugin !== 'undefined' && { scrambleText: { text: "SYSTEM ACCESS", chars: "X-?*#" } }),
                   ease: "power2.out"
                 }
               );
@@ -616,6 +667,5 @@
       new EnclaveOS();
     });
   </script>
-</body>
 </body>
 </html>
