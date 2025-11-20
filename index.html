@@ -589,7 +589,7 @@
         
         gsap.to(this.elements.accessText, {
             duration: 1.5,
-            scrambleText: { text: message, chars: "01" },
+            ...(typeof ScrambleTextPlugin !== 'undefined' && { scrambleText: { text: message, chars: "01" } }),
             ease: "none",
             onComplete: () => {
                 setTimeout(() => {
@@ -644,7 +644,7 @@
                     gsap.to(this.elements.accessOverlay, { opacity: 1, duration: 0.1 });
                     gsap.to(this.elements.accessText, {
                         duration: 2,
-                        scrambleText: { text: "SYSTEM FAILURE", chars: "!@#$%^&*", revealDelay: 0.5, speed: 0.3 },
+                        ...(typeof ScrambleTextPlugin !== 'undefined' && { scrambleText: { text: "SYSTEM FAILURE", chars: "!@#$%^&*", revealDelay: 0.5, speed: 0.3 } }),
                         ease: "none"
                     });
                 }
